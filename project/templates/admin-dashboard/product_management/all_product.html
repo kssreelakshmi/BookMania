@@ -1,0 +1,150 @@
+{% extends 'base/admin_side/admin_base.html' %}
+
+{% block title %}
+Product Management - All Products
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+<main class="main-wrap">
+
+{% include 'base/admin_side/admin_includes/admin_header.html' %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Products List</h2>
+        </div>
+        
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col col-check flex-grow-0">
+                    <div class="form-check ms-2">
+                        <input class="form-check-input" type="checkbox" value="">
+                    </div>
+                </div>
+                <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+                    <select class="form-select">
+                        <option selected>All category</option>
+                        <option>Electronics</option>
+                        <option>Clothes</option>
+                        <option>Automobile</option>
+                    </select>
+                </div>
+                <div class="col-md-2 col-6">
+                    <input type="date" value="02.05.2021" class="form-control">
+                </div>
+                <div class="col-md-2 col-6">
+                    <select class="form-select">
+                        <option selected>Status</option>
+                        <option>Active</option>
+                        <option>Disabled</option>
+                        <option>Show all</option>
+                    </select>
+                </div>
+                <div class=" m-2 p-2">
+                          
+                <div>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class ="card-body">
+            
+           <div class="table-responsive">
+               <table class="table text-nowrap align-items-center mb-0 align-middle">
+                   <thead class="text-dark fs-4">
+                       <tr>
+                           <th class="border-bottom-0">
+                               <h6 class="fw-semibold mb-0">Product ID</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Product image</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Product name</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Publication name</h6>
+                            </th>
+                  <th class="border-bottom-0">
+                      <h6 class="fw-semibold mb-0">Category</h6>
+                    </th>
+                    <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Is available</h6>
+                  </th>
+                  <th class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">Action</h6>
+                  </th>
+                </tr>
+              </thead>
+              {% for product in products %}
+              <tr>
+                <td class="border-bottom-0 text-center">
+                  <h6 class="fw-semibold tablecontent mb-1">{{ forloop.counter }}</h6>
+                </td>
+                <td class="border-bottom-0">
+                  <a href="{% url 'product_update' product.slug %}">
+                    <img style="width: 60px;" class="prod-img-inlist" src="/media/{{ product.image }}" alt="">
+                  </a>
+                </td>
+                <td class="border-bottom-0">
+                  <a href="{% url 'product_update' product.slug %}">
+                    <h6 class="text-decoration-underline text-primary fw-normal mb-1">{{product.product_name}}</h6>
+                  </a>
+                </td>
+                <td class="border-bottom-0">
+                  <h6 class="fw-normal mb-1">{{product.publication}}</h6>
+                </td>
+                <td class="border-bottom-0">
+                  <h6 class="fw-normal mb-1">{{product.category}}</h6>
+                </td>
+                <td class="border-bottom-0">
+                  <div class="mb-1">
+                    <!-- <span class="badge bg-primary rounded-3 fw-semibold"> -->
+                      {% if product.is_available %}
+                      Enabled
+                      {% else %}
+                      Disabled
+                      {% endif %}
+                    <!-- </span> -->
+                  </div>
+                </td>
+                <td class="border-bottom-0">
+                  {% if product.is_available %}
+                  <a href="{% url 'product_control' product.slug %}">
+                    <button class="btn btn-danger mb-1 px-3">Disable</button>
+                  </a>
+                  {% else %}
+                  <a href="{% url 'product_control' product.slug %}">
+                    <button class="btn btn-success mb-1">Enable</button>
+                  </a>
+                  {% endif %}
+                </td>
+              </tr> 
+
+              {% endfor %}
+  
+            </table>
+           </div>
+           
+    
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+    <!-- <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                <li class="page-item"><a class="page-link" href="#">02</a></li>
+                <li class="page-item"><a class="page-link" href="#">03</a></li>
+                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                <li class="page-item"><a class="page-link" href="#">16</a></li>
+                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            </ul>
+        </nav>
+    </div> -->
+</section> <!-- content-main end// -->
+
+{% endblock %}

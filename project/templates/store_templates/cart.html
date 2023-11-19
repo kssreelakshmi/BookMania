@@ -1,0 +1,270 @@
+{% extends 'base/user_side/base_user.html' %}
+	{% block title %}
+	Shopping Cart 
+	{% endblock %}
+	
+	{% block content %}
+
+	{% load static %}
+
+	<!-- Header -->
+	{% include 'base/user_side/includes/header.html' %}
+	
+	
+	<!-- Cart -->
+	{% include 'base/user_side/includes/header_cart.html' %}
+	
+    <!-- Cart -->
+
+
+    <style>
+        .disable-custom {
+            background-color: rgb(238, 237, 237);
+          pointer-events: none;
+          opacity: 0.5;
+          /* Add any other styles you want for the disabled state */
+        }
+        
+    </style>
+
+
+    <!-- breadcrumb -->
+    <div class="container">
+        <div class="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
+            <a href="{% url 'user_home' %}" class="stext-109 cl8 hov-cl1 trans-04">
+                Home
+                <i class="fa fa-angle-right m-l-9 m-r-10" aria-hidden="true"></i>
+            </a>
+
+            <span class="stext-109 cl4">
+                Shoping Cart
+            </span>
+        </div>
+    </div>
+    
+
+    <!-- Shoping Cart -->
+    <form class="bg0 p-t-75 p-b-85">
+        <div class="container">
+            <div class="row">
+                {% if not cart_items  %}
+                <div class="col-12 d-flex align-items-center justify-content-center">
+                    <img src="{% static 'user/images/add-to-cart.jpg' %}" class="w-50">
+                </div>
+                <h4 class="col-12 text-center">Your shopping cart is empty</h4>
+                <br>
+                <a href="{% url 'shop' %}" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-5"> Continue Shopping</a>
+                
+                {% else %}
+                <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
+                    <div class="card p-3">
+                            <div class="wrap-table-shopping-cart border-0">
+                                <table class="table-shopping-cart">
+                                    <tr class="table_head">
+                                        <th class="column-1">Product</th>
+                                        <th class="column-2"></th>
+                                        <th class="column-3">Price</th>
+                                        <th class="column-4">Quantity</th>
+                                        <th class="column-5">Total</th>
+                                    </tr>
+
+                                    {% for cart_item in cart_items %}
+                                    
+                                    <tr class="table_row">
+                                        <td class="column-1">
+                                            <div class="how-itemcart1">
+                                                <img src="{{cart_item.product.thumbnail_image.url}}" alt="IMG">
+                                            </div>
+                                        </td>
+                                        <td class="column-2">
+                                            <a href="{{ cart_item.product.get_url}}">
+                                                {{cart_item.product.product}}
+                                            </a>
+                                            <p class="text-muted small">
+                                                {% for value in cart_item.product.attribute.all %}
+                                                {{value.attribute}}: {{value.attribute_value}}
+                                                <br>
+                                                
+                                                {% endfor %}
+                                                Publication: {{cart_item.product.product.publication}}</p>
+                                            </td>
+
+                                        <td class="column-3">Rs.{{cart_item.product.sale_price}}</td>
+                                        <td class="column-4">
+                                            <div class="wrap-num-product flex-w m-l-auto m-r-0">
+                                                
+                                                <i onclick="update_cartItem('{{cart_item.product.id}}', '{{forloop.counter}}', '-')" class="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m fs-16 zmdi zmdi-minus"></i>
+                                                <input class="mtext-104 cl3 txt-center num-product" type="number" readonly id="num-product{{forloop.counter}}" value="{{cart_item.quantity}}">
+                                                <i onclick="update_cartItem('{{cart_item.product.id}}', '{{forloop.counter}}', '+')" id="plus-button" class="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m fs-16 zmdi zmdi-plus"></i>
+                                            </div>
+                                        </td>
+                                        <td id="cartItemTotal{{forloop.counter}}" class="column-5">&#8377;  {{cart_item.sub_total}}
+
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'remove_cart_item' cart_item.product_id %}" class="btn btn-outline-dark">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                                </svg>
+                                                
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    
+                                    {% endfor %}
+                                </table>
+                            </div>
+
+                            <!-- <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+                                <div class="flex-w flex-m m-r-20 m-tb-5">
+                                    <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" name="coupon" placeholder="Coupon Code">
+                                    
+                                    <div class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
+                                        Apply coupon
+                                    </div>
+                                </div>
+
+                                <div class="flex-c-m stext-101 cl2 size-119 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-10">
+                                    Update Cart
+                                </div>
+                            </div> -->
+                    </div>
+                </div>
+
+                <div class="col-sm-10 col-lg-7 col-xl-5 m-lr-auto m-b-50">
+                    <div class="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
+                        <h4 class="mtext-109 cl2 p-b-30">
+                            Cart Totals
+                        </h4>
+
+                        <div class="flex-w flex-t bor12 p-b-13">
+                            <div class="size-208">
+                                <span class="stext-110 cl2">
+                                    Subtotal:
+                                </span>
+                            </div>
+                            
+                            <div class="size-209">
+                                <span id="total" class="mtext-110 cl2">
+                                    &#8377; {{total}}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex-w flex-t bor12 p-b-13">
+                            <div class="size-208">
+                                <span class="stext-110 cl2">
+                                    Tax:
+                                </span>
+                            </div>
+                            
+                            <div class="size-209">
+                                <span id="tax" class="mtext-110 cl2">
+                                    &#8377; {{tax}}
+                                </span>
+                            </div>
+                        </div>
+
+                        
+                        <div class="flex-w flex-t p-t-27 p-b-33">
+                            <div class="size-208">
+                                <span class="mtext-101 cl2">
+                                    Total:
+                                </span>
+                            </div>
+                            
+                            <div class="size-209 p-t-1">
+                                <span id="grand_total" class="mtext-110 cl2">
+                                    &#8377; {{grand_total}}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'cart_checkout' %}" type="submit" class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                            Proceed to Checkout
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+    
+    <script>
+        
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        
+        
+        
+        function update_cartItem(prodVarId, cartItemNumber, action){
+            var data = {
+                productVariantId: prodVarId,
+                selected_option: action
+            };
+
+            $.ajax({
+                type: "POST",
+                url: "/cart/update-cart/",  // Replace with the actual URL for your view
+                dataType: "json", 
+                data: JSON.stringify(data),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": getCookie("csrftoken"), 
+                },
+
+                  //response from backend
+                success: (data) => {
+                    console.log(data);
+                    if(data.status === 'Stock_limit_reached'){
+                        alert("Product stock limit reached!")
+                        document.getElementById('plus-button').classList.add('disable-custom')
+                        console.log(document.getElementById('plus-button').classList)
+                        
+                    }
+                    
+                    if (data.status === 'success'){
+                        document.getElementById('plus-button').classList.remove('disable-custom')
+                        document.getElementById('num-product'+cartItemNumber).value = data.cart_item_qty
+                        document.getElementById('cartItemTotal'+cartItemNumber).innerHTML = '&#8377; '+ data.cart_item_total
+                        document.getElementById('total').innerHTML = '&#8377; '+ data.total
+                        document.getElementById('tax').innerHTML = '&#8377; '+ data.tax
+                        document.getElementById('grand_total').innerHTML = '&#8377; '+ data.grand_total
+
+                    }
+                    else if(data.status === 'cart_item_empty'){
+                        alert(data.message);
+                        location.reload();
+                    }
+
+                },
+                error: (error) => {
+                    console.log(error);
+                    alert(error)
+                }
+            });
+            
+            
+        }
+
+    </script>
+
+
+
+
+    
+{% endblock %}

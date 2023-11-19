@@ -1,0 +1,178 @@
+{% extends 'base/admin_side/admin_base.html' %}
+
+{% block title %}
+Product Management - Add Product
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+
+<main class="main-wrap">
+
+{% include 'base/admin_side/admin_includes/admin_header.html' %}
+<section class="content-main">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="col-12">
+            <div class="content-header">
+                <div class="card-header bg-transparent border-0">
+                    <h2 class="content-title">Add New Product</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-lg-between">
+            <div class="col-lg-7">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Product details</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label">Product Name</label>
+                                    {{ product_form.product_name }}
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label for="category" class="form-label">Category</label>
+                                    {{ product_form.category }}
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    {{ product_form.description }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label class="form-label">Author</label>
+                                    <div class="row gx-2">
+                                        {{ product_form.author }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label class="form-label">Publication</label>
+                                    <div class="row gx-2">
+                                        {{ product_form.publication }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-check mb-4">
+                                    {{ product_form.is_available }}
+                                    <span class="form-check-label"> Is available </span>
+                                </label>
+                            </div>
+                            
+                        
+                        </div>
+                    </div>
+                </div> <!-- card end// -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Product Variant Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label for="sku_id" class="form-label">SKU ID</label>
+                                    {{ variant_form.sku_id }}
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label for="stock" class="form-label">Stock</label>
+                                    {{ variant_form.stock }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="max_price" class="form-label">Max Price</label>
+                            {{ variant_form.max_price }}
+                        </div>
+                        <div class="mb-4">
+                            <label for="sale_price" class="form-label">Sale Price</label>
+                            {{ variant_form.sale_price }}
+                        </div>
+                        
+                        <div class="mb-3 mt-4 col-12">
+                            <div class="card-header form-label">
+                                <label class="card-title form-label" >Choose Attributes</label>
+                                <hr>
+                                <div class="row">
+                                    {% for attribute_name, attribute_values in attribute_dict.items %}
+                                        <div class="col-6">
+                                            <label class="form-label">{{attribute_name}}</label>
+                                            <select name="attributes_{{ forloop.counter }}" class="form-control" {% if not attribute_values %} disabled {% endif %}>
+                                                {% if not attribute_values %}
+                                                <option  value="None">Empty</option>
+                                                {% else %}
+                                                <option  value="None">Select</option>
+                                                {% endif %}
+                                                
+                                                {% for value in attribute_values %}
+                                                <option value="{{ value.id }}">{{ value.attribute_value }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                             
+                            <label class="form-check my-2">
+                                {{variant_form.is_active}}
+                                <span class="form-check-label"> Is Active </span>
+                            </label>
+                        
+                        </div>
+                    </div>
+                </div> <!-- card end// -->
+            </div>
+            <div class="col-lg-5">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Thumbnail Image</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-upload">
+                            <input class="form-control" type="file" name="thumbnail_image" accept=".jpg,.jpeg,.webp,.png">
+                        </div>
+                    </div>
+                </div> <!-- card end// -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Additional Images</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-upload">
+                            <input class="form-control" type="file" name="additional_images" multiple accept=".jpg,.jpeg,.webp,.png" >
+                        </div>
+                    </div>
+                </div> <!-- card end// -->
+                <div>
+                    <button type="submit" class="w-100 p-3 btn btn-md rounded font-sm hover-up">Add Product</button>
+                </div>
+                
+                
+            </div>
+        </div>
+
+
+
+        </form>
+    </section> <!-- content-main end// -->
+
+</main>
+{% endblock %}

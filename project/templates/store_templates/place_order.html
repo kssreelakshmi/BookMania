@@ -1,0 +1,135 @@
+{% extends 'base/user_side/base_user.html' %}
+
+{% block title %}
+Place Order	
+{% endblock %}
+
+{% block content %}
+
+{% load static %}
+
+<!-- Header -->
+{% include 'base/user_side/includes/header.html' %}
+
+
+<!-- Cart -->
+{% include 'base/user_side/includes/header_cart.html' %}
+<div class="bg0 p-t-75 p-b-85">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 col-xl-5 m-lr-auto m-b-50">
+                <div class="m-l-25 m-r--38 m-lr-0-xl">
+                    <div class="card">
+                        <div class="card-header p-2 m-2 bg-none">
+                            <h6><strong>User details</strong></h6>
+                        </div>
+                        <div class="d-flex form-group">
+                            <div class="card-body">
+                                <label class="form-label" for="id_username">Username</label>
+                                <input type="text"  readonly value="{{user.username}}" class="form-control">
+                                
+                            </div>
+                            <div class="card-body">
+                                <label class="form-label" for="id_email">Email</label>   
+                                <input type="text"  readonly value="{{user.email}}" class="form-control">
+                            </div>
+                        </div>    
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card-header p-2 m-2 bg-none">
+                            <h6><strong>Shipping Address</strong></h6>
+                        </div>
+                        <div class="card-body">  
+                            <div class="form-row row border border-black-50 m-2">
+                                <div class="form-group p-2 mx-2 ">
+                                    {{shipping_address.name}}<br>
+                                    {{shipping_address.phone_number}},
+                                    {{shipping_address.address_line1}},
+                                    {{shipping_address.address_line2}}<br>
+                                    {{shipping_address.city}},
+                                    {{shipping_address.state}},
+                                    {{shipping_address.pincode}}<br>
+                                    {{shipping_address.country}}
+                                </div>
+                            </div>
+                        </div>    
+                                
+                    </div>
+                    <br>
+                    <div class="card">
+                        <div class="card border-0">
+                            <div class="card-header border-0 bg-none p-2 m-2">
+                                <h6><strong>Product Details</strong></h6>
+                            </div>
+
+                            <div class="card-body p-3">
+                                <div class="wrap-table-shopping-cart border-0" style="height: 200px;">
+                                    <table class="table">
+                                        <thead>
+                                            <tr class="table_head">
+                                                <th class="column-1">Product</th>
+                                                <th class="column-3">Price</th>
+                                                <th class="column-4 text-center">Quantity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for cart_item in cart_items %}
+                                            
+                                            <tr class="table_row">
+                                                <td class="column-1">
+                                                    <div class="d-flex justify-content-start bd-highlight mb-3">
+                                                        <div class=" how-itemcart1">
+                                                            <img src="{{cart_item.product.thumbnail_image.url}}" alt="IMG">
+                                                        </div>
+                                                    
+                                                        <figcaption class="info">
+                                                            <a href="{{cart_item.product.get_url}}" class="title text-dark">{{cart_item.product.product}}</a>
+                                                            <p class="text-muted small">
+                                                                {% for value in cart_item.product.attribute.all %}
+                                                                {{value.attribute}}: {{value.attribute_value}}
+                                                                <br>
+                                                                
+                                                                {% endfor %}
+                                                                
+                                                                Publication: {{cart_item.product.product.publication}}
+                                                            </p>
+                                                        </figcaption>
+                                                    </div>
+                                                </td>
+                                                <td class="column-3">
+                                                    Rs.{{cart_item.product.sale_price}}
+                                                </td>
+                                                <td class="column-4">
+                                                    <h6 class="text-center">{{cart_item.quantity}}</h6>
+                                                </td> 
+                                            </tr>
+                                            
+                                            {% endfor %}
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>    
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}
+        
+
+
+
+
+
+
+
+        

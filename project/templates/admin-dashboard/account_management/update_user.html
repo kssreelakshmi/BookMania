@@ -1,0 +1,106 @@
+{% extends 'base/admin_side/admin_base.html' %}
+
+{% block title %}
+Account Management - All Users
+{% endblock %}
+
+{% load static %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+
+{% block content %}
+
+{% include 'base/admin_side/admin_includes/admin_header.html' %}
+
+
+<section class="content-main mt-80 mb-80">
+  {% include 'base/admin_side/admin_includes/alerts.html' %}
+
+
+    <div class="card mx-auto card-box">
+        <div class="card-body ">
+            <h4 class="card-title mb-4">Update User</h4>
+
+                <form method="post" >
+                    {% csrf_token %}
+                    <div class="container">
+                        <div class="row ">
+                            
+                            <div class="col-lg-4 p-3">
+                                <label class="form-label" for="id_first_name">First Name</label>
+                                {{form.first_name}}
+                            </div> <!-- form-group// -->
+                            
+                            <div class="col-lg-4 p-3">
+                                <label class="form-label">Last Name</label>
+                                {{form.last_name}}
+                            </div> <!-- form-group// -->
+
+                        </div>
+                            <div class="row ">
+
+                                <div class="col-lg-4 p-3">
+                                    <label class="form-label">Username</label>
+                                    {{form.username}}
+                                </div> <!-- form-group// -->
+
+                            </div>
+                            <div class="row">
+
+                                <div class="col-lg-4 p-3">
+                                    <label class="form-label">Phone</label>
+                                    <div class="row gx-2">
+                                        <!-- <div class="col-4"> <input class="form-control" value="+998" type="text"> </div> -->
+                                        {{form.phone_number}}
+                                    </div>
+                                </div> <!-- form-group// -->
+
+                                <div class="col-lg-4 p-3">
+                                    <label class="form-label">Email</label>
+                                    {{form.email}}
+                                </div> <!-- form-group// -->
+                            </div>
+                        
+                            <div class="row">
+                                <div class="col-lg-4 mb-3">
+                                    <div class="form-control p-3">
+                                        {{form.is_admin}}
+                                        <label class="ms-3" for="id_is_admin">
+                                            Super User Status
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 mb-3">
+                                    <div class="form-control p-3">
+                                        {{form.is_active}}
+                                    <label class="ms-3" for="id_is_active">
+                                        Is Active
+                                    </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-lg-4 mb-3">
+                                    <div class="form-control p-3">
+                                        {{form.is_staff}}
+                                        <label class="ms-3" for="is_staff">
+                                            Staff Status
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                        <div class="row my-5">
+                            
+                            <div class="col-lg-4">
+                                <button type="submit" class="btn btn-primary w-50 rounded-pill"> Update </button>
+                            </div> <!-- form-group// -->
+                        </div>
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</section>    
+
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base/admin_side/admin_base.html' %}
+
+{% block title %}
+Category Management - Update category
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+<main class="main-wrap">
+
+    {% include 'base/admin_side/admin_includes/admin_header.html' %}
+
+    <section class="content-main mt-80 mb-80">
+        <div class="card mx-auto card-box">
+            <div class="card-body ">
+                <h4 class="card-title mb-4">Update Ccategory</h4>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="container">
+                        <div class="row ">
+                            <div class="col-lg-4 p-3">
+                                <label class="form-label" for="id_first_name">Category Name</label>
+                                {{form.category_name}}
+                            </div> <!-- form-group// -->
+                            
+                            <div class="col-lg-4 p-3">
+                                <label class="form-label">Parent</label>
+                                {{form.parent_cat}}
+                            </div> <!-- form-group// -->
+                        </div>
+
+                            <div class="row">
+                                <div class="col-lg-4 mb-3">
+                                    <div class="form-control p-3">
+                                        {{form.is_active}}
+                                        <label class="ms-3" for="id_is_active">
+                                            Is Active
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row my-5">
+                            
+                            <div class="col-lg-4">
+                                <button type="submit" class="btn btn-primary w-50 rounded-pill"> Create category </button>
+                            </div> <!-- form-group// -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+</main>
+    {% endblock %}
+    

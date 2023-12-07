@@ -1,0 +1,183 @@
+{% extends 'base/admin_side/admin_base.html' %}
+
+{% block title %}
+Order Management - All orders
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+<main class="main-wrap">
+    {% include 'base/admin_side/admin_includes/admin_header.html' %}
+
+
+    <section class="content-main mt-80 mb-80">
+        {% include 'base/admin_side/admin_includes/alerts.html' %}
+        
+        
+        <h4 class="card-title mb-4">Order details</h4>
+        <div class="card mx-auto card-box">
+            <header class="card-header">
+                <div class="row">
+
+                    <div class="col-6 d-flex flex-column">
+                        <div class="d-flex justify-content-start">
+                            <p><strong>Order ID:</strong></p>
+                            <p class="ps-3"><span>{{order.order_id}}</span></p>
+                        </div>
+                        <div class="d-flex justify-content-start">
+                            <p><strong>Ordered on: </strong></p>
+                            <p class="ps-3"><span>{{order.created_at}}</span></p>
+                        </div>
+                    </div>
+                    <div class="col-6" >Order Status :
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <select name="order_status" class="form-select cursor-pointer" onchange="showSelectedOption(this,'{{order.order_id}}')">
+                                    {% for value, label in form.fields.order_status.choices %}
+                                    <option value="{{ value }}" {% if form.instance.order_status == value %}selected{% endif %}>
+                                        {{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </header>
+            <div class="card-body ">
+                <div class="container">
+                    <div class="row justify-content-between pe-5 ">
+                        <div class="col-md-6 border">
+                            <h6 class="text-muted">Delivery to</h6>
+                                <p>{{order.address.get_user_full_address}} <br>  
+                                </p>
+                        </div>
+
+                        <div class="col-md-4 border me-5">
+                            <h6 class="text-muted">Payment</h6>
+                            <span class="text-success">
+                                <i class="fab fa-lg fa-cc-visa"></i>
+                                
+                                ID: {{payment.payment_id}} <br>
+                                Method : {{payment.method.method_name}}<br> 
+                                Status :{{payment.payment_status}} ({{payment.created_at}})
+                            </span>
+                            <hr>
+                            <dl class="dlist-align m-0 d-flex justify-content-between">
+                                <dt>Total price:</dt>
+                                <dd class="text-right ms-5 ps-5">&#8377;{{total}}</dd>
+                            </dl>
+                            <dl class="dlist-align m-0 d-flex justify-content-between">
+                                <dt>Tax:</dt>
+                                <dd class="text-right text-danger ms-5 ps-5"> &#8377;{{order.tax}}</dd>
+                            </dl>
+                            <hr>
+                            <dl class="dlist-align d-flex justify-content-between">
+                                <dt>Payable amount:</dt>
+                                <dd class="text-right text-danger ms-5 ps-5"><span class="fw-bolder">&#8377;{{order.order_total}}</span></dd>
+                            </dl>
+                        </div>
+                    </div>
+
+
+                    <div class="row ">
+                        <div class="card border my-4">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-start">
+                                    <h4>Ordered Products</h4>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                
+
+                                <div class="table-responsive">
+                                    <table class="table table-style-admin table-hover">
+                                        {% for order_product in order_products %}
+                                          <tr class="d-flex justify-content-between align-content-center">
+                                            <td>
+                                                <div>
+                                                    <img src="{{order_product.variant.thumbnail_image.url}}" style="object-fit: contain; height: 100px;">
+
+                                                </div>
+                                            </td>
+                          
+                                            <td> 
+                                                  <p class="title mb-0">
+                                                   
+                                                      {{order_product.variant.product.publication}}
+                                                      {{order_product.variant.get_product_name}}
+                                                      
+                                                      <br>
+                                                      <br>
+                                                      Category: {{order_product.variant.product.category.category_name}}
+                                                  </p>
+                                            </td>
+                                            <td> Quantity <br> {{order_product.quantity}} </td>
+                                            <td> Each Price <br>Rs {{order_product.product_price}}
+                                              <!-- <br> -->
+                                            <!-- <small> <del> Rs max price </del></small> -->
+                                           </td>
+                                          </tr>
+                                        {% endfor %}
+                                    </table>
+                                    
+                                    </div> <!-- table-responsive .end// -->
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+
+    function showSelectedOption(selectElement, order_number) {
+        var selectedOption = selectElement.value
+        console.log (selectedOption);
+        var data = {
+            selected_option: selectedOption
+        };
+        $.ajax({
+            type: "POST",
+            url: `/admin-control/order-management/order-details/${order_number}/`,
+            dataType: "json", 
+            data: JSON.stringify(data),
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie("csrftoken"), 
+              },
+            success: (data) => {
+                console.log(data);
+              },
+            error: (error) => {
+                console.log(error);
+                alert(error)
+              }
+        });
+    }
+</script>
+{% endblock %}

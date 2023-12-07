@@ -1,0 +1,180 @@
+{% extends 'base/user_side/base_user.html' %}
+{% block title %}
+Login With OTP
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<!-- Header -->
+{% include 'base/user_side/includes/header.html' %}
+<!-- Cart -->
+{% include 'base/user_side/includes/header_cart.html' %}
+<section class="bg0 p-t-104 p-b-116">
+    <div class="container">
+        <p hidden id="ajaxmessage" style="margin-bottom: 30px; border-radius: 10px; padding: 25px;"></p>
+
+        {% include 'base/user_side/includes/alerts.html' %}
+        <div class="flex-w flex-tr bor10 ">
+            <div class="size-210 p-lr-70 p-t-150 p-b-150 p-lr-15-lg w-full-md">
+                <form method="POST">
+                    <div class="container-fluid p-0">
+                        <h3 class="cl2 p-b-30">
+                            Login With OTP
+                        </h3>
+                        <div class="row">
+
+                            {% csrf_token %}
+
+
+                            <div class="col-lg-12 p-3">
+                                <label class="form-label" for="id_email">Registered Email:</label>
+                                <input required class="form-control hov1" id="id_email" type="email" name="email">
+                            </div>
+
+                            <div class="col-lg-12 p-3 d-flex justify-content-between">
+                                <button id="sendOtp" type="button" class="btn btn-outline-secondary"
+                                    onclick="otpHandler()">Send OTP</button>
+                                <button id="resendOtp" disabled hidden type="button" class="btn btn-secondary"
+                                    onclick="otpCall();">Resend</button>
+                                <span id="timer"></span>
+                            </div>
+
+
+
+                                <div class="col-lg-12 p-3">
+                                    <label class="form-label" for="id_otp">OTP:</label>
+                                    <input class="form-control hov1" id="id_otp" requied type="otp" name="otp">
+                                    <input hidden id="tempInput">
+                                </div>
+                                
+                                <div class="col-lg-12 d-flex justify-content-center my-4">
+                                    <button type="button" onclick="verifyOtp();" class="btn btn-outline-secondary px-5">
+                                        Submit
+                                    </button>
+                                    
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="size-210 flex-w flex-col-m p-l-10 p-tb-30 p-r-128-lg w-full-md">
+                <img src="{% static 'user/images/otp.jpg' %} " class="w-100 h-100" alt="Login">
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script>
+
+    
+    
+    
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    
+    function otpCall(email = null) {
+        email = document.getElementById('id_email').value;
+        $.ajax({
+            type: "POST",
+            url: "/accounts/user-login-with-otp/",  // Replace with the actual URL for your view
+            dataType: "json",
+            data: JSON.stringify(email),
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie("csrftoken"),
+            },
+            
+            //response from backend
+            success: (data) => {
+                console.log(data)
+                const messageElement = document.getElementById('ajaxmessage')
+                if (data.status === 'error') {
+                    messageElement.innerHTML = data.message
+                    messageElement.hidden = false
+                    messageElement.classList.add('bg-danger')
+                }
+                else {
+                    
+                    messageElement.innerHTML = data.message
+                    messageElement.hidden = false
+                    messageElement.style.backgroundColor = '#92e5a5'
+                    messageElement.style.padding = '#92e5a5'
+                    document.getElementById('tempInput').value = data.uid
+                    setTimeout(function(){
+                        $('#ajaxmessage').fadeOut('slow')
+                        messageElement.hidden = true
+
+                    }, 4000)
+                    
+                }
+            },
+            error: (error) => {
+                console.log(error);
+            }
+        });
+        
+    }
+    
+    
+    
+    function otpHandler() {
+        const email = document.getElementById('id_email').value;
+        console.log(email)
+        let timerStatus = true;
+        document.getElementById('sendOtp').hidden = true
+        document.getElementById('resendOtp').hidden = false
+        otpCall(email);
+        
+        function customTimer(count) {
+            console.log("starting")
+            console.log(count)
+            const timer = setInterval(() => {
+                document.getElementById('timer').innerHTML = 'Resend in ' + (--count);
+                if (count == 0) {
+                    clearInterval(timer);
+                    timerStatus = false;
+                    
+                }
+                if (timerStatus == false) {
+                    document.getElementById('resendOtp').disabled = false;
+                    document.getElementById('timer').hidden = true;
+                }
+            }, 1000);
+        }
+        customTimer(60);
+        
+    }
+
+
+    function verifyOtp(){
+
+        const uid = document.getElementById('tempInput').value
+        if (uid){
+            const otp = document.getElementById('id_otp').value
+            window.location.href = `/accounts/user-login-with-otp/verify/${uid}/?otp=${otp}`
+        }
+        else{
+            alert('Please enter valid email and try again')
+        }
+    }
+
+
+</script>
+{% endblock %}

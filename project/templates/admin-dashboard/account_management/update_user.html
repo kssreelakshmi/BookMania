@@ -5,11 +5,11 @@ Account Management - All Users
 {% endblock %}
 
 {% load static %}
-{% include 'base/admin_side/admin_includes/aside.html' %}
 
 {% block content %}
-
-{% include 'base/admin_side/admin_includes/admin_header.html' %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+<main class="main-wrap">
+    {% include 'base/admin_side/admin_includes/admin_header.html' %}
 
 
 <section class="content-main mt-80 mb-80">
@@ -101,6 +101,6 @@ Account Management - All Users
         </div>
     </div>
 </section>    
-
+</main>
 
 {% endblock %}

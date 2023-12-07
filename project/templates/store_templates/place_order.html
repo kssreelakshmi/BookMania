@@ -1,7 +1,7 @@
 {% extends 'base/user_side/base_user.html' %}
 
 {% block title %}
-Place Order	
+Place Order
 {% endblock %}
 
 {% block content %}
@@ -17,7 +17,7 @@ Place Order
 <div class="bg0 p-t-75 p-b-85">
     <div class="container">
         <div class="row">
-            <div class="col-lg-10 col-xl-5 m-lr-auto m-b-50">
+            <div class="col-lg-10 col-xl-7 m-lr-auto m-b-50">
                 <div class="m-l-25 m-r--38 m-lr-0-xl">
                     <div class="card">
                         <div class="card-header p-2 m-2 bg-none">
@@ -26,21 +26,21 @@ Place Order
                         <div class="d-flex form-group">
                             <div class="card-body">
                                 <label class="form-label" for="id_username">Username</label>
-                                <input type="text"  readonly value="{{user.username}}" class="form-control">
-                                
+                                <input type="text" readonly value="{{user.username}}" class="form-control">
+
                             </div>
                             <div class="card-body">
-                                <label class="form-label" for="id_email">Email</label>   
-                                <input type="text"  readonly value="{{user.email}}" class="form-control">
+                                <label class="form-label" for="id_email">Email</label>
+                                <input type="text" readonly value="{{user.email}}" class="form-control">
                             </div>
-                        </div>    
+                        </div>
                     </div>
                     <br>
                     <div class="card">
                         <div class="card-header p-2 m-2 bg-none">
                             <h6><strong>Shipping Address</strong></h6>
                         </div>
-                        <div class="card-body">  
+                        <div class="card-body">
                             <div class="form-row row border border-black-50 m-2">
                                 <div class="form-group p-2 mx-2 ">
                                     {{shipping_address.name}}<br>
@@ -52,9 +52,10 @@ Place Order
                                     {{shipping_address.pincode}}<br>
                                     {{shipping_address.country}}
                                 </div>
+                                <input type="text" hidden value="{{order.order_id}}" id="order_id_summary"
+                                    name="order_id_summary">
                             </div>
-                        </div>    
-                                
+                        </div>
                     </div>
                     <br>
                     <div class="card">
@@ -62,7 +63,6 @@ Place Order
                             <div class="card-header border-0 bg-none p-2 m-2">
                                 <h6><strong>Product Details</strong></h6>
                             </div>
-
                             <div class="card-body p-3">
                                 <div class="wrap-table-shopping-cart border-0" style="height: 200px;">
                                     <table class="table">
@@ -75,23 +75,24 @@ Place Order
                                         </thead>
                                         <tbody>
                                             {% for cart_item in cart_items %}
-                                            
                                             <tr class="table_row">
                                                 <td class="column-1">
                                                     <div class="d-flex justify-content-start bd-highlight mb-3">
                                                         <div class=" how-itemcart1">
-                                                            <img src="{{cart_item.product.thumbnail_image.url}}" alt="IMG">
+                                                            <img src="{{cart_item.product.thumbnail_image.url}}"
+                                                                alt="IMG">
                                                         </div>
-                                                    
+
                                                         <figcaption class="info">
-                                                            <a href="{{cart_item.product.get_url}}" class="title text-dark">{{cart_item.product.product}}</a>
+                                                            <a href="{{cart_item.product.get_url}}"
+                                                                class="title text-dark">{{cart_item.product.product}}</a>
                                                             <p class="text-muted small">
                                                                 {% for value in cart_item.product.attribute.all %}
                                                                 {{value.attribute}}: {{value.attribute_value}}
                                                                 <br>
-                                                                
+
                                                                 {% endfor %}
-                                                                
+
                                                                 Publication: {{cart_item.product.product.publication}}
                                                             </p>
                                                         </figcaption>
@@ -102,34 +103,145 @@ Place Order
                                                 </td>
                                                 <td class="column-4">
                                                     <h6 class="text-center">{{cart_item.quantity}}</h6>
-                                                </td> 
+                                                </td>
                                             </tr>
-                                            
                                             {% endfor %}
-                                            
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                        </div>    
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="col-sm-10 col-lg-5 col-xl-5 m-lr-auto m-b-50">
+                <div class=" bor10 m-l-63 m-lr-0-xl p-lr-15-sm">
+                    <div class="card">
+                        <div class="card-header bg-none m-2">
+                            <h6 class="mtext-109 cl2 p-b-10 text-dark ">
+                                Cart Totals
+                            </h6>
+                        </div>
 
+                        <div class="card-body">
+                            {% if payment_method.method_name == 'RAZORPAY' %}
+                            <div class="m-3">
+                                <img src="{% static 'user/images/icons/razorpay-icon.png' %}" width="100px"
+                                    alt="Razor Pay">
+                            </div>
+                            {% elif payment_method.method_name == 'COD' %}
+                            <div>
+                                <img src="{% static 'user/images/icons/cash-on-delivery.png' %}" width="50px"
+                                    height="50px" alt="Cash on Delivery">
+                            </div>
+                            {% endif %}
+                            <div class="flex-w flex-t bor12 p-b-13">
 
+                                <div class="size-208">
+                                    <span class="stext-110 cl2">
+                                        Subtotal:
+                                    </span>
+                                </div>
+                                <div class="size-209">
+                                    <span id="total" class="mtext-110 cl2">
+                                        &#8377; {{total}}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex-w flex-t bor12 p-b-13">
+                                <div class="size-208">
+                                    <span class="stext-110 cl2">
+                                        Tax:
+                                    </span>
+                                </div>
+                                <div class="size-209">
+                                    <span id="tax" class="mtext-110 cl2">
+                                        &#8377; {{tax}}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex-w flex-t p-t-27 p-b-33">
+                                <div class="size-208">
+                                    <span class="mtext-101 cl2">
+                                        Total:
+                                    </span>
+                                </div>
+                                <div class="size-209 p-t-1">
+                                    <span id="grand_total" class="mtext-110 cl2">
+                                        &#8377; {{grand_total}}
+                                    </span>
+                                </div>
+                            </div>
+                            {% if payment_method.method_name == 'RAZORPAY' %}
+
+                            <button type="submit" id="rzp-button1"
+                                class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                                Pay &#8377;{{order.order_total}} & Place Order
+                            </button>
+
+                            {% elif payment_method.method_name == 'COD' %}
+                            <button type="button" id="cash_on_delivery"
+                                class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                                Confirm COD and Place order
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 
+<script>
+    //COD PAYMENT
+    document.getElementById('cash_on_delivery').onclick = function (e) {
+        window.location.href = `{{success_url}}?order_id={{order.order_id}}&method=COD`
+    }   
+</script>
+
+
+<script>
+    var options = {
+        "key": "{{razor_pay_key_id}}",
+        "amount": "{{payment.amount}}",
+        "currency": "INR",
+        "name": "BookMania",
+        "description": "Test Transaction",
+        "image": "{% static 'user/images/icons/logo-01.png' %}",
+        "order_id": "{{payment.id}}",
+        "handler": function (response) {
+            window.location.href = `{{success_url}}?order_id={{order.order_id}}&method=RAZORPAY&payment_id=${response.razorpay_payment_id}&payment_order_id=${response.razorpay_order_id}&payment_sign=${response.razorpay_signature}&payment_amount={{payment.amount}}`
+        },
+        "prefill": {
+            "name": "{{shipping_address.user}}",
+            "email": "{{shipping_address.email}}",
+            "contact": "{{shipping_address.phone_number}}"
+        },
+        "notes": {
+            "address": "Razorpay Corporate Office"
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response) {
+        alert(response.error.code);
+        alert(response.error.description);
+        alert(response.error.source);
+        alert(response.error.step);
+        alert(response.error.reason);
+        alert(response.error.metadata.order_id);
+        alert(response.error.metadata.payment_id);
+        window.location.href = `{{ failed_url }}?error_code = ${response.error.code}&error_description=${response.error.description}&error_reason=${response.error.reason}&error_payment_id=${response.error.metadata.payment_id}&error_order_id=${response.error.metadata.order_id}&method=COD`
+    });
+    document.getElementById('rzp-button1').onclick = function (e) {
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
 
 {% endblock %}
-        
-
-
-
-
-
-
-
-        

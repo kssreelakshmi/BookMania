@@ -20,8 +20,6 @@ def _cart_id(request):
 
 def Add_to_cart(request,product_id=None):
     
-    
-    
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if product_id:
         product = ProductVariant.objects.get(id=product_id)
@@ -34,7 +32,6 @@ def Add_to_cart(request,product_id=None):
             cart_id = _cart_id(request)
         )
     cart.save()
-    
     if request.method =='POST' and is_ajax:
         data = json.load(request)
         product_id = int(data['productVariantId'])
@@ -156,10 +153,8 @@ def cart(request,total=0,quantity=0,cart_items=None):
         tax = 0
         grand_total = 0
         total = 0
-        print("jhcckcvbccbckyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
         if request.user.is_authenticated:
             cart_items = Cart_item.objects.filter(user=request.user, is_active=True).order_by('-created_at')
-            print('from cart page\n', cart_items)
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_items = Cart_item.objects.filter(cart=cart, is_active=True).order_by('-created_at')

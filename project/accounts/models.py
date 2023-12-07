@@ -1,5 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
+from django.utils import timezone
+from django_countries.fields import CountryField
+from store.models import ProductVariant
+import datetime
+import uuid
 # Create your models here.
 
 class AccountManager(BaseUserManager):
@@ -46,6 +51,7 @@ class Account(AbstractBaseUser):
     username = models.CharField(max_length=50, unique=True)
     email = models.EmailField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=20)
+    profile_pic = models.ImageField(upload_to='photos/user-profile/user-images',null=True,blank=True)
 
     #required fields
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -70,25 +76,26 @@ class Account(AbstractBaseUser):
     def has_module_perms(self,add_label):
         return True
     
-    
-    
-# class UserProfile(models.Model):
-#     user = models.OneToOneField(Account, on_delete=models.CASCADE)
-#     secret_key = models.CharField(max_length=50)
-    
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(Account, on_delete = models.CASCADE, related_name = 'user_profile')
+    otp = models.CharField(max_length = 6)
+    uid = models.UUIDField(default = uuid.uuid4)
+    created_at = models.DateTimeField(auto_now_add = True)
 
-class Country(models.Model):
-    country_name = models.CharField(max_length=150)
-    is_active = models.BooleanField(default=True)
-    
-    class Meta:
-        verbose_name = 'Country'
-        verbose_name_plural = 'Countries'
-    
-    
+    @property
+    def delete_after_five_minutes(self):
+        time = self.created_at + datetime.timedelta(seconds=5)
+        if time > datetime.datetime.now():
+            e = UserProfile.objects.get(pk=self.pk)
+            e.delete()
+            return True
+        else:
+            return False
+             
     def __str__(self):
-        return self.country_name
+        return self.otp
+
 
 
 class Addresses(models.Model):
@@ -99,7 +106,7 @@ class Addresses(models.Model):
     address_line_2 = models.CharField(max_length=50,blank=True,null=True)
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=50)
-    country = models.ForeignKey(Country,on_delete=models.CASCADE)
+    country = CountryField()
     pincode = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -118,7 +125,7 @@ class Addresses(models.Model):
         if self.address_line_2:
             address_parts.append(self.address_line_2)
         
-        address_parts.append(f'<b>Pin: {self.pincode}</b>')
+        address_parts.append(f'Pin: {self.pincode}')
         address_parts.extend([self.city, self.state, self.country.country_name])
         
         

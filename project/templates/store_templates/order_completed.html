@@ -1,0 +1,202 @@
+{% extends 'base/user_side/base_user.html' %}
+
+{% block title %}
+Order Completed
+{% endblock %}
+
+{% block content %}
+
+{% load static %}
+
+<!-- Header -->
+{% include 'base/user_side/includes/header.html' %}
+<!-- Include Bootstrap CSS -->
+<!-- Include Particle.js Library -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<style>
+    .container_11 {
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+        text-align: center;
+        margin: 0 200px 0 200px;
+        margin-bottom: 100px;
+    }
+
+    /*
+    body {
+        background-color: #f0eeee;
+        
+    }
+    */
+
+    .tick-symbol {
+        font-size: 6em;
+        color: #000000;
+    }
+
+    .success-message {
+        color: #ffffff;
+    }
+
+
+    #particles-js {
+        position: absolute;
+        width: 100%;
+        background-color: ;
+        height: 100%;
+        background-color: transparent;
+        pointer-events: none;
+    }
+</style>
+
+<!-- Particle.js container -->
+<div id="particles-js"></div>
+<div class="container_11 mt-5 mb-5">
+    <div class="tick-symbol mx-auto mb-4">&#10004;</div>
+    <h2 class="success-message">Order Placed Successfully!</h2>
+    <p>Your order has been confirmed. Thank you for shopping with us.</p><br>
+    <a href="{% url 'order_summary'%}" class="btn btn-dark mr-2">Order Details</a>
+    <a href="{% url 'shop' %}" class="btn btn-dark">Continue Shopping</a>
+    <a href="{% url 'user_dashboard' %}" class="btn btn-dark">My Orders</a>
+</div>
+
+<div class=" container_11 ">
+
+    <div class="card-header p-3 m-3">
+        <h4>Invoice Details</h4>
+        <div class="d-flex justify-content-between text-left card-body">
+            <div class="">
+                <ul class="list-unstyled mb0">
+                    <li><strong>Order: </strong>{{order_id}}</li>
+                    <li><strong>Transaction: </strong> {{order.payment.payment_id}}</li>
+                </ul>
+            </div>
+            <div class="">
+                <ul class="list-unstyled mb0">
+                    <li><strong>Order Date: </strong> {{order.created_at}}</li>
+                    <li><strong>Status: </strong> {{order.order_status}}</li>
+                </ul>
+            </div>
+        </div>
+       
+    </div>
+    <div class="d-flex justify-content-between text-left card-body">
+        <div class="col-4 border border-black-50 m-2">
+            <div class="p-3 m-3">
+                <h5>Shipping Address</h5>
+            </div>
+            <div class="form-group p-3 m-3 ">
+                {{order.address.name}}<br>
+                {{order.address.phone_number}},
+                {{order.address.address_line_1}},
+                {{order.address.address_line_2}}<br>
+                {{order.address.city}},
+                {{order.address.state}},
+                {{order.address.pincode}}<br>
+                {{order.address.country}}
+            </div>
+        </div>
+
+        <div class="col-7 border border-black-50 m-2">
+            <div class="p-3 m-3">
+                <h5>Product details</h5>
+            </div>
+            <div class="p-3 m-3">
+                <table class="table">
+                    <thead>
+                        <tr class="table_head">
+                            <th class="column-1">Product</th>
+                            <th class="column-3">Price</th>
+                            <th class="column-4 text-center">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ordered_product in ordered_products %}
+
+                        <tr class="table_row">
+                            <td class="column-1">
+                                <div class="d-flex justify-content-start bd-highlight mb-3">
+                                    <div class=" how-itemcart1">
+                                        <img src="{{ordered_product.variant.thumbnail_image.url}}" alt="IMG">
+                                    </div>
+
+                                    <figcaption class="info">
+                                        <a href="{{ordered_product.variant.get_url}}"
+                                            class="title text-dark">{{ordered_product.variant.product}}</a>
+                                        <p class="text-muted small">
+                                            {% for value in ordered_product.variant.attribute.all %}
+                                            {{value.attribute}}: {{value.attribute_value}}
+                                            <br>
+
+                                            {% endfor %}
+
+                                            Publication: {{ordered_product.variant.product.publication}}
+                                        </p>
+                                    </figcaption>
+                                </div>
+                            </td>
+                            <td class="column-3">
+                                Rs.{{ordered_product.variant.sale_price}}
+                            </td>
+                            <td class="column-4">
+                                <h6 class="text-center">{{ordered_product.quantity}}</h6>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="2" class="text-right">Sub Total:</th>
+                            <th class="text-center ">&#8377;{{total}}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2" class="text-right">Tax:</th>
+                            <th class="text-center text-danger">&#8377;{{tax}}</th>
+                        </tr>
+                        
+                        <tr>
+                            <th colspan="2" class="text-right">Net payable amount:</th>
+                            <th class="text-center"><strong>&#8377;{{payable_amount }}</strong></th>
+                        </tr>
+
+                    </tfoot>
+                </table>
+
+            </div>
+        </div>
+    </div>
+    <div class="card-header border-0 p-3 m-3">
+    <p class="text-center"><strong>Thank you for shopping with us!</strong></p>
+</div>
+
+</div>
+<!-- Include Particle.js Configuration -->
+<script>
+    particlesJS('particles-js', {
+        particles: {
+            number: { value: 100, density: { enable: true, value_area: 800 } },
+            color: { value: '#4CAF50' },
+            shape: { type: 'circle' },
+            opacity: { value: 0.7, random: true },
+            size: { value: 5, random: true },
+            move: { enable: true, speed: 5, direction: 'bottom', out_mode: 'out' },
+            line_linked: { enable: false },
+        },
+    });
+</script>
+<!-- <script>
+    setTimeout(() => {
+        window.location.href = '{% url 'user_home' %}'
+
+    }, 50000)
+</script> -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+{% endblock %}

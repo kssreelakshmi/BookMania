@@ -1,0 +1,52 @@
+{% extends 'base/user_side/base_user.html' %}
+
+{% block title %}
+Reset Password
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<!-- Header -->
+{% include 'base/user_side/includes/header.html' %}
+		
+<!-- Cart -->
+{% include 'base/user_side/includes/header_cart.html' %}
+<section class="bg0 p-t-104 p-b-116">
+    <div class="container">
+        {% include 'base/user_side/includes/alerts.html' %}
+        <div class="flex-w flex-tr bor10 ">
+            <div class="size-210 p-lr-70 p-t-150 p-b-150 p-lr-15-lg w-full-md">
+                <form  method="POST">
+                    <div class="container-fluid p-0">
+                        <h3 class="cl2 p-b-30">
+                            Reset Password
+                        </h3>
+                        <div class="row">
+
+                            {% csrf_token %}
+
+                            <div class="col-lg-12 p-3">
+                                <input class="form-control hov1" id="id_password" type="password" name="password" placeholder="Password">
+                            </div>
+                            <div class="col-lg-12 p-3">
+                                <input class="form-control hov1" id="id_confirm_password" type="password" name="confirm_password" placeholder="Confirm Password">
+                            </div>
+                            <div class="col-lg-12 d-flex justify-content-center my-4">
+                                <button type="submit" class="btn btn-outline-secondary px-5">
+                                    Reset Password
+                                </button>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="size-210 flex-w flex-col-m p-l-10 p-tb-30 p-r-128-lg w-full-md">
+                <img src= "{% static 'user/images/login-illustration.jpg' %} " class="w-100 h-100" alt="Login" >
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

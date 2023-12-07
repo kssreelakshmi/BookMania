@@ -1,0 +1,104 @@
+{% extends 'base/admin_side/admin_base.html' %}
+
+{% block title %}
+Publication Management - All Publication
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+
+<main class="main-wrap">
+
+{% include 'base/admin_side/admin_includes/admin_header.html' %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Publication List</h2>
+        </div>
+        
+    </div>
+    <div class="card mb-4">
+        <div class ="card-body">
+           <div class="table-responsive">
+               <table class="table text-nowrap align-items-center mb-0 align-middle">
+                   <thead class="text-dark fs-4">
+                       <tr>
+                           <th class="border-bottom-0">
+                               <h6 class="fw-semibold mb-0">Sl.No</h6>
+                            </th>
+                           <th class="border-bottom-0">
+                               <h6 class="fw-semibold mb-0">Publication Name</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Is Available</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Action</h6>
+                            </th>
+                        </tr>
+                    </thead>
+                {% for publication in publications %}
+              <tr>
+                <td class="border-bottom-0 text-center">
+                  <h6 class="fw-semibold tablecontent mb-1">{{ forloop.counter }}</h6>
+                </td>
+                
+                <td class="border-bottom-0">
+                  <a href="{% url 'update_publication' publication.id %}">
+                    <h6 class="text-decoration-underline text-primary fw-normal mb-1">{{publication.name}}</h6>
+                  </a>
+                </td>
+                <td class="border-bottom-0">
+                  <div class="mb-1">
+                    <!-- <span class="badge bg-primary rounded-3 fw-semibold"> -->
+                      {% if publication.is_active %}
+                      Enabled
+                      {% else %}
+                      Disabled
+                      {% endif %}
+                    <!-- </span> -->
+                  </div>
+                </td>
+                <td class="border-bottom-0">
+                  {% if publication.is_active %}
+                  <a href="{% url 'publication_control' publication.id %}">
+                    <button class="btn btn-danger mb-1 px-3">Disable</button>
+                  </a>
+                  {% else %}
+                  <a href="{% url 'publication_control' publication.id %}">
+                    <button class="btn btn-success mb-1">Enable</button>
+                  </a>
+                  {% endif %}
+                </td>
+              </tr> 
+
+              {% endfor %}
+  
+            </table>
+           </div>
+           
+    
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+</section> <!-- content-main end// -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</main>
+{% endblock %}

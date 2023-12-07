@@ -76,12 +76,10 @@ Product Management - Product Variant Update
                                     {% endfor %}
                                 </div>
                             </div>
-                             
                             <label class="form-check my-2">
                                 {{variant_form.is_active}}
                                 <span class="form-check-label"> Is Active </span>
                             </label>
-                        
                         </div>
                     </div>
                 </div> <!-- card end// -->
@@ -89,24 +87,36 @@ Product Management - Product Variant Update
             <div class="col-lg-5">
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h4>Thumbnail Image</h4>
+                        <h4>Image</h4>
                     </div>
                     <div class="card-body">
-                        <div class="input-upload">
-                            <input class="form-control" type="file" accept=".jpg,.jpeg,.webp,.png">
-                        </div>
+                        <label class="form-label input-upload">Thumbnail Image </label>
+                        <input class="form-control" type="file" onchange="send_data(inputid ='thumbnail', variant_slug = '{{product_variant_slug}}')" id="photothumbnail" accept=".jpg,.jpeg,.webp,.png">
+                        
                     </div>
                 </div> <!-- card end// -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h4>Additional Images</h4>
+                        <h4></h4>
                     </div>
                     <div class="card-body">
-
                         
+                        <label class="form-label input-upload">Product Images</label>
+                        <div class="overflow-auto" style="height: 300px;">
+                            {% for image in current_additional_images %}
 
-                        <div class="input-upload">
-                            <input class="form-control" type="file" accept=".jpg,.jpeg,.webp,.png" >
+                                <!-- <input class="form-control" type="file" multiple accept=".jpg,.jpeg,.webp,.png" > -->
+                                <div class="row p-3 d-flex justify-content-start">
+                                    <div class="col-md-3 col-sm-12 mx-2 my-2">
+                                    <img id="image{{forloop.counter}}" class="image-form-custom" src="{{image}}" alt="">
+                                    </div>
+                                    <div class="col-md-7 col-sm-12 my-2 mx-2 px-sm-0 px-md-3 d-flex align-items-center">
+                                    <label for="photo{{forloop.counter}}" hidden></label>
+                                    <input type="file" class="form-control" onchange="send_data(inputid ='{{forloop.counter}}', variant_slug = '{{product_variant_slug}}', image_id = '{{image.id}}')" id="photo{{forloop.counter}}" name ="add_image{{forloop.counter}}" accept=".jpg,.jpeg,.WEBP,.png">
+                                    <input type="text" hidden value="{{image.id}}" name="product-image{{forloop.counter}}">
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div> <!-- card end// -->
@@ -122,10 +132,60 @@ Product Management - Product Variant Update
             <a  href="{% url 'delete_product_variant' product_variant_slug %}" class="btn btn-dark w-25 rounded-pill p-3">Delete</a>
 
         </div>        
-
-
         </form>
     </section> <!-- content-main end// -->
 
 </main>
+
+<script>
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+      }
+      
+      
+      function send_data(inputid, variant_slug, image_id='thumbnail') {
+          url = `/admin-control/product-management/product-variant-update/additional-product-images/${variant_slug}/`
+          var formData = new FormData();
+          var files = $('#photo'+ inputid)[0].files[0]
+          formData.append('file', files);
+          formData.append('image_id', image_id);
+      
+          $.ajax({
+            type: "POST",
+            url: url,  // Replace with the actual URL for your view
+            dataType: "json", 
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                // "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie("csrftoken"), 
+              },
+            success: (data) => {
+              console.log(data);
+              document.getElementById('image'+ inputid).setAttribute('src', data['new_image'])
+              },
+            error: (error) => {
+                console.log(error);
+                alert(error)
+              }
+          });
+        }
+
+
+</script>
+
+
 {% endblock %}

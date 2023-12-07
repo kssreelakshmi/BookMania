@@ -1,6 +1,7 @@
 from django import forms
 from accounts.models import Account
 from accounts.models import Addresses
+from django.contrib.auth.forms import PasswordResetForm
 
 
 class UserSignupForm(forms.ModelForm):
@@ -22,7 +23,7 @@ class UserSignupForm(forms.ModelForm):
             'first_name'  : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Firstname'}),
             'last_name'  : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Lastname'}),
             'username'  : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Username'}),
-            'phone_number' : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Mobile Number'}),
+            'phone_number' : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Mobile Number','pattern ':'[+]{1}[0-9]{11,14} required'}),
             'email'  : forms.EmailInput(attrs={'class': 'form-control','placeholder' : 'Enter Email'}),
             'password'  : forms.PasswordInput(attrs={'class': 'form-control','placeholder' : 'Enter Password'}),
             'is_active' : forms. CheckboxInput(),
@@ -30,10 +31,10 @@ class UserSignupForm(forms.ModelForm):
             'is_staff' : forms. CheckboxInput(),
         }
 
-# class UserProfilePicForm(forms.ModelForm):
-#     class Meta:
-#         model = Account
-#         fields = ['profile_pic']        
+class UserProfilePicForm(forms.ModelForm):
+    class Meta:
+        model = Account
+        fields = ['profile_pic']        
                
 
 class AddressForm(forms.ModelForm):
@@ -47,5 +48,9 @@ class AddressForm(forms.ModelForm):
     class Meta:
         model = Addresses
         exclude = ('user','is_default','is_active')  
+        
+      
+        
+
         
 

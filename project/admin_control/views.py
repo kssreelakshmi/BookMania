@@ -2,21 +2,22 @@ from django.shortcuts import render,redirect
 from django.urls import reverse
 from accounts.forms import UserSignupForm
 from category.forms import CategoryForm
-from store.forms import ProductForm,ProductVariantForm
+from store.forms import ProductForm,ProductVariantForm,PublicationForm
 from django.contrib.auth import login, logout
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.cache import cache_control
 from category.models import Category
-from store.models import Product,ProductVariant,Attribute,AttributeValue,Author,AdditionalProductImages
+from store.models import Product,ProductVariant,Attribute,AttributeValue,Author,AdditionalProductImages,Publication
+from order.models import Order, OrderProduct, Payment, PaymentMethod
+from order.forms import OrderStatusForm
 from django.db.models import OuterRef, Subquery
 from django.http import JsonResponse
+import json
 
 # Create your views here.
 User = get_user_model()
-
-
 
 def check_isadmin(view_func, redirect_url="admin_login"):
     
@@ -81,8 +82,6 @@ def admin_login(request):
         
     return render(request, 'admin-dashboard/admin_login.html')
 
-
-
 @login_required(login_url='admin_login')
 # @check_isadmin
 def all_users(request):
@@ -130,11 +129,7 @@ def update_user(request,user_id):
     context = {
         'form': form,
         }
-    
     return render(request,'admin-dashboard/account_management/update_user.html',context)
-        
-        
-        
 
 # @check_isadmin
 @login_required(login_url='admin_login')
@@ -173,9 +168,7 @@ def admin_logout(request):
     return redirect('admin_login')
 
 
-
 # category control
-
 
 @login_required(login_url='admin_login')
 def all_category(request):
@@ -185,7 +178,6 @@ def all_category(request):
         'all_categories': categories,
     }
     return render(request, 'admin-dashboard/category_management/all_category.html', context)
-
 
 
 @login_required(login_url='admin_login')
@@ -198,7 +190,6 @@ def category_control(request, cat_slug):
     category.is_active = not category.is_active
     category.save()
     return redirect('all_category')
-
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -227,9 +218,6 @@ def update_category(request, cat_slug):
         'form': form
         }
     return render(request, 'admin-dashboard/category_management/category-update.html', context)
-
-
-
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -312,7 +300,7 @@ def create_product(request):
             variant.product = product
             variant.save()
             variant.attribute.set(attribute_ids)
-            additional_images = request.FILES.GETLIST('additional_images')
+            additional_images = request.FILES.getlist('additional_images')
             for image in additional_images:
                 AdditionalProductImages.objects.create(product_variant=variant, image=image)
                 
@@ -365,6 +353,8 @@ def product_update(request,slug):
         }
     return render(request,'admin-dashboard/product_management/update_product.html', context)
 
+
+@login_required(login_url='admin_login')
 def create_product_variant(request,slug):
     try:
         product = Product.objects.get(slug=slug)
@@ -394,15 +384,15 @@ def create_product_variant(request,slug):
         
         thumbnail_image = request.FILES.get('thumbnail_image')        
         
-        if variant_form.is_valid:
+        if variant_form.is_valid():
             variant = variant_form.save(commit=False)
             variant.thumbnail_image = request.FILES.get('thumbnail_image')
             variant.product = product
             variant.thumbnail_image = thumbnail_image
             variant.save()
-            variant.attributes.set(attribute_ids)
+            variant.attribute.set(attribute_ids)
             variant.save()
-            additional_images = request.FILES.GETLIST('additional_product_images')
+            additional_images = request.FILES.getlist('additional_images')
             
             for image in additional_images:
                 AdditionalProductImages.objects.create(product_variant=variant, image=image)    
@@ -422,10 +412,9 @@ def create_product_variant(request,slug):
         'product' : product,
         'attribute_dict' : attribute_dict,
     }   
-        
     return render(request,'admin-dashboard/product_management/create_product_variant.html',context)
     
-
+@login_required(login_url='admin_login')
 def product_variant_update(request,product_variant_slug):
     
     try:
@@ -439,26 +428,26 @@ def product_variant_update(request,product_variant_slug):
     
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if  request.method == 'POST' and is_ajax:
-        imge = request.FILES['file']
-        imge_id = request.POST['imge_id']
+        image = request.FILES['file']
+        image_id = request.POST['image_id']
         
-        if imge_id == 'thumbnail':
-            imge_id = None
-        if imge and imge_id:
+        if image_id == 'thumbnail':
+            image_id = None
+        if image and image_id:
             
             try: 
-                additional_image = AdditionalProductImages.objects.get(id=imge_id)
-                additional_image.image = imge
+                additional_image = AdditionalProductImages.objects.get(id=image_id)
+                additional_image.image = image
                 additional_image.save()
                 return JsonResponse({"status": "success",
                                      'new_image': additional_image.image.url,})
                 
             except Exception as e:
                 print(e)
-        elif imge and (not imge_id):
+        elif image and (not image_id):
             
             try:
-                product_variant.thumbnail_image = imge
+                product_variant.thumbnail_image = image
                 product_variant.save()
                 
                 return JsonResponse({
@@ -470,14 +459,13 @@ def product_variant_update(request,product_variant_slug):
         else:
             return JsonResponse({"status": "error", "message": "image send error !"})
         
-    
     if request.method == 'POST':
         variant_form = ProductVariantForm(request.POST,instance=product_variant)
         if variant_form.is_valid():
             variant = variant_form.save()
             
             messages.success(request, "Variant Updated")
-            return redirect('product_update', product_variant.product.product_variant_slug)
+            return redirect('product_update', product_variant.product_variant_slug)
         else:
             messages.error(request, variant_form.errors)
             context = {
@@ -496,8 +484,8 @@ def product_variant_update(request,product_variant_slug):
         }
     return render(request,'admin-dashboard/product_management/variant_update.html',context)
 
+@login_required(login_url='admin_login')
 def delete_product_variant(request,product_variant_slug):
-    
     try:
         product_variant = ProductVariant.objects.get(product_variant_slug=product_variant_slug)
     except ProductVariant.DoesNotExist:
@@ -505,8 +493,129 @@ def delete_product_variant(request,product_variant_slug):
     except ValueError:
         return redirect('all_products')
     product_variant.delete()
-    messages.error(request, "Variant Deleted ❌")
+    messages.error(request, "Variant Deleted")
     return redirect('all_products')
 
 
+@login_required(login_url='admin_login')
+def all_publication(request):
+    publications = Publication.objects.all().order_by('-created_date')
     
+    context = {
+        'publications': publications
+    }
+    return render(request,'admin-dashboard/publication_management/all_publication.html',context)
+
+
+@login_required(login_url='admin_login')
+def publication_control(request, id):
+    print('reached here')
+    try:
+        publication = Publication.objects.get(id=id)
+    except Exception as e:
+        print(e)
+    
+    publication.is_active = not publication.is_active
+    publication.save()
+    return redirect('all_publication')
+
+@login_required(login_url='admin_login')
+def create_publication(request):
+
+    
+    if request.method == 'POST':    
+        form = PublicationForm(request.POST)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Publication updated")
+            return redirect('all_publication')
+        else:
+            messages.error(request, form.errors)
+            return redirect('create_publication')
+
+    form = PublicationForm()
+    context = {
+        'form': form
+        }
+    return render(request, 'admin-dashboard/publication_management/create_publication.html', context)
+
+
+@login_required(login_url='admin_login')
+def update_publication(request, id):
+    try:
+        publication = Publication.objects.get(id=id)
+        
+    except Exception as e:
+        print(e)
+
+    form = PublicationForm(instance = publication)
+    
+    if request.method == 'POST':    
+        form = PublicationForm(request.POST, instance=publication)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Publication updated")
+            return redirect('all_publication')
+        else:
+            messages.error(request, form.errors)
+            return render(request, 'admin-dashboard/publication_management/update_publication.html', context)
+
+    context = {
+        'form': form
+        }
+    return render(request, 'admin-dashboard/publication_management/update_publication.html', context)
+
+    
+@login_required(login_url='admin_login')
+def all_orders(request):
+    order_status = request.GET.get('status')
+    
+    if order_status:
+        orders = Order.objects.filter(order_status__icontains=order_status).order_by('-created_at')
+    else: 
+        orders = Order.objects.all().order_by('-created_at')
+    context = {
+        'orders': orders
+    }
+    return render(request, 'admin-dashboard/order_management/all_orders.html',context)
+
+@login_required(login_url='admin_login')
+def update_order(request, order_id):
+    try:
+        order = Order.objects.get(order_id = order_id)
+    except Exception as e:
+        messages.error(request, 'order not found')
+        return redirect('all_orders')
+
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    if request.method == "POST" and is_ajax:
+        data = json.load(request)
+        selected_option = data.get('selected_option')
+        print("selected option is  :",selected_option)
+
+        order.order_status = selected_option
+        order.save()
+        return JsonResponse({"status": "success", "selected_option": selected_option})
+
+
+    order_products = OrderProduct.objects.filter(order = order)
+    total = 0
+    for order_product in order_products:
+        total += order_product.product_price * order_product.quantity
+
+    try:
+        payment = Payment.objects.filter(payment_id = order.payment.payment_id)[0]
+    except:
+        payment = None
+    form = OrderStatusForm(instance = order)
+    context = {
+        'order': order,
+        'order_products': order_products,
+        'total': total,
+        'payment': payment,
+        'form': form,
+    }
+    return render(request, 'admin-dashboard/order_management/order_details.html',context)

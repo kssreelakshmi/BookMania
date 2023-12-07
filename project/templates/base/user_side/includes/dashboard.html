@@ -1,0 +1,17 @@
+<aside class="col-md-3 col-sm-3">
+    <div class="card m-2 p-2">
+        <header class="m-2 p-2 text-center"> 
+            <h6 class=""><strong>Dashboard</strong></h6>
+        </header>
+            <!--   SIDEBAR   -->
+            <ul class="list-group">
+                <a class="list-group-item {% if '/my-account' in request.path %} active bg-dark text-white {% else %} text-dark {% endif %}" href="#">Profile</a>
+                <a class="list-group-item {% if '/order-history' in request.path %} active {% else %} text-dark {% endif %}" href="">Order History</a>
+                <a class="list-group-item {% if '/myaddress' in request.path %} active {% else %} text-dark {% endif %}" href="#">Addresses</a>
+                <a class="list-group-item {% if '/wishlist' in request.path %} active {% else %} text-dark {% endif %}" href="#">Wishlist</a>
+            </ul>
+            <br>
+            <a class="btn btn-outline-dark btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a> 
+
+    </div>
+</aside>

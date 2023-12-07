@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'admin_control',
     'cart',
     'order',
+    'django_countries',
+    'wishlist',
 ]
 
 MIDDLEWARE = [
@@ -167,5 +169,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 #razorpay
-razor_pay_key_id = config('razor_pay_key_id')
-key_secret = config('key_secret')
+RAZOR_PAY_KEY_ID = config('RAZOR_PAY_KEY_ID')
+KEY_SECRET = config('KEY_SECRET')
+
+#cross site policy
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"

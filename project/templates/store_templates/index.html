@@ -1,108 +1,44 @@
-	{% extends 'base/user_side/base_user.html' %}
-	{% block title %}
-	Home
-	{% endblock %}
-	
-	{% block content %}
-	{% load static %}
-	<!-- Header -->
-	{% include 'base/user_side/includes/header.html' %}
-	
-	
-	<!-- Cart -->
-	{% include 'base/user_side/includes/header_cart.html' %}
-	
+{% extends 'base/user_side/base_user.html' %}
+{% block title %}
+Home
+{% endblock %}
 
-		
-	
-	<!-- Slider -->
-	{% include 'base/user_side/includes/slider.html' %}
-	
-	
-	
+{% block content %}
+{% load static %}
+<!-- Header -->
+{% include 'base/user_side/includes/header.html' %}
+<div style="z-index: 100000; position: absolute; top: 0px; left: 0; right: 0;">
+	{% include 'base/user_side/includes/alerts.html' %}
+</div>	
+<link rel="stylesheet" href="{% static 'user/css/style.css' %}">
+
+<!-- Cart -->
+
+{% include 'base/user_side/includes/header_cart.html' %}
+<!-- Slider -->
+{% include 'base/user_side/includes/slider.html' %}
+
 	<!-- Banner -->
-	<div class="sec-banner bg0 p-t-80 p-b-50">
-		<div class="container">
-			<div class="row">
-				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-					<!-- Block1 -->
-					<div class="block1 wrap-pic-w">
-						<img src="{% static 'user/images/banner-01.jpg' %}" alt="IMG-BANNER">
-						
-						<a href="product.html" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-							<div class="block1-txt-child1 flex-col-l">
-								<span class="block1-name ltext-102 trans-04 p-b-8">
-									Women
-								</span>
-
-								<span class="block1-info stext-102 trans-04">
-									Spring 2018
-								</span>
-							</div>
-
-							<div class="block1-txt-child2 p-b-4 trans-05">
-								<div class="block1-link stext-101 cl0 trans-09">
-									Shop Now
-								</div>
-							</div>
-						</a>
-					</div>
+	<section class="game-section">
+		<h2 class="line-title">trending games</h2>
+		<div class="owl-carousel custom-carousel owl-theme">
+			{% for product in product_variants %}
+			{% if product.thumbnail_image %}
+			<div class="item" style="background-image: url({{product.thumbnail_image.url}});">
+			{% else %}
+			<div class="item" style="background-image: url();">
+			{% endif %}
+				<div class="item-desc">
+			  		<h3>{{ product.product }}</h3>
+			  		<p>
+						{{ product.product.description }}
+					</p>
 				</div>
-
-				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-					<!-- Block1 -->
-					<div class="block1 wrap-pic-w">
-						<img src="{% static 'user/images/banner-02.jpg' %}" alt="IMG-BANNER">
-
-						<a href="product.html" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-							<div class="block1-txt-child1 flex-col-l">
-								<span class="block1-name ltext-102 trans-04 p-b-8">
-									Men
-								</span>
-
-								<span class="block1-info stext-102 trans-04">
-									Spring 2018
-								</span>
-							</div>
-
-							<div class="block1-txt-child2 p-b-4 trans-05">
-								<div class="block1-link stext-101 cl0 trans-09">
-									Shop Now
-								</div>
-							</div>
-						</a>
-					</div>
-				</div>
-
-				<div class="col-md-6 col-xl-4 p-b-30 m-lr-auto">
-					<!-- Block1 -->
-					<div class="block1 wrap-pic-w">
-						<img src="{% static 'user/images/banner-03.jpg' %}" alt="IMG-BANNER">
-
-						<a href="product.html" class="block1-txt ab-t-l s-full flex-col-l-sb p-lr-38 p-tb-34 trans-03 respon3">
-							<div class="block1-txt-child1 flex-col-l">
-								<span class="block1-name ltext-102 trans-04 p-b-8">
-									Accessories
-								</span>
-
-								<span class="block1-info stext-102 trans-04">
-									New Trend
-								</span>
-							</div>
-
-							<div class="block1-txt-child2 p-b-4 trans-05">
-								<div class="block1-link stext-101 cl0 trans-09">
-									Shop Now
-								</div>
-							</div>
-						</a>
-					</div>
-				</div>
-			</div>
+		  	</div>
+			{% endfor %}
 		</div>
-	</div>
-
-
+	</section>
+	
 	<!-- Product -->
 	<section class="bg0 p-t-23 p-b-140">
 		<div class="container">
@@ -118,25 +54,25 @@
 						<a href="{% url 'user_home' %}" class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 {% if not 'products' in request.path %}how-active1{% endif %}">
 							All Products
 						</a>
-
+						
 						{% for category in categories %}
 						{% if not category.parent_cat %}
-
+						
 						<a href="{% url 'products_by_category' category.slug %}" class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5 {% if '/'|add:category.slug in request.path %}how-active1 {% else %} {% endif %} ">
 							{{category.category_name}}
 						</a>
-
+						
 						{% endif %}
 						{% endfor %}
-				</div>
+					</div>
 
 				<div class="flex-w flex-c-m m-tb-10">
 					<div class="flex-c-m stext-106 cl6 size-104 bor4 pointer hov-btn3 trans-04 m-r-8 m-tb-4 js-show-filter">
 						<i class="icon-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-filter-list"></i>
 						<i class="icon-close-filter cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
-						 Filter
+						Filter
 					</div>
-
+					
 					<div class="flex-c-m stext-106 cl6 size-105 bor4 pointer hov-btn3 trans-04 m-tb-4 js-show-search">
 						<i class="icon-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-search"></i>
 						<i class="icon-close-search cl2 m-r-6 fs-15 trans-04 zmdi zmdi-close dis-none"></i>
@@ -150,7 +86,7 @@
 						<button class="size-113 flex-c-m fs-16 cl2 hov-cl1 trans-04">
 							<i class="zmdi zmdi-search"></i>
 						</button>
-
+						
 						<input class="mtext-107 cl2 size-114 plh2 p-r-15" type="text" name="search-product" placeholder="Search">
 					</div>	
 				</div>
@@ -162,14 +98,14 @@
 							<div class="mtext-102 cl2 p-b-15">
 								Sort By
 							</div>
-
+							
 							<ul>
 								<li class="p-b-6">
 									<a href="#" class="filter-link stext-106 trans-04">
 										Default
 									</a>
 								</li>
-
+								
 								<li class="p-b-6">
 									<a href="#" class="filter-link stext-106 trans-04">
 										Popularity
@@ -206,7 +142,7 @@
 							<div class="mtext-102 cl2 p-b-15">
 								Price
 							</div>
-
+							
 							<ul>
 								<li class="p-b-6">
 									<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
@@ -219,19 +155,19 @@
 										$0.00 - $50.00
 									</a>
 								</li>
-
+								
 								<li class="p-b-6">
 									<a href="#" class="filter-link stext-106 trans-04">
 										$50.00 - $100.00
 									</a>
 								</li>
-
+								
 								<li class="p-b-6">
 									<a href="#" class="filter-link stext-106 trans-04">
 										$100.00 - $150.00
 									</a>
 								</li>
-
+								
 								<li class="p-b-6">
 									<a href="#" class="filter-link stext-106 trans-04">
 										$150.00 - $200.00
@@ -245,18 +181,18 @@
 								</li>
 							</ul>
 						</div>
-
+						
 						<div class="filter-col3 p-r-15 p-b-27">
 							<div class="mtext-102 cl2 p-b-15">
 								Color
 							</div>
-
+							
 							<ul>
 								<li class="p-b-6">
 									<span class="fs-15 lh-12 m-r-6" style="color: #222;">
 										<i class="zmdi zmdi-circle"></i>
 									</span>
-
+									
 									<a href="#" class="filter-link stext-106 trans-04">
 										Black
 									</a>
@@ -276,12 +212,12 @@
 									<span class="fs-15 lh-12 m-r-6" style="color: #b3b3b3;">
 										<i class="zmdi zmdi-circle"></i>
 									</span>
-
+									
 									<a href="#" class="filter-link stext-106 trans-04">
 										Grey
 									</a>
 								</li>
-
+								
 								<li class="p-b-6">
 									<span class="fs-15 lh-12 m-r-6" style="color: #00ad5f;">
 										<i class="zmdi zmdi-circle"></i>
@@ -291,12 +227,12 @@
 										Green
 									</a>
 								</li>
-
+								
 								<li class="p-b-6">
 									<span class="fs-15 lh-12 m-r-6" style="color: #fa4251;">
 										<i class="zmdi zmdi-circle"></i>
 									</span>
-
+									
 									<a href="#" class="filter-link stext-106 trans-04">
 										Red
 									</a>
@@ -306,36 +242,36 @@
 									<span class="fs-15 lh-12 m-r-6" style="color: #aaa;">
 										<i class="zmdi zmdi-circle-o"></i>
 									</span>
-
+									
 									<a href="#" class="filter-link stext-106 trans-04">
 										White
 									</a>
 								</li>
 							</ul>
 						</div>
-
+						
 						<div class="filter-col4 p-b-27">
 							<div class="mtext-102 cl2 p-b-15">
 								Tags
 							</div>
-
+							
 							<div class="flex-w p-t-4 m-r--5">
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
 									Fashion
 								</a>
-
+								
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
 									Lifestyle
 								</a>
-
+								
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
 									Denim
 								</a>
-
+								
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
 									Streetstyle
 								</a>
-
+								
 								<a href="#" class="flex-c-m stext-107 cl6 size-301 bor7 p-lr-15 hov-tag1 trans-04 m-r-5 m-b-5">
 									Crafts
 								</a>
@@ -344,17 +280,21 @@
 					</div>
 				</div>
 			</div>
-
+			
 			<div class="row isotope-grid">
 				
 				{% for product in product_variants %}
-
+				
 				<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item ">
 					<!-- Block2 -->
 					<div class="block2">
 						<div class="block2-pic hov-img0">
-							<img src="{{product.thumbnail_image.url}}" alt="IMG-PRODUCT">
-
+							{% if not product.thumbnail_image %}
+							<img src="" width="300px" style="max-height: 200px; object-fit: contain;" alt="Product image loading..">
+							{% else %}
+							<img src="{{ product.thumbnail_image.url }}" width="300px" style="max-height: 200px; object-fit: contain;" alt="IMG-PRODUCT">
+							{% endif %}
+							
 							<a href="{% url 'add_to_cart' product.id %}" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1">
 								Add to Cart
 							</a>
@@ -365,7 +305,7 @@
 								<a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
 									{{product.get_product_name}}
 								</a>
-
+								
 								<span class="stext-105 cl3">
 									Rs{{product.sale_price}}
 								</span>
@@ -383,11 +323,11 @@
 				{% endfor %}
 
 
-
+				
 
 
 			</div>
-
+			
 			<!-- Load more -->
 			<div class="flex-c-m flex-w w-full p-t-45">
 				<a href="#" class="flex-c-m stext-101 cl5 size-103 bg2 bor1 hov-btn1 p-lr-15 trans-04">
@@ -396,38 +336,38 @@
 			</div>
 		</div>
 	</section>
-
+	
 
 	<!-- Back to top -->
-
+	
 	<div class="btn-back-to-top" id="myBtn">
 		<span class="symbol-btn-back-to-top">
 			<i class="zmdi zmdi-chevron-up"></i>
 		</span>
 	</div>
-
+	
 	<!-- Modal1 -->
 	<div class="wrap-modal1 js-modal1 p-t-60 p-b-20">
 		<div class="overlay-modal1 js-hide-modal1"></div>
-
+		
 		<div class="container">
 			<div class="bg0 p-t-60 p-b-30 p-lr-15-lg how-pos3-parent">
 				<button class="how-pos3 hov3 trans-04 js-hide-modal1">
 					<img src="{% static 'user/images/icons/icon-close.png' %}" alt="CLOSE">
 				</button>
-
+				
 				<div class="row">
 					<div class="col-md-6 col-lg-7 p-b-30">
 						<div class="p-l-25 p-r-30 p-lr-0-lg">
 							<div class="wrap-slick3 flex-sb flex-w">
 								<div class="wrap-slick3-dots"></div>
 								<div class="wrap-slick3-arrows flex-sb-m flex-w"></div>
-
+								
 								<div class="slick3 gallery-lb">
 									<div class="item-slick3" data-thumb="images/product-detail-01.jpg">
 										<div class="wrap-pic-w pos-relative">
 											<img src="{% static 'user/images/product-detail-01.jpg' %}" alt="IMG-PRODUCT">
-
+											
 											<a class="flex-c-m size-108 how-pos1 bor0 fs-16 cl10 bg0 hov-btn3 trans-04" href="images/product-detail-01.jpg">
 												<i class="fa fa-expand"></i>
 											</a>
@@ -463,7 +403,7 @@
 							<h4 class="mtext-105 cl2 js-name-detail p-b-14">
 								Lightweight Jacket
 							</h4>
-
+							
 							<span class="mtext-106 cl2">
 								$58.79
 							</span>
@@ -478,7 +418,7 @@
 									<div class="size-203 flex-c-m respon6">
 										Size
 									</div>
-
+									
 									<div class="size-204 respon6-next">
 										<div class="rs1-select2 bor8 bg0">
 											<select class="js-select2" name="time">
@@ -497,7 +437,7 @@
 									<div class="size-203 flex-c-m respon6">
 										Color
 									</div>
-
+									
 									<div class="size-204 respon6-next">
 										<div class="rs1-select2 bor8 bg0">
 											<select class="js-select2" name="time">
@@ -539,11 +479,11 @@
 										<i class="zmdi zmdi-favorite"></i>
 									</a>
 								</div>
-
+								
 								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Facebook">
 									<i class="fa fa-facebook"></i>
 								</a>
-
+								
 								<a href="#" class="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 m-r-8 tooltip100" data-tooltip="Twitter">
 									<i class="fa fa-twitter"></i>
 								</a>
@@ -558,7 +498,11 @@
 			</div>
 		</div>
 	</div>
-<script>
+	<script>
 	document.getElementById('header').classList.remove('header-v4')
 </script>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- <script defer src="plugins/OwlCarousel2.3/owl.carousel.min.js"></script> -->
+<script src="{% static 'user/js/custom.js' %}"></script>
 {% endblock %}

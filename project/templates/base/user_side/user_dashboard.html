@@ -15,51 +15,211 @@ User Dashboard
 
 <div class="container">
     <div class="row">
-        <aside class="col-md-3 col-sm-3">
-            <div class="card m-2 p-2">
-                <header class="m-2 p-2 text-center"> 
-                    <h6 class=""><strong>Dashboard</strong></h6>
-                </header>
-                    <!--   SIDEBAR   -->
-                    <ul class="list-group">
-                        <a class="list-group-item text-dark" href="#">Profile</a>
-                        <a class="list-group-item text-dark" href="#">Order History</a>
-                        <a class="list-group-item text-dark" href="#">Addresses</a>
-                        <a class="list-group-item text-dark" href="#">Payment Methods</a>
-                        <a class="list-group-item text-dark" href="#">Wishlist</a>
-                    </ul>
-                    <br>
-                    <a class="btn btn-dark btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a> 
-
-            </div>
-        </aside>
-        {% block inner_content %}
+        {% include 'base/user_side/includes/dashboard.html' %}
         <div class="col-md-9 col-sm-9">
             <div class="card-title p-3 ">
-                <h5><strong>Profile</strong></h5>
+                <h5 class="text-dark fw-bold"><strong>Profile</strong></h5>
             </div>
-            <div class="card ">
+            <div class="card pb-5 ">
                 <div class="card-header bg-none p-3 m-3">
                     <span><strong>Welcome Back!</strong></span>
                     <span><strong>{{user.username}}</strong></span>
                 </div>
                 <div class="card-body">
-                    
-
-
+                    <div class="row ">
+                        <div class=" col-xl-4 col-md-6 col-sm-12 mt-3 justify-content-center align-items-center">
+                            <div class="d-flex flex-column justify-content-center align-items-center ">
+                                {% if user.profile_pic %}
+                                <img src="{{user.profile_pic.url}}" class="rounded-circle mx-5" style="max-width: 200px;" alt="Avatar" />
+                                {% else %}
+                                <img src="{% static 'user/images/user.png' %}" class="rounded-circle mx-5" style="max-width: 100px;" alt="Avatar" />
+                                {% endif %}
+                            </div>
+                        <!-- </div>
+                        <div class="col-xl-4 col-md-6 col-sm-12 mt-3 justify-content-center align-items-center"> -->
+                            <form method="POST" enctype="multipart/form-data" action="{% url 'update_user_profile' %}" >
+                                {% csrf_token %}
+                                <div class="d-flex flex-column align-items-center px-5">
+                                    <!-- <input required type="file" class="custom-file-input" id="id_profile_pic" name="profile_pic"> -->
+                                    <label for="file-upload" class="mt-xl-5 w-100 ">Select File</label>
+                                    <input id="file-upload" type="file" name="profile_pic" style="display: none;">
+                                    <button type="submit" class="btn btn-dark w-100 mt-3">
+                                        Update image
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="flex-column">
+                            <div class="row"> 
+                                <label class="form-label p-3 mx-5  ">First Name</label>
+                                <div class="input-group px-3 mx-5">
+                                    <input type="text" onchange="UpdateProfileField(this)" class="form-control " name="first_name" id="userprofilefield1" placeholder="First name" value="{{user.first_name}}" readonly aria-describedby="edit-btn1">
+                                    <button type="button" id="edit-btn1" class="btn btn-dark" onclick="EditProfileField('1')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="form-label p-3 mx-5 ">Last Name</label>
+                                <div class="input-group px-3 mx-5">
+                                    <input type="text" onchange="UpdateProfileField(this)" class="form-control " name="last_name" id="userprofilefield2" placeholder="Last name" value="{{user.last_name}}" readonly aria-describedby="edit-btn1">
+                                    <button type="button" id="edit-btn1" class="btn btn-dark" onclick="EditProfileField('2')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <label class="form-label p-3 mx-5 ">Username</label>
+                                <div class="input-group px-3 mx-5">
+                                    <input type="text" onchange="UpdateProfileField(this)" class="form-control " name="username" id="updateprofilefield3" placeholder="Username" value="{{user.username}}" readonly aria-describedby="edit-btn1">
+                                    <button type="button" id="edit-btn1" class="btn btn-dark" onclick="EditProfileField('3')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>    
+                    <div class="row">
+                        <div class=" col-xl-5 col-md-6 col-sm-12 ">
+                            <label class="form-label p-3 mx-5 ">Mobile Number</label>
+                            <div class="input-group px-3 mx-5"> 
+                                <input type="tel" class="form-control" name="phone" id="userprofilefield4" pattern="[+]{1}[0-9]{11,14}" required placeholder="Mobile Number" value="{{user.phone_number}}" readonly aria-describedby="edit-btn1">
+                                <button type="button" id="edit-btn1" class="btn btn-dark" data-toggle="modal" data-target="#phone_numberModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-xl-5 col-md-6 col-sm-12 ">
+                            <label class=" form-label p-3 mx-5 ">Email</label>
+                            <div class="input-group px-3 mx-5">
+                                <input type="email" class="form-control" name="email" id="userprofilefield5" placeholder="Email" value="{{user.email}}" readonly aria-describedby="edit-btn1">
+                                <button type="button" class="btn btn-dark" id="edit-btn1" data-toggle="modal" data-target="#emailModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class=" col-xl-5 col-md-6 col-sm-12 ">
+                            <label class="form-label p-3 mx-5 ">Password</label>
+                            <div class="input-group px-3 mx-5">
+                                <input type="password" class="form-control" name="password" id="updateprofilefield6" placeholder="Password" value="*********" readonly aria-describedby="edit-btn1">
+                                <button type="button" class="btn btn-dark" id="edit-btn1" data-toggle="modal" data-target="#passwordModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-
-
-
+            <br>
+            <br>
         </div>
-
-
-
-
-
-        {% endblock %}
     </div>
 </div>
+
+  <!-- Modal for phone number change -->
+  <div class="modal fade" id="phone_numberModal" tabindex="-1" role="dialog" aria-labelledby="phone_numberModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="phone_numberModalLabel">Mobile Number Update</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-dark">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Email Change -->
+  <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="emailModalLabel">Email Update </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>You are going to change your current Email ID to a new Email ID. After filling the new Email ID a verification mail send to your new Email ID.</p>
+          <label for="" class="mt-2"> <small>New Email Id</small></label> 
+            <input type="email" id="EmailChangeOtpNewMail"  class="form-control " placeholder="New Email Address" value="" >
+            <p class="text-danger small m-0 p-0" id="EmailChangeOtpNewMailError"></p>
+            
+            <a class="btn btn-dark mt-2" onclick="EmailChangeOtpMail()" id="EmailChangeOtpNewMailbtn">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+              Confirm
+          </a>
+
+          <div id="EmailChangeOtpNewMailDiv" class="d-none">
+                
+            <label for="" class="mt-2"> <small>Enter Otp</small></label> 
+                <input type="number" id="EmailChangeOtpNewMail" class="form-control " placeholder="OTP" value="" >
+                <p class="text-danger small m-0 p-0" id="EmailChangeOtpNewMailError"></p>
+            <button class="btn btn-dark mt-2" onclick="EmailChangeOtpMailVerify()">
+                Change
+            </button>
+        </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-dark" data-dismiss="modal" onclick="location.reload();">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal for password change -->
+  <div class="modal fade" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="passwordModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 {% endblock %}
+
+
+
+

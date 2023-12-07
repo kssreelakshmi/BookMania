@@ -22,99 +22,100 @@ Product Management - Add Product Variant
     </div>
 
     <div class="row justify-content-lg-between">
-        <div class="col-lg-7">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Product Variant Details</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="mb-4">
-                                <label for="sku_id" class="form-label">SKU ID</label>
-                                {{ variant_form.sku_id }}
+        <form method="post">
+            {% csrf_token %}
+            <div class="col-lg-7">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Product Variant Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label for="sku_id" class="form-label">Product Name</label>
+                                    <input class="form-control" value="{{product}}" readonly type="text">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label for="sku_id" class="form-label">SKU ID</label>
+                                    {{ variant_form.sku_id }}
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label for="stock" class="form-label">Stock</label>
+                                    {{ variant_form.stock }}
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="mb-4">
-                                <label for="stock" class="form-label">Stock</label>
-                                {{ variant_form.stock }}
-                            </div>
+                        <div class="mb-4">
+                            <label for="max_price" class="form-label">Max Price</label>
+                            {{ variant_form.max_price }}
                         </div>
-                    </div>
-                    <div class="mb-4">
-                        <label for="max_price" class="form-label">Max Price</label>
-                        {{ variant_form.max_price }}
-                    </div>
-                    <div class="mb-4">
-                        <label for="sale_price" class="form-label">Sale Price</label>
-                        {{ variant_form.sale_price }}
-                    </div>
-                    
-                    <div class="mb-3 mt-4 col-12">
-                        <div class="card-header form-label">
-                            <label class="card-title form-label" >Choose Attributes</label>
-                            <hr>
-                            <div class="row">
-                                {% for attribute_name, attribute_values in attribute_dict.items %}
-                                    <div class="col-6">
-                                        <label class="form-label">{{attribute_name}}</label>
-                                        <select name="attributes_{{ forloop.counter }}" class="form-control" {% if not attribute_values %} disabled {% endif %}>
-                                            {% if not attribute_values %}
-                                            <option  value="None">Empty</option>
-                                            {% else %}
-                                            <option  value="None">Select</option>
-                                            {% endif %}
-                                            
-                                            {% for value in attribute_values %}
-                                            <option value="{{ value.id }}">{{ value.attribute_value }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                {% endfor %}
-                            </div>
+                        <div class="mb-4">
+                            <label for="sale_price" class="form-label">Sale Price</label>
+                            {{ variant_form.sale_price }}
                         </div>
                         
-                        <label class="form-check my-2">
-                            {{variant_form.is_active}}
-                            <span class="form-check-label"> Is Active </span>
-                        </label>
-                    
+                        <div class="mb-3 mt-4 col-12">
+                            <div class="card-header form-label">
+                                <label class="card-title form-label" >Choose Attributes</label>
+                                <hr>
+                                <div class="row">
+                                    {% for attribute_name, attribute_values in attribute_dict.items %}
+                                        <div class="col-6">
+                                            <label class="form-label">{{attribute_name}}</label>
+                                            <select name="attributes_{{ forloop.counter }}" class="form-control" {% if not attribute_values %} disabled {% endif %}>
+                                                {% if not attribute_values %}
+                                                <option  value="None">Empty</option>
+                                                {% else %}
+                                                <option  value="None">Select</option>
+                                                {% endif %}
+                                                
+                                                {% for value in attribute_values %}
+                                                <option value="{{ value.id }}">{{ value.attribute_value }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                            </div>
+                            
+                            <label class="form-check my-2">
+                                {{variant_form.is_active}}
+                                <span class="form-check-label"> Is Active </span>
+                            </label>
+                            
+                        </div>
                     </div>
-                </div>
-            </div> <!-- card end// -->
-        </div>
-        <div class="col-lg-5">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Thumbnail Image</h4>
-                </div>
-                <div class="card-body">
-                    <div class="input-upload">
-                        <input class="form-control" type="file" accept=".jpg,.jpeg,.webp,.png">
-                    </div>
-                </div>
-            </div> <!-- card end// -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Additional Images</h4>
-                </div>
-                <div class="card-body">
-                    <div class="input-upload">
-                        <input class="form-control" type="file" accept=".jpg,.jpeg,.webp,.png" >
-                    </div>
-                </div>
-            </div> <!-- card end// -->
-            <div>
-                <button type="submit" class="w-100 p-3 btn btn-md rounded font-sm hover-up">Add Product Variant</button>
+                </div> <!-- card end// -->
             </div>
-            
-        </div>
+            <div class="col-lg-5">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Image Section</h4>
+                    </div>
+                    <div class="card-body">
+                        <label class="form-label input-upload"></label>Thumbnail Image </label>
+                        <input class="form-control" type="file" accept=".jpg,.jpeg,.webp,.png">
+                      
+                    </div>
+                </div> <!-- card end// -->
+                <div class="card mb-4">
+                    <label class="card-body">Additional Images </label>
+                        <div class="input-upload">
+                            <input class="form-control" type="file" multiple accept=".jpg,.jpeg,.webp,.png" >
+                        </div>
+                   
+                </div> <!-- card end// -->
+                <div>
+                    <button type="submit" class="w-100 p-3 btn btn-md rounded font-sm hover-up">Add Product Variant</button>
+                </div>  
+            </div>
+        </form>
     </div>
-    
-
-
-
 </section>
 </main>
 {% endblock %}

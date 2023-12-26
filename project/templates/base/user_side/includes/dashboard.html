@@ -5,10 +5,10 @@
         </header>
             <!--   SIDEBAR   -->
             <ul class="list-group">
-                <a class="list-group-item {% if '/my-account' in request.path %} active bg-dark text-white {% else %} text-dark {% endif %}" href="#">Profile</a>
-                <a class="list-group-item {% if '/order-history' in request.path %} active {% else %} text-dark {% endif %}" href="">Order History</a>
-                <a class="list-group-item {% if '/myaddress' in request.path %} active {% else %} text-dark {% endif %}" href="#">Addresses</a>
-                <a class="list-group-item {% if '/wishlist' in request.path %} active {% else %} text-dark {% endif %}" href="#">Wishlist</a>
+                <a class="list-group-item {% if '/my-account' in request.path %} active bg-dark {% else %}text-dark {% endif %}" href="{%  url 'user_dashboard' %}">Profile</a>
+                <a class="list-group-item {% if '/order-history' in request.path %} active bg-dark {% else %} text-dark {% endif %}" href="{%  url 'order_history' %}">Order History</a>
+                <a class="list-group-item {% if '/myaddress' in request.path %} active bg-dark {% else %} text-dark {% endif %}" href="{% url 'my_address' %}">Addresses</a>
+                <a class="list-group-item {% if '/wishlist' in request.path %} active bg-dark {% else %} text-dark {% endif %}" href="{% url 'wishlist' %}">Wishlist</a>
             </ul>
             <br>
             <a class="btn btn-outline-dark btn-block" href="#"> <i class="fa fa-power-off"></i> <span class="text">Log out</span> </a> 

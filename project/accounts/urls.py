@@ -14,14 +14,22 @@ urlpatterns = [
     path('reset-password/', views.reset_password, name='reset_password'),
     path('user-logout/', views.user_logout, name='user_logout'),
     
-    
+    # user account management
     path('my-account/', views.user_dashboard, name='user_dashboard'),
-    path('my-account/user-profile-update/', views.update_user_profile, name='update_user_profile'),
-    path('my-account/profile-update/', views.update_profile, name='update_profile'),
-    path('my-account/order-history', views.order_history, name='order_hidtory'),
-    path('my-account/myaddress', views.my_address, name='my_address'),
-    path('my-account/add-address/<str:source>/', views.add_address, name='add_address'),
-    path('my-account/default-address', views.default_address, name= 'default_address'),
-    path('my-account/delete-address', views.delete_address, name='delete_address'),
+    path('user-profile-update/', views.update_user_profile, name='update_user_profile'),
+    path('profile-update/', views.update_profile, name='update_profile'),
+
+    path('mobile-number-change/', views.mobile_number_change, name='mobile_number_change'),
+    path('email-change/', views.email_change, name='email_change'),
+    path('password-change/', views.password_change, name='password_change'),
+
+
+    path('order-history/', views.order_history, name='order_history'),
+    path('order-detail/<str:order_id>/', views.order_detail, name='order_detail'),
+    path('myaddress/', views.my_address, name='my_address'),
+    path('add-address/<str:source>/', views.add_address, name='add_address'),
+    path('update-address/',views.update_address,name='update_address'),
+    path('default-address/<int:id>/', views.default_address, name= 'default_address'),
+    path('delete-address/<int:id>/', views.delete_address, name='delete_address'),
     
 ]

@@ -14,6 +14,95 @@ function getCookie(name) {
   return cookieValue;
 }
 
+function handleAddress(id){
+  const data ={
+    'id':id,
+  }
+
+  $.ajax({
+    type: "GET",
+    url: `/accounts/update-address/`,  // Replace with the actual URL for your view
+    dataType: "json", 
+    data: data,
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+    },
+
+      //response from backend
+    success: (data) => {
+      console.log(data);
+      document.getElementById('addressId').value = data.formData.id
+      document.getElementById('name').value = data.formData.name
+      document.getElementById('phone_number').value = data.formData.phone_number
+      document.getElementById('address_line_1').value = data.formData.address_line_1
+      document.getElementById('address_line_2').value = data.formData.address_line_2
+      document.getElementById('city').value = data.formData.city
+      document.getElementById('state').value = data.formData.state
+      document.getElementById('pincode').value = data.formData.pincode
+      const defaultCountry = data.formData.country
+      const selectField = document.getElementById('country')
+
+      const validJsonString = data.countries.replace(/,(\s*])/, '$1');
+      
+      JSON.parse(validJsonString).forEach(element => {
+        const option = document.createElement('option')
+        if(element[1] == defaultCountry){
+          option.selected = true;
+        }
+        option.value = element[0]
+        option.text = element[1]
+        selectField.appendChild(option)
+        
+      });
+
+
+
+    },
+    error: (error) => {
+      console.log(error);
+      alert(error)
+    }
+  });
+}
+
+function handleAddressSubmit(){
+  const data = {
+    "id": document.getElementById('addressId').value,
+    "name": document.getElementById('name').value,
+    "phone_number": document.getElementById('phone_number').value,
+    "address_line_1": document.getElementById('address_line_1').value,
+    "address_line_2": document.getElementById('address_line_2').value,
+    "city": document.getElementById('city').value,
+    "state": document.getElementById('state').value,
+    "country": document.getElementById('country').value,
+    "pincode": document.getElementById('pincode').value,
+    
+  }
+  console.log(data)
+  $.ajax({
+    type: "POST",
+    url: `/accounts/update-address/`,  // Replace with the actual URL for your view
+    dataType: "json", 
+    data: data,
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": getCookie("csrftoken"), 
+    },
+  
+      //response from backend
+    success: (data) => {
+      console.log(data);
+      window.location.reload();
+    },
+    error: (error) => {
+      console.log(error);
+      alert(error)
+    }
+  });
+  
+}
+
+
 function update_wishlist(product_id, action){
   const data = {
     'product_id' : product_id,

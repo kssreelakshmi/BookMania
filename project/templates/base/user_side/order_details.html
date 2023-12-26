@@ -1,0 +1,149 @@
+{% extends 'base/user_side/base_user.html' %}
+
+{% block title %}
+Orders Details
+{% endblock %}
+
+{% block content %}
+
+{% load static %}
+<!-- Header -->
+{% include 'base/user_side/includes/header.html' %}
+<div style="z-index: 100000; position: absolute; top: 0px; left: 0; right: 0;">
+	{% include 'base/user_side/includes/alerts.html' %}
+</div>	
+<!-- Cart -->
+{% include 'base/user_side/includes/header_cart.html' %}
+
+
+<div class="container">
+    <div class="row">
+        {% include 'base/user_side/includes/dashboard.html' %}
+        <div class="col-md-9 col-sm-9">
+            <div class="card-title p-3 ">
+                Order Details
+            </div>
+            <div class="card">
+                <div class="card-header p-3 m-3">
+                    <h4>Invoice Details</h4>
+                    <div class="d-flex justify-content-between text-left card-body">
+                        <div class="">
+                            <ul class="list-unstyled mb0">
+                            <li><strong>Order: </strong>{{order.order_id}}</li>
+                            <li><strong>Transaction: </strong> {{order.payment.payment_id}}</li>
+                            </ul>
+                        </div>
+                        <div class="">
+                        <ul class="list-unstyled mb0">
+                            <li><strong>Order Date: </strong> {{order.created_at}}</li>
+                            <li><strong>Status: </strong> {{order.order_status}}</li>
+                        </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between text-left card-body ">
+                    <div class="col-7 border border-black-50 m-2">
+                        <div class="p-3 m-3">
+                            <h5>Product details</h5>
+                        </div>
+                        <div class="p-3 m-3">
+                            <table class="table">
+                                <thead>
+                                     <tr class="table_head">
+                                        <th class="column-1">Product</th>
+                                        <th class="column-3">Price</th>
+                                        <th class="column-4 text-center">Quantity</th>
+                                    </tr>
+                                 </thead>
+                            <tbody>
+                                {% for product in products %}
+                                
+                                <tr class="table_row">
+                                    <td class="column-1">
+                                        <div class="d-flex justify-content-start bd-highlight mb-3">
+                                            <div class=" how-itemcart1">
+                                                <img src="{{ product.variant.thumbnail_image.url }}" alt="IMG">
+                                            </div>
+                                            <figcaption class="info">
+                                                <a href="{{ product.variant.get_url }}" class="title text-dark">{{product.variant.product}}
+                                            </a>
+                                                <p class="text-muted small">
+                                                    {% for value in product.variant.attribute.all %}
+                                                    {{value.attribute}}: {{value.attribute_value}}
+                                                    <br>
+                                                    
+                                                    {% endfor %}
+                                                    
+                                                    Publication: {{product.variant.product.publication}}
+                                                </p>
+                                            </figcaption>
+                                        </div>
+                                    </td>
+                                    <td class="column-3">
+                                        Rs.{{product.variant.sale_price}}
+                                    </td>
+                                    <td class="column-4">
+                                        <h6 class="text-center">{{product.quantity}}</h6>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="2" class="text-right">Sub Total:</th>
+                                    <th class="text-center ">&#8377;{{sub_total}}</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2" class="text-right">Tax:</th>
+                                    <th class="text-center text-danger">&#8377;{{tax}}</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2" class="text-right">Net payable amount:</th>
+                                    <th class="text-center"><strong>&#8377;{{ grand_total }}</strong></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    </div>
+                    <div class="flex-column col-4 border border-black-50 m-2 h-25">
+                        <div class="card-header bg-none p-3 m-3">
+                        <h5>Shipping Address</h5>
+                        </div>
+                        <div class="form-group p-3 m-3 ">
+                            {{order.address.name}}<br>
+                            {{order.address.phone_number}},
+                            {{order.address.address_line_1}},
+                            {{order.address.address_line_2}}<br>
+                            {{order.address.city}},
+                            {{order.address.state}},
+                            {{order.address.pincode}}<br>
+                            {{order.address.country}}
+                        </div>
+                    </div>
+                </div>
+            <!-- <div class=""> -->
+                <!-- <div class="row col-4">
+                    <div class="card">
+                        <div class="card-header bg-none p-3 m-3">
+                            <h5>Payment Details</h5>
+                        </div>
+                        <div class=" m-2 h-25">
+                            <div class="card-body form-group p-3 m-3 ">
+                                Payment Method : {{payment.method.method_name}}<br>
+                                Payment ID : {{payment.payment_order_id}}
+                                Payment Signature : {{payment.}}
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            <!-- </div>  -->
+        </div>
+        <br>
+        <br>
+        <br>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

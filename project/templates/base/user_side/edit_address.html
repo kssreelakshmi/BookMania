@@ -1,0 +1,122 @@
+{% extends 'base/user_side/base_user.html' %}
+
+{% block title %}
+My Address
+{% endblock %}
+
+{% block content %}
+
+{% load static %}
+
+<!-- Header -->
+{% include 'base/user_side/includes/header.html' %}
+<!-- Cart -->
+{% include 'base/user_side/includes/header_cart.html' %}
+<style>
+  .modal-custom{
+      position: fixed;
+      top: 120px;
+      right: 0;
+      bottom: 0;
+      left: 0;
+  }
+ </style>
+
+<div class="container">
+    <div class="row">
+        {% include 'base/user_side/includes/dashboard.html' %}
+        <div class="col-md-9 col-sm-9">
+            <div class="card-title p-3 ">
+                <h5 class="text-dark fw-bold"><strong>My Address</strong></h5>
+            </div>
+            <div class="card col-md-10 col-sm-6 col-xl-12">
+                <div class="card-header row ">
+                    <h6 class="d-flex flex-column align-items-center justify-content-start">Addresses</h6>
+                </div>
+                <div class="card-body">
+                    <div class=" row">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade modal-custom" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <label for="name" >Name</label>
+          {{address_form.name}}
+          <label for="phone_number">Mobile Number</label>
+          {{address_form.phone_number}}
+          <label for="address_line_1">Address Line1</label>
+          {{address_form.address_line_1}}
+          <label for="address_line_2">Address Line2</label>
+          {{address_form.address_line_2}}
+          <label for="city">City</label>
+          {{address_form.city}}
+          <label for="state">State</label>
+          {{address_form.state}}
+          <label for="country">Country</label>
+          {{address_form.country}}
+          <label for="pincode">Pincode</label>
+          {{address_form.pincode}}
+        </div>
+        <div class="modal-footer">
+          <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+          <button type="submit" class="btn btn-dark">Add Address</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Modal -->
+  <div class="modal fade modal-custom" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateModalLabel">Update Address</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="modal-body">
+            <label for="name" >Name</label>
+            {{address_form.name}}
+            <label for="phone_number">Mobile Number</label>
+            {{address_form.phone_number}}
+            <label for="address_line_1">Address Line1</label>
+            {{address_form.address_line_1}}
+            <label for="address_line_2">Address Line2</label>
+            {{address_form.address_line_2}}
+            <label for="city">City</label>
+            {{address_form.city}}
+            <label for="state">State</label>
+            {{address_form.state}}
+            <label for="country">Country</label>
+            {{address_form.country}}
+            <label for="pincode">Pincode</label>
+            {{address_form.pincode}}
+          </div>
+          <div class="modal-footer">
+            <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+            <button type="submit" class="btn btn-dark">Add Address</button>
+          </div>
+        </form>
+       
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

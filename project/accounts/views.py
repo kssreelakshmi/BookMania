@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from .forms import UserSignupForm,AddressForm,UserProfilePicForm
+from .forms import UserSignupForm,AddressForm,UserProfilePicForm, AddressCountryForm
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.contrib.auth import authenticate
@@ -16,9 +16,14 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.core.mail import EmailMessage
 from accounts.models import UserProfile
+from order.models import Order,OrderProduct,Payment,PaymentMethod
 import requests, json, random
 from django.views.decorators.cache import cache_control
 from wishlist.models import Wishlist
+from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
+from django.http import JsonResponse
+from django.forms.models import model_to_dict
+from django_countries.fields import CountryField
 # Create your views here.
 
 User = get_user_model()
@@ -351,12 +356,62 @@ def update_profile(request):
                     'message' : 'Invalid Request'
                 })
         
+def mobile_number_change(request):
+    try:
+        user = User.objects.get()
+        
+    except:
+            pass
+
 def email_change(request):
     pass
 
-def order_history(request):
-    return render(request,'base/user_side/order_history.html')
+def password_change(request):
+    pass
 
+def order_history(request):
+    orders = Order.objects.filter(user=request.user).order_by('created_at')
+    paginator = Paginator(orders,3)
+    page = request.GET.get('page')
+    paged_products = paginator.get_page(page)
+
+    context={
+        'orders':paged_products,
+    }
+    return render(request,'base/user_side/order_history.html', context)
+
+def order_detail(request,order_id):
+    try:
+        order = Order.objects.get(order_id = order_id)
+        print(order)
+        products = OrderProduct.objects.filter(order = order)
+        print(products)
+        sub_total = 0
+        tax = 0
+        grand_total = 0
+
+        for product in products:
+            sub_total += product.variant.sale_price * product.quantity
+        tax += (5 * sub_total)/100     
+        grand_total += sub_total + tax
+
+    except:
+        messages.warning(request,'The details of this order is not available')
+        return redirect('order_history')
+
+    context={
+        'order':order, 
+        'products' : products,
+        'payment' : order.payment,
+        'sub_total' : sub_total,
+        'tax' : tax,
+        'grand_total' : grand_total,
+
+    }
+    return render(request,'base/user_side/order_details.html',context)
+
+def order_cancel_or_return(request):
+    pass
 
 def my_address(request):
     current_user = request.user
@@ -375,7 +430,7 @@ def add_address(request,source):
     if request.method == 'POST':
         
         address_form = AddressForm(request.POST)
-        if address_form.is_valid:
+        if address_form.is_valid():
             address = address_form.save(commit = False)
             address.user = request.user
             address.is_default = True
@@ -389,8 +444,79 @@ def add_address(request,source):
                 'address_form' : address_form,
             }
             return render(request,'base/user_side/my_address.html',context)
+    else:
+        context ={
+            'address_form' : address_form,
+        }
+        return render(request,'base/user_side/my_address.html',context)
  
+
+def get_country_choices():
+   return [(code, str(name)) for code, name in CountryField().get_choices()]
+
+
+
+def update_address(request):
+
+    if request.method == 'GET':
+        id = request.GET.get('id')
+        try:
+            address = Addresses.objects.get(id = int(id))
+        except Exception as e:
+            print(e)
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Address not found'
+            })
         
+        address_form = AddressForm(request.POST, instance = address)
+        form_data = model_to_dict(address_form.instance)
+        form_data.pop('country')
+        form_data['country'] = address.country.name
+        print(form_data)
+
+        print("-----------------------------")
+        country_choices = get_country_choices()
+        countries = json.dumps(country_choices)
+        
+        return JsonResponse({
+            'formData': form_data,
+            'countries': countries
+        })
+    
+        # return JsonResponse({
+        #     'id': address.id,
+        #     'name': address.name,
+        #     'phone_number':address.phone_number,
+        #     'addrl1': address.address_line_1,
+        #     'addrl2': address.address_line_2,
+        #     'city': address.city,
+        #     'state': address.state,
+        #     'country': address.get_country_display(),
+        #     'pincode': address.pincode,
+        # })
+    elif request.method =='POST':
+        
+        address_id = request.POST.get('id')
+        try:
+            address = Addresses.objects.get(id = address_id)
+            print(address)
+        except Exception as e:
+            print(e)
+
+        address_form = AddressForm(request.POST,instance = address)
+        if address_form.is_valid():
+            new_address = address_form.save()
+
+            return JsonResponse({
+                "status" : 'Success',
+                'message': 'Address updated successfully'
+            })
+        else:
+            return JsonResponse({
+                "name_error": address_form.errors
+                })    
+
 def default_address(request, id):
     try:  
         address = Addresses.objects.get(id=id)

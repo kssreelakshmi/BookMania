@@ -65,14 +65,14 @@ def shop(request, cat_slug = None):
 
     elif cat_slug:
         category = Category.objects.get(slug = cat_slug)
-        product_variants = ProductVariant.objects.filter(product__category=category, is_active = True)
+        product_variants = ProductVariant.objects.filter(product__category=category, is_active = True).order_by('-created_date')
         
         paginator = Paginator(product_variants,4)
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
 
     else:
-        product_variants = ProductVariant.objects.all().filter(is_active = True)
+        product_variants = ProductVariant.objects.all().filter(is_active = True).order_by('-created_date')
         paginator = Paginator(product_variants,4)
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
@@ -103,5 +103,6 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
         'in_cart' : in_cart,
     }
     return render(request,'store_templates/product_variant_detail.html', context)
+
 
 

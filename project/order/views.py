@@ -99,9 +99,7 @@ def place_order(request):
         order_total += cart_item.sub_total()
     tax =(5 * order_total)/100
     grand_total = order_total + tax
-    if request.method == "POST":
-        print("insidedeeeeeeeeeeeeee")
-        
+    if request.method == "POST":  
         order_id = request.POST.get('order_id_summary')
         payment_id= request.POST.get('payment1')
         if not payment_id:
@@ -288,9 +286,7 @@ def order_completed(request):
             payment_id   = request.session['payment_id']
             
             try:
-                print('from complete page1111111')
                 order = Order.objects.get(order_id = order_id, is_ordered = True)
-                print('from complete page',order)
                 ordered_products = OrderProduct.objects.filter(order_id = order.id)
                 total = 0
                 tax = 0 

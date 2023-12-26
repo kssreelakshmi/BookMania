@@ -7,6 +7,9 @@ Login With OTP
 {% load static %}
 <!-- Header -->
 {% include 'base/user_side/includes/header.html' %}
+<div style="z-index: 100000; position: absolute; top: 0px; left: 0; right: 0;">
+	{% include 'base/user_side/includes/alerts.html' %}
+</div>	
 <!-- Cart -->
 {% include 'base/user_side/includes/header_cart.html' %}
 <section class="bg0 p-t-104 p-b-116">

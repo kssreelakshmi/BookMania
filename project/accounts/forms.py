@@ -48,7 +48,22 @@ class AddressForm(forms.ModelForm):
     class Meta:
         model = Addresses
         exclude = ('user','is_default','is_active')  
+
+
+
+class AddressCountryForm(forms.ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
         
+    class Meta:
+        fields = ['country']
+        model = Addresses
+
+
       
         
 

@@ -96,8 +96,6 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.otp
 
-
-
 class Addresses(models.Model):
     user = models.ForeignKey(Account,on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
@@ -116,25 +114,30 @@ class Addresses(models.Model):
     def save(self, *args, **kwargs):
         if self.is_default:
     
-            Addresses.objects.filter(user=self.user).exclude(pk=self.pk).update(is_default=False)
+            Addresses.objects.filter(user = self.user).exclude(pk=self.pk).update(is_default=False)
         super(Addresses, self).save(*args, **kwargs)
         
     def get_user_full_address(self):
-        address_parts = [self.name, self.phone_number,self.address_line_1]
-
+        address_parts = f"{self.name}, {self.phone_number}, {self.address_line_1}"
+        
         if self.address_line_2:
-            address_parts.append(self.address_line_2)
+            address_parts += (', '+self.address_line_2)
         
-        address_parts.append(f'Pin: {self.pincode}')
-        address_parts.extend([self.city, self.state, self.country.country_name])
+        address_parts += (f", Pin: {self.pincode}, {self.city}, {self.state}, {self.country.name}")
         
         
-        return ', '.join(address_parts)
+        return address_parts
         # return f'{self.name},{self.phone},Pin:{self.pincode},Address:{self.address_line_1},{self.address_line_2},{self.city},{self.state},{self.country}'
     
     def __str__(self):
         return self.name
     
+class Review(models.Model):
+    user = models.ForeignKey(Account,on_delete=models.CASCADE)
+    product_variant = models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
+    
+
+                                                                                                                                                                              
     
     
     

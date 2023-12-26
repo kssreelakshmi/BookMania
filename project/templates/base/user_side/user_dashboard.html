@@ -11,8 +11,15 @@ User Dashboard
 {% include 'base/user_side/includes/header.html' %}
 <!-- Cart -->
 {% include 'base/user_side/includes/header_cart.html' %}
-
-
+<style>
+  .modal-custom{
+      position: fixed;
+      top: 120px;
+      right: 0;
+      bottom: 0;
+      left: 0;
+  }
+ </style>
 <div class="container">
     <div class="row">
         {% include 'base/user_side/includes/dashboard.html' %}
@@ -137,7 +144,7 @@ User Dashboard
 </div>
 
   <!-- Modal for phone number change -->
-  <div class="modal fade" id="phone_numberModal" tabindex="-1" role="dialog" aria-labelledby="phone_numberModalLabel" aria-hidden="true">
+  <div class="modal fade modal-custom" id="phone_numberModal" tabindex="-1" role="dialog" aria-labelledby="phone_numberModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -146,19 +153,25 @@ User Dashboard
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-dark">Save changes</button>
-        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="modal-body">
+            <p>You are going to change your current Mobile Number to a new Mobile Number .</p>
+            <label for="new_phone_number" class="mt-2"> <small>New Mobile Number</small></label> 
+            <input class="form-control" type="tel" id="new_phone_number" name="phone" pattern="[+]{1}[0-9]{11,14}" required >
+            
+          </div>
+          <div class="modal-footer">
+            <!-- <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button> -->
+            <button type="button" class="btn btn-dark">Update Mobile Number</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 
   <!-- Modal for Email Change -->
-  <div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+  <div class="modal fade modal-custom" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -167,37 +180,38 @@ User Dashboard
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          <p>You are going to change your current Email ID to a new Email ID. After filling the new Email ID a verification mail send to your new Email ID.</p>
-          <label for="" class="mt-2"> <small>New Email Id</small></label> 
+        <form method="post">
+          {% csrf_token %}
+          <div class="modal-body">
+            <p>You are going to change your current Email ID to a new Email ID. After filling the new Email ID a verification mail send to your new Email ID.</p>
+            <label for="" class="mt-2"> <small>New Email Id</small></label> 
             <input type="email" id="EmailChangeOtpNewMail"  class="form-control " placeholder="New Email Address" value="" >
             <p class="text-danger small m-0 p-0" id="EmailChangeOtpNewMailError"></p>
             
             <a class="btn btn-dark mt-2" onclick="EmailChangeOtpMail()" id="EmailChangeOtpNewMailbtn">
               <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
               Confirm
-          </a>
-
-          <div id="EmailChangeOtpNewMailDiv" class="d-none">
-                
-            <label for="" class="mt-2"> <small>Enter Otp</small></label> 
-                <input type="number" id="EmailChangeOtpNewMail" class="form-control " placeholder="OTP" value="" >
-                <p class="text-danger small m-0 p-0" id="EmailChangeOtpNewMailError"></p>
-            <button class="btn btn-dark mt-2" onclick="EmailChangeOtpMailVerify()">
-                Change
-            </button>
-        </div>
-
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-dark" data-dismiss="modal" onclick="location.reload();">Close</button>
-        </div>
+            </a>
+            <div id="EmailChangeOtpNewMailDiv" class="d-none">
+              <label for="" class="mt-2"> <small>Enter Otp</small></label> 
+                  <input type="number" id="EmailChangeOtpNewMail" class="form-control " placeholder="OTP" value="" >
+                  <p class="text-danger small m-0 p-0" id="EmailChangeOtpNewMailError"></p>
+              <button class="btn btn-dark mt-2" onclick="EmailChangeOtpMailVerify()">
+                  Change
+              </button>
+          </div>
+  
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-dark" data-dismiss="modal" onclick="location.reload();">Close</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
   
   <!-- Modal for password change -->
-  <div class="modal fade" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel" aria-hidden="true">
+  <div class="modal fade modal-custom" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -206,13 +220,16 @@ User Dashboard
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
+        <form method="post">
+          {% csrf_token %}
+          <div class="modal-body">
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-dark">Save changes</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

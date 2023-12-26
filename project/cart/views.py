@@ -181,7 +181,8 @@ def Cart_checkout(request,total=0,cart_items=None,quantity=0):
         tax=0
         grand_total= 0
         cart_items = Cart_item.objects.filter(user=request.user,is_active=True)
-                
+        if not cart_items:
+            return redirect('shop')
         for cart_item in cart_items:
             total += cart_item.product.sale_price * cart_item.quantity 
             quantity += cart_item.quantity

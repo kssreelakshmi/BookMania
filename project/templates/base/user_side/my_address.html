@@ -1,17 +1,186 @@
-{% include 'base/user_side/user_dashboard.html' %}
+{% extends 'base/user_side/base_user.html' %}
 
 {% block title %}
-Address
+My Address
 {% endblock %}
 
 {% block content %}
 
 {% load static %}
 
+<!-- Header -->
+{% include 'base/user_side/includes/header.html' %}
+<!-- Cart -->
+{% include 'base/user_side/includes/header_cart.html' %}
+<style>
+  .modal-custom{
+      position: fixed;
+      top: 120px;
+      right: 0;
+      bottom: 0;
+      left: 0;
+  }
+ </style>
 
- 
+<div class="container">
+    <div class="row">
+        {% include 'base/user_side/includes/dashboard.html' %}
+        <div class="col-md-9 col-sm-9">
+            <div class="card-title p-3 ">
+                <h5 class="text-dark fw-bold"><strong>My Address</strong></h5>
+            </div>
+            <div class="card col-md-10 col-sm-6 col-xl-12">
+                <div class="card-header row ">
+                  <div class="d-flex flex-column justify-content-start">
+                    <h6 class=" align-items-center ">Addresses</h6>
+                  </div>
+                </div>
+                <div class="d-flex flex-end pt-3 mr-2 align-items-center justify-content-end">
+                  <button type="button" class="btn btn-dark " data-toggle="modal" data-target="#addAddressModal">
+                    Add Address
+                  </button>
+                </div>
+                <div class="card-body">
+                    <div class=" row">
+                      {% for address in addresses %}
+                        <div class="card m-2 d-flex flex-column" >
+                            <div class="card-body" {% if address.is_default %} style="background: #dedddd;" {% endif %}>
+                              <!-- <h5 class="card-title">Card title</h5> -->
+                              <div class="row justify-content-between">
+                                <div class="col-7">
+                                  <h6 class="card-subtitle mb-2 text-muted">Address {{forloop.counter}}</h6>
+                                  <p class="card-text text-wrap">
+                                    {{address.get_user_full_address}}
+                                  </p>
 
+                                </div>
+                                <div class="col-4 d-flex align-items-center overflow-hidden justify-content-between my-1 py-1">
+                                    
+                                    <button type="button" onclick="handleAddress('{{address.id}}')" class="card-link btn btn-dark mx-2" data-toggle="modal" data-target="#updateModal">
+                                      Update
+                                    </button>
+                                    <a href="{% url 'delete_address' address.id %}" class="card-link btn btn-dark mx-2">Delete</a>
+                                    {% if address.is_default %}
+                                      <div class="card-link btn">
+                                        <img width="41px" src="{% static 'user/images/icons/check.png' %}" alt="Default">
+                                      </div>
+                                    {% else %}
+                                      <a href="{% url 'default_address' address.id %}" class="card-link btn btn-dark mx-2 ">Select</a>
 
+                                    {% endif %}
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                        {% endfor %}  
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <br>
+      <br>
+</div>
 
+<!-- Modal -->
+<div class="modal fade modal-custom" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAddressModalLabel">Add New Address</h5>
+        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'add_address' source='my_address' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <label for="name" >Name</label>
+          {{address_form.name}}
+          <label for="phone_number">Mobile Number</label>
+          {{address_form.phone_number}}
+          <label for="address_line_1">Address Line1</label>
+          {{address_form.address_line_1}}
+          <label for="address_line_2">Address Line2</label>
+          {{address_form.address_line_2}}
+          <label for="city">City</label>
+          {{address_form.city}}
+          <label for="state">State</label>
+          {{address_form.state}}
+          <label for="country">Country</label>
+          {{address_form.country}}
+          <label for="pincode">Pincode</label>
+          {{address_form.pincode}}
+        </div>
+        <div class="modal-footer">
+          <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+          <button type="submit" class="btn btn-dark">Add Address</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Update Address Modal -->
+  <div class="modal fade modal-custom" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateModalLabel">Update Address</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form>
+          <div class="modal-body">
+            <div class="m-3">
+              <label for="name" >Name</label>
+              <input class="form-control" id="name" type="text">
+              <input hidden id="addressId" type="text">
+            </div>
+            
+            <div class="m-3">
+              <label for="phone_number">Mobile Number</label>
+              <input class="form-control" id="phone_number" type="text">
+            </div>
+            
+            <div class="m-3">
+              <label for="address_line_1">Address Line1</label>
+              <input class="form-control" id="address_line_1" type="text">
+            </div>
+            
+            <div class="m-3">
+              <label for="address_line_2">Address Line2</label>
+              <input class="form-control" id="address_line_2" type="text">
+            </div>
+            
+            <div class="m-3">
+              <label for="city">City</label>
+              <input class="form-control" id="city" type="text">
+            </div>
+
+            <div class="m-3">
+              <label for="state">State</label>
+              <input class="form-control" id="state" type="text">
+            </div>
+            
+            <div class="m-3">
+              <label for="country">Country</label>
+              <select class="form-control" name="country" id="country"></select>
+            </div>
+            
+            <div class="m-3">
+              <label for="pincode">Pincode</label>
+              <input class="form-control" id="pincode" type="text">
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+            <button type="button" onclick="handleAddressSubmit()" class="btn btn-dark">Update Address</button>
+          </div>
+        </form>
+       
+      </div>
+    </div>
+  </div>
 
 {% endblock %}

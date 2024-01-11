@@ -13,6 +13,17 @@ Product Management - Add Product
 
 {% include 'base/admin_side/admin_includes/admin_header.html' %}
 <section class="content-main">
+
+
+    <div hidden id="image_warning" class="container-fluid p-0">
+        <div class="py-4 alert alert-danger" role="alert">
+            <span>Contains unsupported file, kindly re-enter !</span>
+            <button type="button" class="btn-close float-end" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
+    
+  {% include 'base/admin_side/admin_includes/alerts.html' %}
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="col-12">
@@ -145,14 +156,14 @@ Product Management - Add Product
                     </div>
                     <div class="card-body">
                         <label class="input-upload form-label">Thumbnail Image</label>
-                        <input class="form-control" type="file" name="thumbnail_image" accept=".jpg,.jpeg,.webp,.png">
+                        <input id="thumbnail" onchange="handleImage('thumbnail')" class="form-control" type="file" name="thumbnail_image" accept=".jpg,.jpeg,.webp,.png">
                         
                     </div>
                 </div> <!-- card end// -->
                 <div class="card mb-4">
                     <div class="card-body">
                         <label class="form-label input-upload">Additional Product Images </label>
-                        <input class="form-control" type="file" name="additional_images" multiple accept=".jpg,.jpeg,.webp,.png" >
+                        <input id="additionalImages" class="form-control" onchange="handleImage('additionalImages')" type="file" name="additional_images" multiple accept=".jpg,.jpeg,.webp,.png" >
                     </div>
                 </div> <!-- card end// -->
                 <div>

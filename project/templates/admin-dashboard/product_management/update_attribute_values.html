@@ -1,7 +1,7 @@
 {% extends 'base/admin_side/admin_base.html' %}
 
 {% block title %}
-Publication Management - Update Publication
+Product Management - Update Attribute Value
 {% endblock %}
 
 {% load static %}
@@ -15,7 +15,7 @@ Publication Management - Update Publication
 <section class="content-main mt-80 mb-80">
     <div class="card mx-auto card-box">
         <div class="card-body ">
-            <h4 class="card-title mb-4">Update Publication</h4>
+            <h4 class="card-header mb-4">Update Attribute</h4>
             {% include 'base/admin_side/admin_includes/alerts.html' %}
                 <form method="post" >
                     {% csrf_token %}
@@ -23,26 +23,34 @@ Publication Management - Update Publication
                         <div class="row ">
                             <div class="col-lg-5 p-3">
                                 <div class="d-flex p-3">
-                                    <label class="d-block" for="id_name">Publication Name</label>
-                                    {{form.name}}
+                                    <label class="d-block" for="id_name">Attribute Name</label>
+                                    {{attribute_value_form.attribute}}
                                 </div>
                             </div> <!-- form-group// -->
+                            <div class="col-lg-5 p-3">
+                                <div class="d-flex p-3">
+                                    <label class="d-block" for="id_name">Attribute Value</label>
+                                    {{attribute_value_form.attribute_value}}
+                                </div>
+                            </div> <!-- form-group// -->
+                            
                             <div class="col-lg-4 p-3">
                                 <div class=" p-3">
                                     <label class="p-3" for="id_is_active">
                                         Is Active
                                     </label>
-                                    {{form.is_active}}
+                                    {{attribute_value_form.is_active}}
                                 </div>
                             </div>
                         </div>
                         <div class="row my-5">
                             <div class="col-lg-4">
-                                <button type="submit" class="btn btn-primary w-50 rounded-pill"> Update Publication</button>
+                                <button type="submit" class="btn btn-primary w-75 rounded-pill"> Update Attribute Value</button>
                             </div> <!-- form-group// -->
                         </div>
                     </div>
                 </form>
+            
         </div>
     </div>
 

@@ -43,6 +43,10 @@
                 <div class="submenu">
                     <a href="{% url 'all_products' %}">Product List</a>
                     <a href="{% url 'create_product' %}">Add Product</a>
+                    <a href="{% url 'all_attributes' %}">All Attributes</a>
+                    <a href="{% url 'create_attribute' %}">Add Attribute</a>
+                    <a href="{% url 'all_attribute_values' %}">All Attribute Value</a>
+                    <a href="{% url 'add_attribute_values' %}">Add Attribute Value</a>
                     
                 
                     <!-- <a href="page-products-grid-2.html">Pzroduct grid 2</a>
@@ -75,8 +79,8 @@
                     <span class="text">Author Management</span>
                 </a>
                 <div class="submenu">
-                    <a href="page-transactions-1.html">All Authors</a>
-                    <a href="page-transactions-2.html">Add Author</a>
+                    <a href="{% url 'all_authors' %}">All Authors</a>
+                    <a href="{% url 'add_authors' %}">Add Author</a>
                 </div>
             </li>
             <li class="menu-item">

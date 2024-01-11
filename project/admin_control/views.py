@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.urls import reverse
 from accounts.forms import UserSignupForm
 from category.forms import CategoryForm
-from store.forms import ProductForm,ProductVariantForm,PublicationForm
+from store.forms import ProductForm,ProductVariantForm,PublicationForm,AuthorForm,CreateAttributeForm,CreateAttributeValueForm
 from django.contrib.auth import login, logout
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.decorators import login_required
@@ -383,7 +383,6 @@ def create_product_variant(request,slug):
                 attribute_ids.append(int(attribute_value_id)) 
         
         thumbnail_image = request.FILES.get('thumbnail_image')        
-        
         if variant_form.is_valid():
             variant = variant_form.save(commit=False)
             variant.thumbnail_image = request.FILES.get('thumbnail_image')
@@ -393,7 +392,7 @@ def create_product_variant(request,slug):
             variant.attribute.set(attribute_ids)
             variant.save()
             additional_images = request.FILES.getlist('additional_images')
-            
+            print(additional_images)
             for image in additional_images:
                 AdditionalProductImages.objects.create(product_variant=variant, image=image)    
            
@@ -415,7 +414,7 @@ def create_product_variant(request,slug):
     return render(request,'admin-dashboard/product_management/create_product_variant.html',context)
     
 @login_required(login_url='admin_login')
-def product_variant_update(request,product_variant_slug):
+def product_variant_update(request, product_variant_slug):
     
     try:
         product_variant= ProductVariant.objects.get(product_variant_slug=product_variant_slug)
@@ -423,7 +422,26 @@ def product_variant_update(request,product_variant_slug):
     except ProductVariant.DoesNotExist:
         return redirect('all_products')
     
+    
     variant_form = ProductVariantForm(instance=product_variant)
+
+    attributes = Attribute.objects.prefetch_related('attributevalue_set').filter(is_active=True)
+    variant_attributes_list = []
+    variant_attributes = product_variant.attribute.all()
+
+    for value in variant_attributes:
+        print('hoiio',value)
+        variant_attributes_list.append(value.attribute_value)
+
+    
+    attribute_dict = {}
+    for attribute in attributes:
+        attribute_values = attribute.attributevalue_set.filter(is_active= True)
+        attribute_dict[attribute.attribute_name] = attribute_values
+    attribute_values_count =attributes.count()
+    
+
+
     current_additional_product_images = product_variant.additional_product_images.all()
     
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -439,8 +457,10 @@ def product_variant_update(request,product_variant_slug):
                 additional_image = AdditionalProductImages.objects.get(id=image_id)
                 additional_image.image = image
                 additional_image.save()
-                return JsonResponse({"status": "success",
-                                     'new_image': additional_image.image.url,})
+                return JsonResponse({
+                                     "status": "success",
+                                     'new_image': additional_image.image.url,
+                                     })
                 
             except Exception as e:
                 print(e)
@@ -461,31 +481,39 @@ def product_variant_update(request,product_variant_slug):
         
     if request.method == 'POST':
         variant_form = ProductVariantForm(request.POST,instance=product_variant)
+        variant_form.fields.pop('attribute',None)        
+        attribute_ids =[]
+    
+        for i in range(1,attribute_values_count+1):
+            attribute_value_id = request.POST.get('attributes_'+str(i))
+            if attribute_value_id != 'None':
+                attribute_ids.append(int(attribute_value_id)) 
+
         if variant_form.is_valid():
             variant = variant_form.save()
+            variant.attribute.set(attribute_ids)
+            variant.save()
             
             messages.success(request, "Variant Updated")
             return redirect('product_update', product_variant.product_variant_slug)
         else:
-            messages.error(request, variant_form.errors)
-            context = {
-                'variant_form': variant_form,
-                'product_variant_slug':product_variant_slug,
-                'product_variant': product_variant,
-                'current_additional_images': current_additional_product_images,
-            }
-            
-            return render(request,'admin-dashboard/product_management/variant_update.html')
+            messages.error(request, 'Invalid credentials !')
+            return redirect('product_variant_update', product_variant_slug)
+        
+    print(variant_attributes_list)
     context = {
         'variant_form': variant_form,
         'product_variant_slug': product_variant_slug,
         'product_variant': product_variant,
         'current_additional_images': current_additional_product_images,
+        'attribute_dict' : attribute_dict,
+        'variant_attributes_list':variant_attributes_list,
         }
     return render(request,'admin-dashboard/product_management/variant_update.html',context)
 
 @login_required(login_url='admin_login')
 def delete_product_variant(request,product_variant_slug):
+    print("fhgbbjhsdghfbsdahfvhasdvfsdhvfhj")
     try:
         product_variant = ProductVariant.objects.get(product_variant_slug=product_variant_slug)
     except ProductVariant.DoesNotExist:
@@ -521,7 +549,6 @@ def publication_control(request, id):
 
 @login_required(login_url='admin_login')
 def create_publication(request):
-
     
     if request.method == 'POST':    
         form = PublicationForm(request.POST)
@@ -567,7 +594,64 @@ def update_publication(request, id):
         }
     return render(request, 'admin-dashboard/publication_management/update_publication.html', context)
 
+def all_authors(request):
+    authors = Author.objects.all().order_by('-author_created_at')
+    context = {
+        'authors' : authors,
+    }
+    return render(request,'admin-dashboard/author_management/all_authors.html',context)
+
+def author_control(request,id):
+    try:
+        author = author.objects.get(id = id)
+    except Exception as e:
+        print(e)
     
+    author.is_active = not author.is_active
+    author.save()
+    return redirect('all_authors')
+    
+def add_authors(request):
+    if request.method == 'POST':
+        form = AuthorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Publication updated")
+            return redirect('all_authors')
+        else:
+            messages.error(request, form.errors)
+            return redirect('add_authors')
+    else:
+        form = AuthorForm()
+        context = {
+            'form': form,
+        }  
+    return render(request,'admin-dashboard/author_management/add_author.html',context)
+
+def update_author(request,id):
+    try:
+        author = Author.objects.get(id=id)
+        
+    except Exception as e:
+        print(e)
+
+    form = AuthorForm(instance = author)
+    
+    if request.method == 'POST':    
+        form = AuthorForm(request.POST, instance=author)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Author updated")
+            return redirect('all_author')
+        else:
+            messages.error(request, form.errors)
+            return redirect('update_author')
+    form = AuthorForm(instance = author)
+    context={
+        'form' :form,
+    }
+    return render(request,'admin-dashboard/author_management/update_author.html',context)
+
 @login_required(login_url='admin_login')
 def all_orders(request):
     order_status = request.GET.get('status')
@@ -619,3 +703,122 @@ def update_order(request, order_id):
         'form': form,
     }
     return render(request, 'admin-dashboard/order_management/order_details.html',context)
+
+def all_attributes(request):
+    attribute =Attribute.objects.all()
+    context = {
+        'attribute' : attribute,
+    }
+    return render(request,'admin-dashboard/product_management/all_attributes.html',context)
+
+def attribute_control(request,id):
+    try:
+        attribute = Attribute.objects.get(id = id)
+    except Exception as e:
+        print(e)
+    
+    attribute.is_active = not attribute.is_active
+    attribute.save()
+    return redirect('all_attributes')
+
+def create_attribute(request):
+    if request.method == 'POST':
+        attribute_form = CreateAttributeForm(request.POST)
+        if attribute_form.is_valid():
+            attribute_form.save()
+            messages.success(request, "Attribute added")
+            return redirect('all_attributes')
+        else:
+            messages.error(request, attribute_form.errors)
+            return redirect('create_attribute')
+    attribute_form = CreateAttributeForm()
+    context = {
+        'attribute_form': attribute_form,
+    }  
+    return render(request,'admin-dashboard/product_management/create_attribute.html',context)
+
+def update_attribute(request,id):
+    try:
+        attribute = Attribute.objects.get(id=id)
+    except Exception as e:
+        print(e)
+
+    attribute_form = CreateAttributeForm(instance = attribute)
+    
+    if request.method == 'POST':    
+        attribute_form = CreateAttributeForm(request.POST, instance=attribute)
+        
+        if attribute_form.is_valid():
+            attribute_form.save()
+            messages.success(request, "Attribute updated")
+            return redirect('all_attributes')
+        else:
+            messages.error(request, attribute_form.errors)
+            return redirect('update_attribute')
+    attribute_form = CreateAttributeForm(instance = attribute)
+    context = {
+        'attribute_form' : attribute_form,
+    }
+    return render(request,'admin-dashboard/product_management/update_attributes.html',context)
+
+def all_attribute_values(request):
+    attributevalue = AttributeValue.objects.all()
+
+    context ={
+        'attributevalue' : attributevalue,
+    }
+    return render(request,'admin-dashboard/product_management/all_attribute_values.html',context)
+
+def attribute_value_control(request,id):
+    try:
+        attribute_value = AttributeValue.objects.get(id = id)
+    except Exception as e:
+        print(e)
+    
+    attribute_value.is_active = not attribute_value.is_active
+    attribute_value.save()
+    return redirect('all_attribute_values')
+
+def add_attribute_values(request):
+    if request.method == 'POST':
+        attribute_value_form = CreateAttributeValueForm(request.POST)
+        if attribute_value_form.is_valid():
+
+            attribute_value_form.save()
+            messages.success(request, "Attribute value added")
+            return redirect('all_attribute_values')
+        else:
+
+            messages.error(request, attribute_value_form.errors)
+            return redirect('create_attribute_value')
+        
+    attribute_value_form = CreateAttributeValueForm()
+    context = {
+        'attribute_value_form': attribute_value_form,
+    }  
+    return render(request,'admin-dashboard/product_management/create_attribute_value.html',context)
+
+def update_attribute_values(request,id):
+    try:
+        attribute_value = AttributeValue.objects.get(id=id)
+    except Exception as e :
+        print(e)
+
+    attribute_value_form = CreateAttributeValueForm(instance = attribute_value)
+    if request.method == 'POST':
+        attribute_value_form = CreateAttributeValueForm(request.POST,instance=attribute_value)
+
+        if attribute_value_form.is_valid():
+            attribute_value_form.save()
+            messages.success(request, "Attribute value updated")
+            return redirect('all_attribute values')
+        else:
+            messages.error(request, attribute_value_form.errors)
+            return redirect('update_attribute_values')
+        
+    attribute_value_form = CreateAttributeValueForm(instance=attribute_value)
+    context = {
+        'attribute_value_form' : attribute_value_form,
+        }
+    return render(request,'admin-dashboard/product_management/update_attribute_values.html',context)
+

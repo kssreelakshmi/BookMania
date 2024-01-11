@@ -1,0 +1,33 @@
+{% autoescape off %}
+{% load static %}
+<pre>
+<title><strong>Subject:</strong> Account Verification - Your One-Time Password (OTP)</title>
+
+
+Dear {{ user.username }},
+
+
+Thank you for choosing BookMania! We're excited to have you on board as a valued member of our community.
+
+Please use the following One-Time Password (OTP) to complete the Email change process:
+
+</pre>
+{% block content %}
+OTP:<strong>{{otp}}</strong>
+{% endblock %}
+
+<pre>
+
+Please enter this OTP on the Email Change Page within the next 2 minutes to confirm your email address.
+Thank you for choosing <strong>BookMania</strong>. Happy reading!
+
+Best regards,
+
+
+<strong>The BookMania Team</strong>
+
+<strong>BookMania</strong>
+</pre>
+
+
+{% endautoescape %}

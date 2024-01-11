@@ -16,8 +16,8 @@ Update Product
 
 
 <section class="content-main">
+  {% include 'base/admin_side/admin_includes/alerts.html' %}
     <form method="POST" enctype="multipart/form-data">
-
         {% csrf_token %}
         <div class="col-12">
             <div class="content-header">

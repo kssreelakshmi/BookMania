@@ -146,13 +146,15 @@ $(".custom-carousel").owlCarousel({
 
 function UpdateProfileField(field){
 
+  console.log(field)
+
   var data = {
     field: field.name,
     value: field.value,
   };
   $.ajax({
     type: "POST",
-    url: `/accounts/my-account/profile-update/`,  // Replace with the actual URL for your view
+    url: `/accounts/profile-update/ `,  // Replace with the actual URL for your view
     dataType: "json", 
     data: JSON.stringify(data),
     headers: {
@@ -166,16 +168,310 @@ function UpdateProfileField(field){
       
     },
     error: (error) => {
-      console.log(error);
       alert(error)
     }
   });
 
 }
 
+
 function EditProfileField(number){
-  component =document.getElementById('userprofilefield' + number)
-  component.readonly = false
-  component.focus()
-  component.save()
+  component = document.getElementById('userprofilefield' + number)
+  component.readOnly = false;
+  component.focus();
+  component.setSelectionRange(component.value.length, component.value.length);
 }
+
+function SendMobileNumberChangeOtp(){
+  var new_number = document.getElementById('MobileNumberChange')
+  document.getElementById('MobileNumberChangeError').innerText = ""
+  if(!new_number.value){
+    document.getElementById('MobileNumberChangeError').innerText = "Please Enter Your New Number"
+    return
+  }
+  var data = {
+    new_number : new_number.value,
+  }
+  $.ajax({
+    type : "POST",
+    url: `/accounts/mobile-number-change/ `,  // Replace with the actual URL for your view
+    dataType: "json", 
+    data: JSON.stringify(data),
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": getCookie("csrftoken"), 
+    },
+
+      //response from backend
+    success: (data) => {
+      if (data.status === "success"){
+        console.log(data)
+        document.getElementById('MobileNumberChangeOtpDiv').classList.remove('d-none')
+        document.getElementById('MobileNumberChangeOtpbtn').classList.add('d-none')
+        document.getElementById('MobileNumberChange').setAttribute('readonly', true);
+       
+      }
+      else{
+        console.log(data);
+        document.getElementById('MobileNumberChangeOtpErrors').innerText = data.message
+
+      }
+      
+    },
+    error: (error) => {
+      console.log(error);
+    }
+
+  });
+}
+
+function MobileNumberChangeOtpVerify(){
+  var new_number = document.getElementById('MobileNumberChange')
+  var otp = document.getElementById('MobileNumberChangeOtp')
+
+  document.getElementById('MobileNumberChangeError').innerText = ""
+  if(!otp.value){
+    document.getElementById('MobileNumberChangeError').innerText = "Please Enter Your New Number"
+    return
+  }
+  var data = {
+    new_number : new_number.value,
+    otp : otp.value ,
+  }
+  $.ajax({
+    type : "POST",
+    url: `/accounts/mobile-number-change/verify/ `,  // Replace with the actual URL for your view
+    dataType: "json", 
+    data: JSON.stringify(data),
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": getCookie("csrftoken"), 
+    },
+
+      //response from backend
+    success: (data) => {
+      if (data.status === "success"){
+        console.log(data);
+        location.reload();
+      }
+      else{
+        console.log(data);
+        document.getElementById('MobileNumberChangeOtpErrors').innerText = data.message
+
+      }
+      
+    },
+    error: (error) => {
+      console.log(error);
+    }
+
+  });
+}
+
+function sendEmailChangeOtpMail(){
+  console.log('asdfghjkldfghj');
+  var email_id = document.getElementById('EmailChangeOtpNewMail')
+  console.log(email_id)
+  document.getElementById('sendEmailChangeOtpMailNewMailError').innerText = ''
+  if (!email_id.value){
+    document.getElementById('sendEmailChangeOtpMailNewMailError').innerText = 'Please enter a Email-ID'
+    return
+  }
+
+  var data = {
+    new_email: email_id.value,
+  };
+
+  $.ajax({
+    type: "POST",
+    url: `/accounts/email-change/`,  // Replace with the actual URL for your view
+    dataType: "json",
+    data: JSON.stringify(data),
+    headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": getCookie("csrftoken"), 
+      },
+      success: (data) => {
+        if (data.status === "success") {
+          console.log(data);
+          document.getElementById('EmailChangeOtpNewMailDiv').classList.remove('d-none')
+          document.getElementById('EmailChangeOtpNewMailbtn').classList.add('d-none')
+          document.getElementById('EmailChangeOtpNewMailOtp').setAttribute('readonly', true);
+
+      } else {
+          console.log(data);
+          document.getElementById('sendEmailChangeOtpMailNewMailError').innerText = data.message
+
+      }
+        
+    },
+    error: (xhr, status, error) => {
+        console.log("error");
+        console.log(error);
+    }
+});
+  
+}
+
+
+function sendEmailChangeOtpMailVerify(){
+  console.log("ok");
+  var email_id = document.getElementById('EmailChangeOtpNewMail')
+  var otp = document.getElementById('EmailChangeOtpMailOtp')
+
+  document.getElementById('EmailChangeOtpMailOtpError').innerText = ''
+  if (!otp.value){
+    document.getElementById('EmailChangeOtpMailOtpError').innerText = 'Please enter the '
+    return
+  }
+
+  var data = {
+    new_email: email_id.value,
+    otp : otp.value
+  };
+
+  $.ajax({
+    type: "POST",
+    url: `/accounts/email-change/verify/`,
+    dataType: "json",
+    data: JSON.stringify(data),
+    headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": getCookie("csrftoken"), 
+      },
+      success: (data) => {
+        if (data.status === "success") {
+          // email success
+          console.log(data);
+          location.reload();
+
+      } else {
+          // Password change error
+          console.log(data);
+          document.getElementById('sendEmailChangeOtpMailNewMailOtpError').innerText = data.message
+      }
+        
+    },
+    error: (xhr, status, error) => {
+        console.log("error");
+        console.log(error);
+    }
+});
+  
+}
+
+function UpdateFieldUserProfilePassword(get_old_password,get_password1,get_password2) {
+
+  document.getElementById(get_old_password+'Error').innerText = ''
+  document.getElementById(get_password1+'Error').innerText = ''
+  document.getElementById(get_password2+'Error').innerText = ''
+
+  var old_password = document.getElementById(get_old_password)
+  var password1 = document.getElementById(get_password1)
+  var password2 = document.getElementById(get_password2)
+
+  if (!old_password.value){
+    document.getElementById(get_old_password+'Error').innerText = 'Please Enter Password'
+    return
+  }
+
+  if (!password1.value){
+    document.getElementById(get_password1+'Error').innerText = 'Please Enter Password'
+    return
+  }
+
+  if (!password2.value){
+    document.getElementById(get_password2+'Error').innerText = 'Please Enter Password'
+    return
+  }
+
+  if(matchPassword(get_password1,get_password2))
+  {
+    url = '/users/basic/changepassword'
+    var data = {
+      old_password: old_password.value,
+      password2: password2.value,
+    };
+    
+    $.ajax({
+        type: "POST",
+        url: url,  // Replace with the actual URL for your view
+        dataType: "json",
+        data: JSON.stringify(data),
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCookie("csrftoken"), 
+          },
+          success: (data) => {
+            if (data.status === "success") {
+              // Password change success
+              console.log(data);
+              location.reload();
+          } else {
+              // Password change error
+              console.log(data);
+              // Display the error message on the page
+              document.getElementById(get_old_password + 'Error').innerText =data.message;
+          }
+        },
+        error: (xhr, status, error) => {
+            // Display the error message on the page
+            document.getElementById(get_old_password + 'Error').innerText = 'Error: ' + xhr.responseText;
+            console.log("error");
+            console.log(error);
+        }
+    });
+    
+  }
+  else{
+    document.getElementById(get_password2+'Error').innerText = 'Password Not Match'
+  }
+
+};
+
+
+//password change user send mail 
+function sendPasswordResetOtpMail() {
+  document.getElementById('sendPasswordResetOtpMailSpinnner').classList.remove('d-none')
+  document.getElementById('sendPasswordResetOtpMailBtn').classList.add('disabled')
+  console.log("call");
+
+
+  $.ajax({
+      type: "POST",
+      url: `accounts/password-change/`,  // Replace with the actual URL for your view
+      dataType: "json",
+      // data: JSON.stringify(data),
+      headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": getCookie("csrftoken"), 
+        },
+        success: (data) => {
+          if (data.status === "success") {
+            // Password change success
+            var inTwoMinutes = new Date(new Date().getTime() + 2 * 60 * 1000);
+            Cookies.set('can_otp_enter', 'True', { expires: inTwoMinutes, path: '/' });
+            window.location = data.redirect_url;
+        } else {
+            // Password change error
+            console.log(data);
+            // Display the error message on the page
+        }
+          
+      },
+      error: (xhr, status, error) => {
+          // Display the error message on the page
+          console.log("error");
+          console.log(error);
+      }
+  });
+    
+
+};
+
+
+
+
+
+
+

@@ -21,6 +21,7 @@ Product Management - Product Variant Update
                     <h2 class="content-title">Update Product Variant</h2>
                 </div>
             </div>
+            {% include 'base/admin_side/admin_includes/alerts.html' %}
         </div>
         <div class="row justify-content-lg-between">
             <div class="col-lg-7">
@@ -34,18 +35,29 @@ Product Management - Product Variant Update
                                 <div class="mb-4">
                                     <label for="sku_id" class="form-label">SKU ID</label>
                                     {{ variant_form.sku_id }}
+                                    <p>
+                                        {{variant_form.sku_id.errors}}
+                                    </p>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="mb-4">
                                     <label for="stock" class="form-label">Stock</label>
                                     {{ variant_form.stock }}
+                                    <p>
+                                        {{variant_form.stock.errors}}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                         <div class="mb-4">
                             <label for="max_price" class="form-label">Max Price</label>
                             {{ variant_form.max_price }}
+                            {% for error in variant_form.max_price.errors %}
+                                <p class="invalid-feedback">
+                                    {{error}}
+                                </p>
+                            {% endfor %}
                         </div>
                         <div class="mb-4">
                             <label for="sale_price" class="form-label">Sale Price</label>
@@ -57,7 +69,6 @@ Product Management - Product Variant Update
                                 <label class="card-title form-label" >Choose Attributes</label>
                                 <hr>
                                 <div class="row">
-                                    
                                     {% for attribute_name, attribute_values in attribute_dict.items %}
                                         <div class="col-6">
                                             <label class="form-label">{{attribute_name}}</label>
@@ -69,7 +80,8 @@ Product Management - Product Variant Update
                                                 {% endif %}
                                                 
                                                 {% for value in attribute_values %}
-                                                <option value="{{ value.id }}">{{ value.attribute_value }}</option>
+                                                 
+                                                <option value="{{ value.id }}" {% if value.attribute_value in variant_attributes_list %} selected {% endif %}>{{ value.attribute_value }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -90,9 +102,19 @@ Product Management - Product Variant Update
                         <h4>Image</h4>
                     </div>
                     <div class="card-body">
+
                         <label class="form-label input-upload">Thumbnail Image </label>
-                        <input class="form-control" type="file" onchange="send_data(inputid ='thumbnail', variant_slug = '{{product_variant_slug}}')" id="photothumbnail" accept=".jpg,.jpeg,.webp,.png">
-                        
+                        <div class="row p-3 d-flex justify-content-start">
+                            <div class="col-md-3 col-sm-12 mx-2 my-2">
+                                <img id="imagethumbnail" class="image-form-custom" src="{{product_variant.thumbnail_image.url}}" alt="">
+                                <!-- <img id="image{{forloop.counter}}" class="image-form-custom" src="{{image}}" alt=""> -->
+                            </div>
+                            <div class="col-md-7 col-sm-12 my-2 mx-2 px-sm-0 px-md-3 d-flex align-items-center">
+                                <input class="form-control" type="file" onchange="send_data(inputid ='thumbnail', variant_slug = '{{product_variant_slug}}')" id="photothumbnail" accept=".jpg,.jpeg,.webp,.png">
+                            </div>
+                        </div>
+
+
                     </div>
                 </div> <!-- card end// -->
                 <div class="card mb-4">
@@ -102,18 +124,18 @@ Product Management - Product Variant Update
                     <div class="card-body">
                         
                         <label class="form-label input-upload">Product Images</label>
-                        <div class="overflow-auto" style="height: 300px;">
+                        <div style="overflow-x: hidden; height: 300px;">
                             {% for image in current_additional_images %}
 
                                 <!-- <input class="form-control" type="file" multiple accept=".jpg,.jpeg,.webp,.png" > -->
                                 <div class="row p-3 d-flex justify-content-start">
                                     <div class="col-md-3 col-sm-12 mx-2 my-2">
-                                    <img id="image{{forloop.counter}}" class="image-form-custom" src="{{image}}" alt="">
+                                        <img id="image{{forloop.counter}}" class="image-form-custom" src="{{image}}" alt="">
                                     </div>
                                     <div class="col-md-7 col-sm-12 my-2 mx-2 px-sm-0 px-md-3 d-flex align-items-center">
-                                    <label for="photo{{forloop.counter}}" hidden></label>
-                                    <input type="file" class="form-control" onchange="send_data(inputid ='{{forloop.counter}}', variant_slug = '{{product_variant_slug}}', image_id = '{{image.id}}')" id="photo{{forloop.counter}}" name ="add_image{{forloop.counter}}" accept=".jpg,.jpeg,.WEBP,.png">
-                                    <input type="text" hidden value="{{image.id}}" name="product-image{{forloop.counter}}">
+                                        <label for="photo{{forloop.counter}}" hidden></label>
+                                        <input type="file" class="form-control" onchange="send_data(inputid ='{{forloop.counter}}', variant_slug = '{{product_variant_slug}}', image_id = '{{image.id}}')" id="photo{{forloop.counter}}" name ="add_image{{forloop.counter}}" accept=".jpg,.jpeg,.WEBP,.png">
+                                        <input type="text" hidden value="{{image.id}}" name="product-image{{forloop.counter}}">
                                     </div>
                                 </div>
                             {% endfor %}
@@ -121,71 +143,19 @@ Product Management - Product Variant Update
                     </div>
                 </div> <!-- card end// -->
                 <div>
-                    <button type="submit" class="w-100 p-3 btn btn-md rounded font-sm hover-up">Add Product</button>
+                    <button type="submit" class="w-100 p-3 btn btn-md rounded font-sm hover-up">Update Variant</button>
                 </div>
                 
             </div>
         </div>
+    </form>
+    <div class="col-lg-7 d-flex justify-content-evenly">
+        <a  href="{% url 'all_products' %}" class="btn btn-primary w-25 p-3 rounded-pill">Go Back</a>
+        <a  href="{% url 'delete_product_variant' product_variant_slug %}" class="btn btn-dark w-25 rounded-pill p-3">Delete</a>
 
-        <div class="col-lg-7 d-flex justify-content-evenly">
-            <a  href="{% url 'all_products' %}" class="btn btn-primary w-25 p-3 rounded-pill">Go Back</a>
-            <a  href="{% url 'delete_product_variant' product_variant_slug %}" class="btn btn-dark w-25 rounded-pill p-3">Delete</a>
-
-        </div>        
-        </form>
+    </div>        
     </section> <!-- content-main end// -->
 
 </main>
-
-<script>
-
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-      }
-      
-      
-      function send_data(inputid, variant_slug, image_id='thumbnail') {
-          url = `/admin-control/product-management/product-variant-update/additional-product-images/${variant_slug}/`
-          var formData = new FormData();
-          var files = $('#photo'+ inputid)[0].files[0]
-          formData.append('file', files);
-          formData.append('image_id', image_id);
-      
-          $.ajax({
-            type: "POST",
-            url: url,  // Replace with the actual URL for your view
-            dataType: "json", 
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                // "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": getCookie("csrftoken"), 
-              },
-            success: (data) => {
-              console.log(data);
-              document.getElementById('image'+ inputid).setAttribute('src', data['new_image'])
-              },
-            error: (error) => {
-                console.log(error);
-                alert(error)
-              }
-          });
-        }
-
-
-</script>
-
 
 {% endblock %}

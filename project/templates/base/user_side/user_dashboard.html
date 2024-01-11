@@ -84,7 +84,7 @@ User Dashboard
                             <div class="row">
                                 <label class="form-label p-3 mx-5 ">Username</label>
                                 <div class="input-group px-3 mx-5">
-                                    <input type="text" onchange="UpdateProfileField(this)" class="form-control " name="username" id="updateprofilefield3" placeholder="Username" value="{{user.username}}" readonly aria-describedby="edit-btn1">
+                                    <input type="text" onchange="UpdateProfileField(this)" class="form-control " name="username" id="userprofilefield3" placeholder="Username" value="{{user.username}}" readonly aria-describedby="edit-btn1">
                                     <button type="button" id="edit-btn1" class="btn btn-dark" onclick="EditProfileField('3')">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
                                             <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
@@ -153,19 +153,31 @@ User Dashboard
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form method="post">
-          {% csrf_token %}
           <div class="modal-body">
             <p>You are going to change your current Mobile Number to a new Mobile Number .</p>
-            <label for="new_phone_number" class="mt-2"> <small>New Mobile Number</small></label> 
-            <input class="form-control" type="tel" id="new_phone_number" name="phone" pattern="[+]{1}[0-9]{11,14}" required >
-            
+            <label for="MobileNumberChange" class="mt-2">New Mobile Number</label> 
+            <input class="form-control" type="tel" id="MobileNumberChange" name="phone" pattern="[+]{1}[0-9]{11,14}" required >
+            <p class="text-danger small m-0 p-0" id="MobileNumberChangeOtpError"></p>
           </div>
+
+          <a class="btn btn-dark rounded-pill px-5" onclick="SendMobileNumberChangeOtp()" id="MobileNumberChangeOtpbtn">
+            <div class="d-flex p-2 d-none" role="status" aria-hidden="true"></div>
+            Confirm
+          </a>
+
+          <div id="MobileNumberChangeOtpDiv" class="d-none">
+            <label for="" class="mt-2">Enter Otp</label> 
+            <input type="number" id="MobileNumberChangeOtp" class="form-control " placeholder="OTP" value="" >
+            <p class="text-danger small m-0 p-0" id="MobileNumberChangeOtpErrors"></p>
+            <button class="btn btn-dark mt-2" onclick="MobileNumberChangeOtpVerify()">
+                Change
+            </button>
+          </div>
+
           <div class="modal-footer">
-            <!-- <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button> -->
-            <button type="button" class="btn btn-dark">Update Mobile Number</button>
+            <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+            <!-- <button type="button" class="btn btn-dark">Update Mobile Number</button> -->
           </div>
-        </form>
       </div>
     </div>
   </div>
@@ -186,19 +198,19 @@ User Dashboard
             <p>You are going to change your current Email ID to a new Email ID. After filling the new Email ID a verification mail send to your new Email ID.</p>
             <label for="" class="mt-2"> <small>New Email Id</small></label> 
             <input type="email" id="EmailChangeOtpNewMail"  class="form-control " placeholder="New Email Address" value="" >
-            <p class="text-danger small m-0 p-0" id="EmailChangeOtpNewMailError"></p>
+            <p class="text-danger small m-0 p-0" id="sendEmailChangeOtpMailNewMailError"></p>
             
-            <a class="btn btn-dark mt-2" onclick="EmailChangeOtpMail()" id="EmailChangeOtpNewMailbtn">
+            <a class="btn btn-dark mt-2" onclick="sendEmailChangeOtpMail()" id="EmailChangeOtpNewMailbtn">
               <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
               Confirm
             </a>
             <div id="EmailChangeOtpNewMailDiv" class="d-none">
               <label for="" class="mt-2"> <small>Enter Otp</small></label> 
-                  <input type="number" id="EmailChangeOtpNewMail" class="form-control " placeholder="OTP" value="" >
-                  <p class="text-danger small m-0 p-0" id="EmailChangeOtpNewMailError"></p>
-              <button class="btn btn-dark mt-2" onclick="EmailChangeOtpMailVerify()">
+                  <input type="number" id="EmailChangeOtpNewMailOtp" class="form-control " placeholder="OTP" value="" >
+                  <p class="text-danger small m-0 p-0" id="sendEmailChangeOtpMailNewMailError"></p>
+              <button type="button" class="btn btn-dark mt-2" onclick="sendEmailChangeOtpVerify()">
                   Change
-              </button>
+              </button>1
           </div>
   
           </div>
@@ -220,16 +232,19 @@ User Dashboard
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form method="post">
-          {% csrf_token %}
           <div class="modal-body">
-            
+            <p>You are going to reset password , for that you will get a otp in your
+              registered email id <b>({{request.user.email}})</b> Please Verify and Continue
+          </p>
+          <a class="btn btn-dark" id="sendPasswordResetOtpMailBtn" onclick="sendPasswordResetOtpMail()" >
+              <span id="sendPasswordResetOtpMailSpinnner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+              Send Email
+          </a>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-dark">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="location.reload();">Close</button>
+
           </div>
-        </form>
       </div>
     </div>
   </div>

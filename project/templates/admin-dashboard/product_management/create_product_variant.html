@@ -13,6 +13,7 @@ Product Management - Add Product Variant
 
 {% include 'base/admin_side/admin_includes/admin_header.html' %}
 <section class="content-main">
+  {% include 'base/admin_side/admin_includes/alerts.html' %}
     <div class="col-12">
         <div class="content-header">
             <div class="card-header bg-transparent border-0">
@@ -22,7 +23,7 @@ Product Management - Add Product Variant
     </div>
 
     <div class="row justify-content-lg-between">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="col-lg-7">
                 <div class="card mb-4">
@@ -99,14 +100,14 @@ Product Management - Add Product Variant
                     </div>
                     <div class="card-body">
                         <label class="form-label input-upload"></label>Thumbnail Image </label>
-                        <input class="form-control" type="file" accept=".jpg,.jpeg,.webp,.png">
+                        <input class="form-control" name="thumbnail_image" type="file" accept=".jpg,.jpeg,.webp,.png">
                       
                     </div>
                 </div> <!-- card end// -->
                 <div class="card mb-4">
                     <label class="card-body">Additional Images </label>
                         <div class="input-upload">
-                            <input class="form-control" type="file" multiple accept=".jpg,.jpeg,.webp,.png" >
+                            <input class="form-control" name="additional_images" type="file" multiple accept=".jpg,.jpeg,.webp,.png" >
                         </div>
                    
                 </div> <!-- card end// -->

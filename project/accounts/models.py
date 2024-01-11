@@ -132,9 +132,9 @@ class Addresses(models.Model):
     def __str__(self):
         return self.name
     
-class Review(models.Model):
-    user = models.ForeignKey(Account,on_delete=models.CASCADE)
-    product_variant = models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
+# class Review(models.Model):
+#     user = models.ForeignKey(Account,on_delete=models.CASCADE)
+#     product_variant = models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
     
 
                                                                                                                                                                               

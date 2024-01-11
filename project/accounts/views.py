@@ -24,6 +24,9 @@ from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from django_countries.fields import CountryField
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth import update_session_auth_hash
+from django.urls import reverse
 # Create your views here.
 
 User = get_user_model()
@@ -227,7 +230,6 @@ def verify_otp(request, uid):
         user_profile = UserProfile.objects.get(uid = uid)
     except Exception as e:
         print(e)
-
     otp = request.GET['otp']        
     print(otp)
     if otp == user_profile.otp:
@@ -328,46 +330,250 @@ def update_user_profile(request):
         return redirect('user_dashboard')
             
 def update_profile(request):
-
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == 'POST' and is_ajax:
         data =json.load(request)
         field = data['field']
         value = data['value']
         try:
-            user = request.GET.get(user = request.user.id)
-            field_tracing = {
-                'first_name': 'first_name',
-                'last_name' : 'last_name',
-                'username' : 'username'
-            }
-            if field in field_tracing:
-                setattr(user,field_tracing[field],value)
-                user.save()
-                return JsonResponse({'status' : 'success'})
-            else:
-                return JsonResponse({
-                    'status' : 'error',
-                    'message' : 'Contact Admin'
+            user = User.objects.get(id= request.user.id)
+            setattr(user,field,value)
+            user.save()
+            return JsonResponse({
+                'status' : 'success'
                 })
         except:
-                return JsonResponse({
-                    'status' : 'error',
-                    'message' : 'Invalid Request'
-                })
+            return JsonResponse({
+                'status' : 'error',
+                'message' : 'Contact Admin'
+            })
+    else:
+        return JsonResponse({
+            'status' : 'error',
+            'message' : 'Invalid Request'
+        })
         
 def mobile_number_change(request):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if request.method == 'POST' and is_ajax:
+        data =json.load(request)
+        get_new_number = data['new_number']
+
+        if (request.user.phone_number == get_new_number):
+            return JsonResponse({
+                "status" : "error",
+                "message" : "Please enter a new mobile number",
+            })
+        try:
+            user = User.objects.get(phone_number=request.user.phone_number)
+            email = User.objects.get(email=request.user.email)
+            otp = random.randint(100000,999999)
+            user_otp,created = UserProfile.objects.update_or_create(user=user,defaults={'otp' :otp})
+
+            subject = 'Mobile Number Change'
+            current_site = get_current_site(request)
+            data = {
+                'user': user,
+                'domain': current_site,
+                'otp': user_otp.otp,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+
+            }
+            message = render_to_string('base/user_side/verification/mobile_change.html', data)
+            to_email = email
+            send_email = EmailMessage(subject, message,to=[to_email])
+            send_email.content_subtype = 'html'
+            send_email.send()
+            
+            return JsonResponse({
+                "status": "success",
+                "message": get_new_number,
+                })
+        except:
+            return JsonResponse({
+                "status": "error",
+                "message": 'Unable to send OTP , Please check mobile number again'})
+    else:
+        return JsonResponse({"status": "error", "message": "Invalid request"})
+    
+def mobile_number_change_verify(request):
+    is_ajax = is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if request.method == 'POST' and is_ajax:
+       data = json.load(request)
+       otp = data['otp']
+       pass 
     try:
-        user = User.objects.get()
-        
-    except:
-            pass
+        user_profile = UserProfile.objects.get(uid = request.user.uid)
+    except Exception as e:
+        print(e)
+
+    otp = request.GET['otp']        
+    print(otp)
+    if otp == user_profile.otp:
+        login(request, user_profile.user)
+        messages.success(request, 'Login successfull !!!')
+        return redirect('user_home')
+    else:
+        messages.error(request, 'Invalid OTP !!!')
+
 
 def email_change(request):
-    pass
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if request.method == "POST" and is_ajax:
+        data = json.load(request)
+        get_new_email = data['new_email']
+        
+        if (request.user.email == get_new_email):
+            return JsonResponse({"status": "error", "message": 'Entered email is same as current email'})
+        
+        try:
+            user = User.objects.get(email = request.user.email)
+            print(user)
+            otp=random.randint(100000,999999)
+            user_otp,created = UserProfile.objects.update_or_create(user=user, defaults={'otp': f'{otp}'})
+            current_site = get_current_site(request)
+            mail_subject = 'Update your Email address'
+            data = {
+            'user': user,
+            'domain': current_site,
+            'otp': user_otp.otp,
+            }
+            message = render_to_string ('base/user_side/verification/email_change.html',data)
+            to_email = get_new_email
+            print(to_email)
+            send_email = EmailMessage(mail_subject,message,to=[to_email])
+            print(send_email)
+            send_email.content_subtype = 'html'
+            send_email.send() 
 
+            return JsonResponse({
+                "status": "success",
+                "message": 'Enter Otp To Change'
+                })
+        except:
+            return JsonResponse({
+                "status": "error", 
+                "message": 'Unable to send mail , Please check mail again'
+                })
+            
+    else:
+        return JsonResponse({
+            "status": "error", 
+            "message": "Invalid request"
+            })
+
+def change_email_verify(request):  
+    
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if request.method == "POST" and is_ajax:
+        data = json.load(request)
+        get_new_email = data['new_email']
+        get_otp = data['otp']
+        
+        user = User.objects.get(id=request.user.id)
+     
+        user_otp = UserProfile.objects.filter(user=user,otp=get_otp).exists()
+        
+        if user_otp:
+            user.email = get_new_email
+            user.save()
+            messages.success(request,"Email ID changed successfully")
+            return JsonResponse({
+                "status": "success",
+                "message": 'OTP OK'
+                 })
+        else:
+            return JsonResponse({
+                "status": "error", 
+                "message": 'Invalid Otp'})
+
+# def password_change(request):
+#     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+#     if request.method == "POST" and is_ajax:
+#         data = json.load(request)
+                
+#         try:
+#             current_password= request.user.password #user's current password
+#             current_password_entered= data['old_password']
+#             password2= data['password2']
+
+#             matchcheck= check_password(current_password_entered, current_password)
+            
+#             if matchcheck:
+#                 user = User.objects.get(id=request.user.id)
+#                 user.set_password(password2)
+#                 user.save()  
+#                 update_session_auth_hash(request, user)
+
+#                 messages.success(request, "Password Change Successfully")
+#                 return JsonResponse({"status": "success"})
+#             else:
+#                 return JsonResponse({"status": "error","message": "Invalid Old Password"})
+        
+#         except:
+#             return JsonResponse({"status": "error", "message": "Contact Admin"})
+
+#     else:
+#         # Return a JSON response indicating an invalid request
+#         return JsonResponse({"status": "error", "message": "Invalid request"})
+    
 def password_change(request):
-    pass
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if request.method == "POST" and is_ajax:
+        email = request.user.email
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email__exact=email)
+            
+            #SEND OTP TO MAIL
+            otp=random.randint(1000,9999)
+            user_otp,created = UserProfile.objects.update_or_create(user=user, defaults={'otp': f'{otp}'})
+            
+            current_site = get_current_site(request)
+            mail_subject = 'Password Change'
+            message = render_to_string ('base/user_side/verification/password_change.html',{
+                'user' : user,
+                'domain' : current_site,
+                'otp':user_otp.otp,
+                
+            })
+            to_email = email
+            send_email = EmailMessage(mail_subject,message,to=[to_email])
+            send_email.content_subtype = 'html'
+            send_email.send()
+            messages.success(request, "Email Has Been Successfully shared , please verify to reset")
+            
+            redirect_to =redirect('password_change', uid=user_otp.uid)
+            redirect_to.set_cookie("can_otp_enter",True,max_age=600)
+            redirect_url = reverse('password_change', kwargs={'uid':user_otp.uid})
+            print(redirect_url)
+            return JsonResponse({"status": "success", "redirect_url": redirect_url})
+    else:
+        # Return a JSON response indicating an invalid request
+        return JsonResponse({"status": "error", "message": "Invalid request"})
+    
+        
+def change_password_with_email(request,uid):  
+    if request.method == "POST":
+        userOtp=UserProfile.objects.get(uid=uid)     
+        if request.COOKIES.get('can_otp_enter')!=None:
+            if(userOtp.otp==request.POST['otp']):
+               
+                user = User.objects.get(id=request.user.id)
+                user.set_password(request.POST['password1'])
+                user.save()  
+                messages.success(request, "Password Changed Successfully")
+                return redirect('user-dashboard')      
+            else:
+                messages.error(request, "Invalid Otp")
+                return render(request,'accounts/change_password_with_mail.html')
+        else:
+            messages.error(request, "2 mins Over ! Time Exceeded")
+            return render(request,'accounts/change_password_with_mail.html')
+    else:
+        return render(request, 'accounts/change_password_with_mail.html')
+        
+
+
 
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('created_at')
@@ -426,9 +632,7 @@ def my_address(request):
 
 
 def add_address(request,source):
-    
     if request.method == 'POST':
-        
         address_form = AddressForm(request.POST)
         if address_form.is_valid():
             address = address_form.save(commit = False)
@@ -475,7 +679,6 @@ def update_address(request):
         form_data['country'] = address.country.name
         print(form_data)
 
-        print("-----------------------------")
         country_choices = get_country_choices()
         countries = json.dumps(country_choices)
         

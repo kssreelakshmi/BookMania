@@ -1,10 +1,12 @@
 
 {% if messages %}
     {% for message in messages %}
-    <div id="message" class="container-fluid p-0">
+    <div id="mesfsage" class="container-fluid p-0">
         <div {% if message.tags %} class="py-4 alert alert-{% if message.tags == 'error'%}danger{% else %}{{ message.tags }}{% endif %}"{% endif %} role="alert">
             {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-            {{ message }}
+            <div>
+                {{ message }}
+            </div>
             <button type="button" class="btn-close float-end" data-bs-dismiss="alert"></button>
         </div>
     </div>
@@ -12,7 +14,11 @@
 {% endif %}
 
 
-
+<script>
+    setTimeout(function(){
+        $('#message').fadeOut('slow')
+    }, 4000)
+</script>
 
 
 

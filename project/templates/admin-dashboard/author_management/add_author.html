@@ -1,7 +1,7 @@
 {% extends 'base/admin_side/admin_base.html' %}
 
 {% block title %}
-Publication Management - Update Publication
+Publication Management - Add Publication
 {% endblock %}
 
 {% load static %}
@@ -15,16 +15,15 @@ Publication Management - Update Publication
 <section class="content-main mt-80 mb-80">
     <div class="card mx-auto card-box">
         <div class="card-body ">
-            <h4 class="card-title mb-4">Update Publication</h4>
-            {% include 'base/admin_side/admin_includes/alerts.html' %}
+            <h4 class="card-header mb-4">Add Author</h4>
                 <form method="post" >
                     {% csrf_token %}
                     <div class="container">
                         <div class="row ">
                             <div class="col-lg-5 p-3">
                                 <div class="d-flex p-3">
-                                    <label class="d-block" for="id_name">Publication Name</label>
-                                    {{form.name}}
+                                    <label class="d-block" for="id_name">Author Name</label>
+                                    {{form.author_name}}
                                 </div>
                             </div> <!-- form-group// -->
                             <div class="col-lg-4 p-3">
@@ -37,12 +36,14 @@ Publication Management - Update Publication
                             </div>
                         </div>
                         <div class="row my-5">
+                            
                             <div class="col-lg-4">
-                                <button type="submit" class="btn btn-primary w-50 rounded-pill"> Update Publication</button>
+                                <button type="submit" class="btn btn-primary w-50 rounded-pill"> Add Author</button>
                             </div> <!-- form-group// -->
                         </div>
                     </div>
                 </form>
+            
         </div>
     </div>
 

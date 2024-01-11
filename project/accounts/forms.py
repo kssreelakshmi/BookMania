@@ -23,13 +23,15 @@ class UserSignupForm(forms.ModelForm):
             'first_name'  : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Firstname'}),
             'last_name'  : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Lastname'}),
             'username'  : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Username'}),
-            'phone_number' : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Mobile Number','pattern ':'[+]{1}[0-9]{11,14} required'}),
-            'email'  : forms.EmailInput(attrs={'class': 'form-control','placeholder' : 'Enter Email'}),
+            'phone_number' : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Mobile Number',}),
+            'email'  : forms.EmailInput(attrs={'class': 'form-control','placeholder' : 'Enter Email',"pattern" : '[^@]+@[^@]+\.[a-zA-Z]{2,6} required'}),
             'password'  : forms.PasswordInput(attrs={'class': 'form-control','placeholder' : 'Enter Password'}),
             'is_active' : forms. CheckboxInput(),
             'is_admin' : forms. CheckboxInput(),
             'is_staff' : forms. CheckboxInput(),
         }
+
+
 
 class UserProfilePicForm(forms.ModelForm):
     class Meta:

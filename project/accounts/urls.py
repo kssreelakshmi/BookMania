@@ -20,7 +20,9 @@ urlpatterns = [
     path('profile-update/', views.update_profile, name='update_profile'),
 
     path('mobile-number-change/', views.mobile_number_change, name='mobile_number_change'),
+    path('mobile-number-change/verify/', views.mobile_number_change_verify, name='mobile_number_change_verify'),
     path('email-change/', views.email_change, name='email_change'),
+    path('email-change/verify', views.email_change, name='change_email_verify'),
     path('password-change/', views.password_change, name='password_change'),
 
 

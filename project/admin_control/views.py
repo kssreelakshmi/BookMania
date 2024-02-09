@@ -13,6 +13,7 @@ from store.models import Product,ProductVariant,Attribute,AttributeValue,Author,
 from order.models import Order, OrderProduct, Payment, PaymentMethod
 from order.forms import OrderStatusForm
 from django.db.models import OuterRef, Subquery
+from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import JsonResponse
 import json
 
@@ -86,8 +87,11 @@ def admin_login(request):
 # @check_isadmin
 def all_users(request):
     users= User.objects.all().exclude(is_admin = True)
+    paginator = Paginator(users,5)
+    page = request.GET.get('page')
+    paged_users = paginator.get_page(page)
     context = {
-        'users': users
+        'users': paged_users
     }
     return render(request,'admin-dashboard/account_management/all_users.html',context)
 
@@ -149,7 +153,7 @@ def create_user(request):
             user.set_password(password)
             
             user.save()
-            messages.success(request, "User Created ")
+            messages.success(request, "User Created")
             return redirect('all_users')
         
         else:
@@ -172,10 +176,13 @@ def admin_logout(request):
 
 @login_required(login_url='admin_login')
 def all_category(request):
-    
     categories = Category.objects.all().order_by('id')
+    paginator = Paginator(categories,10)
+    page = request.GET.get('page')
+    paged_categories = paginator.get_page(page)
+    
     context = {
-        'all_categories': categories,
+        'all_categories': paged_categories,
     }
     return render(request, 'admin-dashboard/category_management/all_category.html', context)
 
@@ -252,9 +259,11 @@ def all_products(request):
     image=Subquery(
         ProductVariant.objects.filter(product_id=OuterRef('pk')).values('thumbnail_image')[:1]
     ))
-    
+    paginator = Paginator(products,10)
+    page = request.GET.get('page')
+    paged_products = paginator.get_page(page)
     context = {
-        'products': products
+        'products': paged_products,
     }
     return render(request,'admin-dashboard/product_management/all_product.html',context)
 
@@ -528,9 +537,11 @@ def delete_product_variant(request,product_variant_slug):
 @login_required(login_url='admin_login')
 def all_publication(request):
     publications = Publication.objects.all().order_by('-created_date')
-    
+    paginator = Paginator(publications,10)
+    page = request.GET.get('page')
+    paged_publications = paginator.get_page(page)
     context = {
-        'publications': publications
+        'publications': paged_publications,
     }
     return render(request,'admin-dashboard/publication_management/all_publication.html',context)
 
@@ -596,8 +607,11 @@ def update_publication(request, id):
 
 def all_authors(request):
     authors = Author.objects.all().order_by('-author_created_at')
+    paginator = Paginator(authors,10)
+    page = request.GET.get('page')
+    paged_authors = paginator.get_page(page)
     context = {
-        'authors' : authors,
+        'authors' : paged_authors,
     }
     return render(request,'admin-dashboard/author_management/all_authors.html',context)
 
@@ -658,10 +672,16 @@ def all_orders(request):
     
     if order_status:
         orders = Order.objects.filter(order_status__icontains=order_status).order_by('-created_at')
+        paginator = Paginator(orders,10)
+        page = request.GET.get('page')
+        paged_orders = paginator.get_page(page)
     else: 
         orders = Order.objects.all().order_by('-created_at')
+        paginator = Paginator(orders,10)
+        page = request.GET.get('page')
+        paged_orders = paginator.get_page(page)
     context = {
-        'orders': orders
+        'orders': paged_orders,
     }
     return render(request, 'admin-dashboard/order_management/all_orders.html',context)
 
@@ -706,8 +726,11 @@ def update_order(request, order_id):
 
 def all_attributes(request):
     attribute =Attribute.objects.all()
+    paginator = Paginator(attribute,10)
+    page = request.GET.get('page')
+    paged_attribute = paginator.get_page(page)
     context = {
-        'attribute' : attribute,
+        'attribute' : paged_attribute,
     }
     return render(request,'admin-dashboard/product_management/all_attributes.html',context)
 
@@ -763,9 +786,11 @@ def update_attribute(request,id):
 
 def all_attribute_values(request):
     attributevalue = AttributeValue.objects.all()
-
-    context ={
-        'attributevalue' : attributevalue,
+    paginator = Paginator(attributevalue,10)
+    page = request.GET.get('page')
+    paged_attributevalue = paginator.get_page(page)
+    context = {
+        'attributevalue' : paged_attributevalue,
     }
     return render(request,'admin-dashboard/product_management/all_attribute_values.html',context)
 

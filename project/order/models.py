@@ -58,6 +58,8 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     ip = models.CharField(max_length=50, blank=True)
+    # cancellation_requested = models.BooleanField(default=False)
+    # return_requested = models.BooleanField(default=False)
     
     
     def __str__(self):
@@ -82,3 +84,10 @@ class OrderProduct(models.Model):
     
     def __str__(self):
         return str(self.order)
+    
+class OrderCancel(models.Model):
+    user = models.ForeignKey(Account,on_delete = models.CASCADE)
+    order = models.ForeignKey(Order,on_delete=models.CASCADE)
+
+class OrderReturn(models.Model):
+    pass

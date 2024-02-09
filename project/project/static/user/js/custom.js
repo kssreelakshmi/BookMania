@@ -103,11 +103,11 @@ function handleAddressSubmit(){
 }
 
 
-function update_wishlist(product_id, action){
+function update_wishlist(product_id, imageNumber){
   const data = {
     'product_id' : product_id,
-    'action' : action,
   }
+  console.log(product_id)
   $.ajax({
     type: "POST",
     url: `/wishlist/wishlist-update/`,  // Replace with the actual URL for your view
@@ -121,6 +121,30 @@ function update_wishlist(product_id, action){
       //response from backend
     success: (data) => {
       console.log(data);
+      let name = document.getElementById('variant_name'+imageNumber).text
+      if (data.status === 'added'){
+        console.log(data.status);
+        console.log(addedImagePath); //The variable imagePath is declared and initialised in the shop.html script tag 
+        document.getElementById('wishlist_icon'+imageNumber).src = addedImagePath
+        swal( name+"\n is added to wishlist !", "Success");
+        
+        
+      }
+      if (data.status === 'removed'){
+        console.log(data.status);
+        console.log(removedImagePath); //The variable imagePath is declared and initialised in the shop.html script tag 
+        document.getElementById('wishlist_icon'+imageNumber).src = removedImagePath
+        swal( name+"\nis removed from wishlist !", "Success");
+
+        if (window.location.pathname === data.path){
+          setTimeout(() => {
+            window.location.reload()
+          }, 2000)
+
+        };
+        
+      }
+      
       
     },
     error: (error) => {
@@ -468,6 +492,35 @@ function sendPasswordResetOtpMail() {
     
 
 };
+
+function filterWithPrice(min,max) {
+  const urlParams = new URLSearchParams(window.location.search);
+
+  try{
+      var price_min = document.getElementById(min).value
+
+    }
+  catch
+    {
+      var price_min = 0
+    }
+    
+    try{
+        var price_max = document.getElementById(max).value
+
+      }
+    catch
+      {
+        var price_max = ''
+      }
+
+  urlParams.set('price-min',  price_min.toString());
+  urlParams.set('price-max', price_max.toString());
+  
+  const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+  window.location.href = newUrl;
+  }
+
 
 
 

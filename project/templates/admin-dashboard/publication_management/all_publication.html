@@ -82,6 +82,48 @@ Publication Management - All Publication
     
         </div> <!-- card-body end// -->
     </div> <!-- card end// -->
+    <div class="pagination-area mt-30 mb-50">
+      nav class="flex-c-m flex-w w-full p-t-45">
+               {% if publications.has_other_pages %}
+                 <ul class="pagination">
+                   {% if publications.has_previous %}
+                   <li class="page-item">
+                     <a href="?page={{publications.previous_page_number}}" class="page-link ">
+                       Previous
+                     </a>
+                   </li>
+                   {% else %}
+                   <li class="page-item disabled">
+                     <a href="#" class="page-link ">
+                       <span>Previous</span>
+                     </a>
+                   </li>
+                   {% endif %}
+                   
+                   {% for i in publications.paginator.page_range %}
+                   {% if publications.number == i %}
+                   <li class="page-item active">
+                     <a href="#" class="page-link ">
+                       <span>{{i}}</span>
+                     </a>
+                   </li>
+                   {% else %}
+                   <li class="page-item ">
+                     <a href="?page={{i}}" class="page-link ">
+                       <span>{{i}}</span>
+                     </a>
+                   </li>
+                   {% endif %}
+                   {% endfor %}
+                   {% if publications.has_next %}
+                   <li class="page-item"><a class="page-link" href="?page={{publications.next_page_number}}">Next</a></li>
+                   {% else %}
+                     <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                   {% endif %}
+                 </ul>
+               {% endif %}
+             </nav>
+   </div>
 </section> <!-- content-main end// -->
 
 

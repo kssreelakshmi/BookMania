@@ -2,6 +2,7 @@ from django import forms
 from accounts.models import Account
 from accounts.models import Addresses
 from django.contrib.auth.forms import PasswordResetForm
+from django.core.validators import RegexValidator,EmailValidator
 
 
 class UserSignupForm(forms.ModelForm):
@@ -24,7 +25,7 @@ class UserSignupForm(forms.ModelForm):
             'last_name'  : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Lastname'}),
             'username'  : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Username'}),
             'phone_number' : forms.TextInput(attrs={'class': 'form-control','placeholder' : 'Enter Mobile Number',}),
-            'email'  : forms.EmailInput(attrs={'class': 'form-control','placeholder' : 'Enter Email',"pattern" : '[^@]+@[^@]+\.[a-zA-Z]{2,6} required'}),
+            'email'  : forms.EmailInput(attrs={'class': 'form-control','placeholder' : 'Enter Email'}),
             'password'  : forms.PasswordInput(attrs={'class': 'form-control','placeholder' : 'Enter Password'}),
             'is_active' : forms. CheckboxInput(),
             'is_admin' : forms. CheckboxInput(),

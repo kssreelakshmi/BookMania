@@ -133,7 +133,7 @@ def user_login(request):
             if user is not None:
                 try:
                     cart = Cart.objects.get(cart_id = _cart_id(request))
-                    is_cartitem = Cart_item.objects.get(cart=cart)
+                    is_cartitem = Cart_item.objects.filter(cart=cart).exists()
                    
                     if is_cartitem:
                         cart_items = Cart_item.objects.filter(cart=cart)
@@ -150,13 +150,14 @@ def user_login(request):
                             print(cart_item.user)
                                                     
                 except Exception as e:
-                    print(e)
-                    try:
-                        wishlist_exist = Wishlist.objects.filter(user=user).exists()
-                        if not wishlist_exist:
-                            wishlist = Wishlist.objects.create(user=user)
-                    except Exception as e:
-                        print (e)
+                    pass
+                try:
+                    wishlist_exist = Wishlist.objects.filter(user=user).exists()
+                    if not wishlist_exist:
+                        wishlist = Wishlist.objects.create(user=user)   
+                        print(wishlist,'ffgduhasidoiopisoiSOIOisIHDUGSAGDSFGYDGSYFGDUFHUHUHS')
+                except Exception as e:
+                    print (e)
                 login(request,user)
                 messages.success(request,'You are now logged in')
 
@@ -589,9 +590,7 @@ def order_history(request):
 def order_detail(request,order_id):
     try:
         order = Order.objects.get(order_id = order_id)
-        print(order)
         products = OrderProduct.objects.filter(order = order)
-        print(products)
         sub_total = 0
         tax = 0
         grand_total = 0

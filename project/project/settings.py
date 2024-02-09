@@ -75,6 +75,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'admin_control.context_processor.admin_categories',
                 'cart.context_processor.counter',
+                'category.context_processor.category_list',
+                'category.context_processor.attribute_list',
                 
             ],
         },

@@ -16,8 +16,8 @@ class Category(models.Model):
         self.slug = slugify(self.category_name)
         super(Category,self).save(*args, **kwargs)
 
-    # def get_url(self):
-    #     return reverse('product_by_category',args=[self.slug])
+    def get_url(self):
+        return reverse('products_by_category',args=[self.slug])
     
 
     class Meta:

@@ -64,7 +64,46 @@ Category Management - All Categories
                   </tbody>
                 </table>
               </div>
-
+              <nav class="flex-c-m flex-w w-full p-t-45">
+                {% if all_categories.has_other_pages %}
+                  <ul class="pagination">
+                    {% if all_categories.has_previous %}
+                    <li class="page-item">
+                      <a href="?page={{all_categories.previous_page_number}}" class="page-link ">
+                        Previous
+                      </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                      <a href="#" class="page-link ">
+                        <span>Previous</span>
+                      </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for i in all_categories.paginator.page_range %}
+                    {% if all_categories.number == i %}
+                    <li class="page-item active">
+                      <a href="#" class="page-link ">
+                        <span>{{i}}</span>
+                      </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item ">
+                      <a href="?page={{i}}" class="page-link ">
+                        <span>{{i}}</span>
+                      </a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if all_categories.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{all_categories.next_page_number}}">Next</a></li>
+                    {% else %}
+                      <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                    {% endif %}
+                  </ul>
+                {% endif %}
+              </nav>
 
 
         </div> <!-- card-body end// -->

@@ -122,14 +122,12 @@ def place_order(request):
             if payment_method.method_name == 'RAZORPAY':
                 client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID,settings.KEY_SECRET))
                 payment = client.order.create({'amount':float(order.order_total) * 100,"currency": "INR"}) 
-                print('sreeeeeee33333333333')
+                
                 for key, value in payment.items():
                     print(key,'  :  ',value)
             else:
-                print("sreeeeeeeeeeeeeeeeee")
                 payment = False 
         except :
-            print("aaradh")
             payment = False
         
         success_url = request.build_absolute_uri(reverse('payment_success'))

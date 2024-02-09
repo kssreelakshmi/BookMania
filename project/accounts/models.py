@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.utils import timezone
 from django_countries.fields import CountryField
 from store.models import ProductVariant
+from django.core.validators import RegexValidator,EmailValidator
 import datetime
 import uuid
 # Create your models here.
@@ -43,14 +44,13 @@ class AccountManager(BaseUserManager):
         user.save(using = self._db)
         return user
 
-
-
 class Account(AbstractBaseUser):
+    pattern=r"^[6-9]\d{9}$"
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     username = models.CharField(max_length=50, unique=True)
-    email = models.EmailField(max_length=100, unique=True)
-    phone_number = models.CharField(max_length=20)
+    email = models.EmailField(max_length=100, unique=True,validators = [EmailValidator()])
+    phone_number = models.CharField(max_length=15, validators = [RegexValidator(pattern)] )
     profile_pic = models.ImageField(upload_to='photos/user-profile/user-images',null=True,blank=True)
 
     #required fields

@@ -153,13 +153,24 @@ Order Summary
                             </div>
                             <div class="card-body p-3">
                                 {% for payment_method in payment_methods %}
-                                <div class="form-check border border-black-50 m-2">
-                                    <div class="p-2 mx-2 d-flex align-items-center">
-                                        <input value="{{ payment_method.id }}" class="form-check-input m-1" type="radio"
+                                <div class="form-check border border-black-50 m-2" {% if payment_method.method_name == 'COD' and grand_total >= 1000 %} style="background: #f1f1f1;" {% endif %}>
+                                    <div class="p-3 pl-4 mx-2 d-flex align-items-center">
+                                        {% if payment_method.method_name == 'COD' and grand_total >= 1000 %}
+                                        <input value="{{ payment_method.id }}" class="form-check-input mr-3" disabled type="radio"
                                             name="payment1" id="payment_method{{ forloop.counter }" {% if payment_method.is_default %}checked{% endif %}>
-                                        <label class="form-check-label" for="payment{{ forloop.counter }}">
+                                            
+                                        <label class="text-muted form-check-label" for="payment{{ forloop.counter }}">
+                                            {{payment_method.method_name}} is not available for orders above Rs 1000.00
+                                        </label>
+                                        {% else %}
+                                        <input value="{{ payment_method.id }}" class="form-check-input mr-3" type="radio"
+                                            name="payment1" id="payment_method{{ forloop.counter }" {% if payment_method.is_default %}checked{% endif %}>
+                                            
+                                        <label class="form-check-label text-dark " for="payment{{ forloop.counter }}">
                                             {{payment_method.method_name}}
                                         </label>
+                                        {% endif %}
+                                        
                                     </div>
                                 </div>
                                 {% endfor %}

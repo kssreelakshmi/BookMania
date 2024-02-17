@@ -25,6 +25,8 @@ class Payment(models.Model):
     payment_order_id = models.CharField(max_length=100,null=True,blank=True)
     payment_signature = models.CharField(max_length=100,null=True,blank=True)
     payment_status = models.CharField(choices = PAYMENT_STATUS_CHOICES, null=True, max_length=20)
+    error_description = models.TextField(max_length=500,null=True,blank=True)
+    error_reason = models.CharField(max_length=500,null=True,blank=True)
     payment_id = models.CharField(max_length=100)
     amount_paid = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add = True)
@@ -41,10 +43,17 @@ class Order(models.Model):
         ("Order placed", "Order placed"),
         ("Accepted", "Accepted"),
         ("Delivered", "Delivered"),
-        ("Cancelled by Admin", "Cancelled by Admin"),
-        ("Cancelled by User", "Cancelled by User"),
+        ("Cancelled", "Cancelled"),
         ("Returned", "Returned"),
+        ("Payment Pending", "Payment Pending"),
+        ("Partially Cancelled", "Partially Cancelled"),
+        ("Partially Returned", "Partially Returned"),
+        # user choices
+        ('Cancel or Return Requested', 'Cancel or Return Requested'),
         )
+
+
+       
     
     user = models.ForeignKey(Account,on_delete=models.CASCADE)
     order_id = models.CharField(max_length=100)
@@ -54,12 +63,10 @@ class Order(models.Model):
     order_total = models.DecimalField(max_digits=50, decimal_places=2)
     is_ordered = models.BooleanField(default=False)
     tax = models.DecimalField(max_digits=50, decimal_places=2, null=True)
-    order_status = models.CharField(choices = ORDER_STATUS_CHOICES, max_length=20, default='New')
+    order_status = models.CharField(choices = ORDER_STATUS_CHOICES, max_length=100, default='New')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     ip = models.CharField(max_length=50, blank=True)
-    # cancellation_requested = models.BooleanField(default=False)
-    # return_requested = models.BooleanField(default=False)
     
     
     def __str__(self):
@@ -67,6 +74,42 @@ class Order(models.Model):
     
 
 class OrderProduct(models.Model):
+    STATUS_CHOICES = (
+        
+        ("New", "New"),
+        ("Order placed", "Order placed"),
+        ("Accepted", "Accepted"),
+        ("Delivered", "Delivered"),
+        ("Cancelled", "Cancelled"),
+        ("Returned", "Returned"),
+        ('Cancellation Requested', 'Cancellation Requested'),
+        ('Return Requested', 'Return Requested')
+        )
+    
+    ORDER_CANCEL_CHOICES = (
+        
+        (" I have bought the wrong item", " I have bought the wrong item"),
+        ("I have found a cheaper alternative for lesser price.", "I have found a cheaper alternative for lesser price."),
+        ("I have provided the wrong address.", "I have provided the wrong address."),
+        ("Expected delivery date has changed and the product is arriving at a later date.", "Expected delivery date has changed and the product is arriving at a later date."),
+        ("Product is not required anymore.", "Product is not required anymore."),
+        ("Bad review from friends/relatives after ordering the product.", "Bad review from friends/relatives after ordering the product."),
+        ("Product is taking too long to be delivered", " Product is taking too long to be delivered"),
+        ("other","other")
+        )
+
+    ORDER_RETURN_CHOICES = (
+        
+        ("Wrong product ordered","Wrong product ordered"),
+        ("Product is not required anymore.", "Product is not required anymore."),
+        ("The product was damaged or defective.", "The product was damaged or defective."),
+        ("The quality of product was cheap", "The quality of product was cheap"),
+        ("The product arrived late ", "The product arrived late"),
+        ("Wrong product shipped", "Wrong product shipped"),
+        ("Wardrobing", "Wardrobing"),
+        ("other","other"),
+        )
+    
     
     user = models.ForeignKey(Account, on_delete=models.SET_NULL,null=True)
     order = models.ForeignKey(Order,on_delete=models.CASCADE)
@@ -75,19 +118,31 @@ class OrderProduct(models.Model):
     quantity = models.IntegerField()
     product_price = models.DecimalField(max_digits=12, decimal_places=2)
     is_ordered = models.BooleanField(default=False)
+
+    order_status = models.CharField(choices = STATUS_CHOICES, max_length=100, default='New')
+    cancellation_reason = models.CharField(choices = ORDER_CANCEL_CHOICES, max_length=500, default='Not cancelled')
+    return_reason = models.CharField(choices = ORDER_RETURN_CHOICES, max_length=500, default='Not returned')
+    others = models.TextField(max_length = 500, null = True, blank = True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     
     def price_in_order_product(self):
-        return self.product_price*self.quantity    
+        return self.product_price*self.quantity
     
     def __str__(self):
         return str(self.order)
     
-class OrderCancel(models.Model):
-    user = models.ForeignKey(Account,on_delete = models.CASCADE)
-    order = models.ForeignKey(Order,on_delete=models.CASCADE)
 
-class OrderReturn(models.Model):
-    pass
+class Invoice(models.Model):
+    invoice_number = models.CharField(max_length=30)
+    order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.invoice_number
+
+    def save(self, *args, **kwargs):
+        self.invoice_number = 'BMIV-0' + str(Invoice.objects.all().count() + 1)
+        super(Invoice, self).save(*args, **kwargs)

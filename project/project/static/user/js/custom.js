@@ -103,7 +103,19 @@ function handleAddressSubmit(){
 }
 
 
-function update_wishlist(product_id, imageNumber){
+function update_wishlist(product_id, imageNumber, userLoginStatus){
+  if(userLoginStatus === 'False'){
+    let baseUrl = window.location.origin
+    console.log(baseUrl);
+    const newUrl = baseUrl + '/accounts/user-login/'
+    console.log(newUrl);
+    setTimeout(() =>{
+      window.location.href = newUrl
+    },2000)
+    swal("You need to login for wishlist access", " Rediecting to login...");
+    
+    return
+  }
   const data = {
     'product_id' : product_id,
   }
@@ -166,6 +178,8 @@ $(".custom-carousel").owlCarousel({
       $(this).toggleClass("active");
     });
   });
+
+  
   
 
 function UpdateProfileField(field){
@@ -494,35 +508,176 @@ function sendPasswordResetOtpMail() {
 };
 
 function filterWithPrice(min,max) {
-  const urlParams = new URLSearchParams(window.location.search);
+  let queryParams = window.location.search
+  if(queryParams){
+    queryParams = ""
+  }
+
+
+  const urlParams = new URLSearchParams(queryParams);
+  console.log(urlParams.toString());
+  
 
   try{
       var price_min = document.getElementById(min).value
-
+      
     }
-  catch
+    catch
     {
       var price_min = 0
     }
     
-    try{
-        var price_max = document.getElementById(max).value
+  try{
+      var price_max = document.getElementById(max).value
 
-      }
-    catch
-      {
-        var price_max = ''
-      }
+    }
+  catch
+    {
+      var price_max = ''
+      console.log('fudhgoidfshgofhd');
+    }
+    if(price_max){
+      urlParams.set('price-max', price_max.toString());
+    }
 
-  urlParams.set('price-min',  price_min.toString());
-  urlParams.set('price-max', price_max.toString());
+    if(price_min){
+      urlParams.set('price-min',  price_min.toString());
+    }
+
   
   const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+  console.log(newUrl);
   window.location.href = newUrl;
   }
 
 
 
+function SortByPrice(input){
+  console.log(input);
+    const urlParams = new URLSearchParams(window.location.search);
+  
+    if(input === 'Low-to-High'){
+
+      urlParams.set('sort', input);
+      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+      console.log(newUrl);
+      window.location.href = newUrl;
+    }
+    else if(input === 'High-to-Low'){
+
+      urlParams.set('sort', input);
+      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+      console.log(newUrl);
+      window.location.href = newUrl;
+    }
+
+}  
+
+
+function SortByNew(input){
+  const urlParams = new URLSearchParams(window.location.search);
+
+  if(input === 'New'){
+
+    urlParams.set('new', input);
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    console.log(newUrl);
+    window.location.href = newUrl;
+  }
+
+}
+
+function reasonControl(idNumber){
+  const selectedValue = document.getElementById('reason' + idNumber).value;
+  if (selectedValue === 'other'){
+    document.getElementById('other-reason' + idNumber).disabled = false;
+  }
+  else{
+    document.getElementById('other-reason' + idNumber).disabled = true;
+  }
+}
+
+function order_operation(operation, idNumber){
+  const title = document.getElementById('reasonModalTitle' + idNumber)
+  if (operation === 'return'){
+    title.innerHTML = 'State your reason for return...'
+  }
+  else if(operation === 'cancel'){
+    title.innerHTML = 'State your reason for cancellation...'
+  }
+}
+
+
+
+function retry_payment(order_id){
+
+  const data = {
+    'order_id' : order_id 
+  }
+
+
+
+  $.ajax({
+        type: "POST",
+        url: `/order/retry-payment/`,  // Replace with the actual URL for your view
+        dataType: "json",
+        data: data,
+
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCookie("csrftoken"), 
+          },
+
+
+
+        success: (responseData) => {
+          if (responseData.status === "SUCCESS") {
+
+
+            var options = {
+              "key": responseData.razor_pay_key_id,
+              "amount": responseData.payment_amount,
+              "currency": "INR",
+              "name": "BookMania",
+              "description": "Payment Retry",
+              "image": logoPath,
+              "order_id": responseData.payment_id,
+              "handler": function (response) {
+                  window.location.href = `${responseData.success_url}?order_id=${order_id}&method=RAZORPAY&payment_id=${response.razorpay_payment_id}&payment_order_id=${response.razorpay_order_id}&payment_sign=${response.razorpay_signature}&payment_amount=${responseData.payment_amount}`
+              },
+              "prefill": {
+                  "name": responseData.name,
+                  "email": responseData.email,
+                  "contact": responseData.contact
+              },
+              "notes": {
+                  "address": "Razorpay Corporate Office"
+              },
+              "theme": {
+                  "color": "#3399cc"
+              }
+            };
+      
+            var rzp = new Razorpay(options);
+
+            rzp.on('payment.failed', function (response) {
+                window.location.href = `${responseData.failed_url}?order_id=${order_id}&error_description=${response.error.description}&error_reason=${response.error.reason}&error_payment_id=${response.error.metadata.payment_id}&error_order_id=${response.error.metadata.order_id}&method=RAZORPAY&payment_amount=${responseData.payment_amount}`
+            });
+            
+            rzp.open();
+
+          } else if(responseData.status === "FAILED") {
+            console.log(responseData);
+          }
+          
+        },
+        error: (xhr, status, error) => {
+            // Display the error message on the page
+            console.log("error");
+            console.log(error);
+        }
+  });
+}
 
 
 

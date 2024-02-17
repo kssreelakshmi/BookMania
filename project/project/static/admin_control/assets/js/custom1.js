@@ -85,4 +85,30 @@ function getCookie(name) {
 
       // }
 
+
+    }
+
+    function showSelectedOption(selectElement, order_number) {
+        var selectedOption = selectElement.value
+        console.log (selectedOption);
+        var data = {
+            selected_option: selectedOption
+        };
+        $.ajax({
+            type: "POST",
+            url: `/admin-control/order-management/order-details/${order_number}/`,
+            dataType: "json", 
+            data: JSON.stringify(data),
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": getCookie("csrftoken"), 
+              },
+            success: (data) => {
+                console.log(data);
+              },
+            error: (error) => {
+                console.log(error);
+                alert(error)
+              }
+        });
     }

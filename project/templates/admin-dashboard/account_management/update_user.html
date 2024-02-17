@@ -13,12 +13,12 @@ Account Management - All Users
 
 
 <section class="content-main mt-80 mb-80">
-  {% include 'base/admin_side/admin_includes/alerts.html' %}
-
-
+    
+    
     <div class="card mx-auto card-box">
         <div class="card-body ">
             <h4 class="card-title mb-4">Update User</h4>
+            {% include 'base/admin_side/admin_includes/alerts.html' %}
 
                 <form method="post" >
                     {% csrf_token %}

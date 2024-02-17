@@ -12,7 +12,7 @@
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                 datasets: [{
-                        label: 'Sales',
+                        label: 'Razorpay',
                         tension: 0.3,
                         fill: true,
                         backgroundColor: 'rgba(44, 120, 220, 0.2)',
@@ -20,7 +20,7 @@
                         data: [18, 17, 4, 3, 2, 20, 25, 31, 25, 22, 20, 9]
                     },
                     {
-                        label: 'Visitors',
+                        label: 'COD',
                         tension: 0.3,
                         fill: true,
                         backgroundColor: 'rgba(4, 209, 130, 0.2)',

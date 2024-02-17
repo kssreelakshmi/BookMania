@@ -3,12 +3,19 @@ from django.urls import reverse
 from cart.models import Cart_item
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
-from .models import Order,PaymentMethod,Payment,OrderProduct
+from .models import Order,PaymentMethod,Payment,OrderProduct,Invoice
 from store.models import Product,ProductVariant
 import datetime
 from accounts.forms import Addresses
 import razorpay
+import json
+from django.http import JsonResponse
 from django.conf import settings
+from django.http import HttpResponse
+from io import BytesIO
+from django.template.loader import get_template,render_to_string
+from xhtml2pdf import pisa
+
 
 
 # Create your views here.
@@ -34,6 +41,7 @@ def order_summary(request):
         if address_id is None:
             messages.error(request, "Please choose an address")
             return redirect('cart_checkout')
+        Order.objects.filter(user = current_user, payment = None).delete()
         data = Order()
         
         try:
@@ -61,6 +69,7 @@ def order_summary(request):
         order_number = 'BM-ORD'+concatenated_datetime+str(data.pk)
         data.order_id = order_number
         data.save()
+
         
         order = Order.objects.get(user=current_user,is_ordered=False,order_id=order_number)
         payment_method = PaymentMethod.objects.filter(is_active=True)
@@ -107,11 +116,9 @@ def place_order(request):
             return redirect('order_summary')
         
         payment_method = PaymentMethod.objects.get(id = payment_id)
-        print(payment_method)
         
         try:
             order = Order.objects.get(user=current_user, is_ordered=False, order_id=order_id)
-            print(order)
             
         except Exception as e:
             print(e)
@@ -123,11 +130,9 @@ def place_order(request):
                 client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID,settings.KEY_SECRET))
                 payment = client.order.create({'amount':float(order.order_total) * 100,"currency": "INR"}) 
                 
-                for key, value in payment.items():
-                    print(key,'  :  ',value)
             else:
                 payment = False 
-        except :
+        except:
             payment = False
         
         success_url = request.build_absolute_uri(reverse('payment_success'))
@@ -230,6 +235,7 @@ def payment_success(request):
             
             order.payment = payment
             order.is_ordered = True
+            order.order_status = 'New'
             order.save()
 
             cart_items = Cart_item.objects.filter(user=request.user)
@@ -260,27 +266,114 @@ def payment_success(request):
     
     else:
         return redirect('user_dashboard')    
-                        
+
+
 def payment_failed(request):
+    payment_method = request.GET['method']
+    order_id = request.GET['order_id']
+    try:
+        order = Order.objects.get(user=request.user,is_ordered=False,order_id=order_id)
+        payment_method = PaymentMethod.objects.get(method_name = payment_method)
+    except Exception as e:
+        print(e)
+
+    payment_id = request.GET['error_payment_id']                
+    payment_order_id = request.GET['error_order_id']
+    payment_amount = request.GET['payment_amount']
+    error_reason = request.GET['error_reason']
+    error_description = request.GET['error_description']
+    
+
+    payment = Payment(
+        user = request.user,
+        payment_id = payment_id,
+        payment_order_id = payment_order_id,
+        method = payment_method,
+        amount_paid = payment_amount,
+        error_reason = error_reason,
+        error_description = error_description,
+        payment_status = 'FAILED',
+        )
+    payment.save()
+        
+    order.payment = payment
+    order.is_ordered = False
+    order.order_status = 'Payment Pending'
+    order.save()
+
+    cart_items = Cart_item.objects.filter(user=request.user)
+            
+    for cart_item in cart_items:
+        order_product = OrderProduct()
+        order_product.order_id = order.id
+        order_product.user_id = request.user.id
+        order_product.quantity = cart_item.quantity
+        order_product.variant_id = cart_item.product.id
+        order_product.product_price = cart_item.product.sale_price
+        order_product.is_ordered = False
+        order_product.save()
+
+
     context = {
-        'payment_method' : request.GET['method'],
-        'error_code' : request.GET['error_code'],
-        'error_description' :  request.GET['error_description'],
-        'error_reason' : request.GET['error_reason'],
-        'error_payment_id' : request.GET['error_payment_id'],
-        'error_order_id' : request.GET['error_order_id'],
+        'payment_method' : payment_method,
+        # 'error_code' : request.GET['error_code'],
+        'error_description' :  error_description,
+        'error_reason' : error_reason,
+        'error_payment_id' : payment_id,
+        'error_order_id' : payment_order_id,
     }
 
     return render(request,'store_templates/order_failed.html',context)
 
+def retry_payment(request):
+
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+    if request.method=='POST' and is_ajax:
+
+        order_id = request.POST.get('order_id')
+
+        try:
+            order = Order.objects.get(user = request.user, is_ordered = False, order_id = order_id)
+        except Exception as e:
+            print(e)
+
+        client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID,settings.KEY_SECRET))
+        payment = client.order.create({'amount':float(order.order_total) * 100,"currency": "INR"}) 
+        success_url = request.build_absolute_uri(reverse('payment_success'))
+        failed_url = request.build_absolute_uri(reverse('payment_failed'))
+                
+        if payment:
+            return JsonResponse(
+                {
+                    'status' : 'SUCCESS',
+                    'name' : order.address.user.username,
+                    'email' : order.address.user.email,
+                    'contact' : order.address.phone_number,
+                    'payment_id': payment['id'],
+                    'payment_amount': payment['amount'],
+
+                    'razor_pay_key_id': settings.RAZOR_PAY_KEY_ID,
+                    'razor_pay_secret_key': settings.KEY_SECRET,
+                    'success_url': success_url,
+                    'failed_url': failed_url,
+                    }
+                    )
+        else:
+            return JsonResponse(
+                {
+                    'status' : 'FAILED',
+                    'reason': 'Oops its not you, its us ! Please try again',
+                    }
+                    )
+
+
 
 def order_completed(request):
-    print('from complete reached')
+    print('cfcjjlkdlkldkkkklajk')
     try:
-        print('from complete page22222')
         if (request.session['order_id'] and request.session['payment_id']):
             order_id = request.session['order_id']
-            print(order_id) 
             payment_id   = request.session['payment_id']
             
             try:
@@ -288,14 +381,20 @@ def order_completed(request):
                 ordered_products = OrderProduct.objects.filter(order_id = order.id)
                 total = 0
                 tax = 0 
+                print('cfcjjlkdlkldkkdxtfyuuiuoiokklajk')   
                 
                 for item in ordered_products:
                     total += item.product_price * item.quantity
                 tax = (5*total)/100
                 grand_total = total + tax
                 payment = Payment.objects.get(payment_id=payment_id)
-                
+
+                invoice = Invoice()
+                invoice.order = order
+                invoice.save()
+
                 context = {
+
                     'order' : order,
                     'order_id' :order_id,
                     'total' :total,
@@ -303,7 +402,8 @@ def order_completed(request):
                     'grand_total' : grand_total,
                     'payable_amount' : order.order_total,
                     'ordered_products' : ordered_products,
-                    'payment' :payment
+                    'payment' :payment,
+                    'invoice' : invoice,
                     
                 }   
                 
@@ -317,4 +417,42 @@ def order_completed(request):
     except Exception as e:
         print(e)
         return redirect('user_home')
-        
+    
+def generate_invoice(request,invoice_number):
+    try:
+        invoice = Invoice.objects.get(invoice_number = invoice_number)
+        print(invoice)
+    except:
+        messages.warning(request, 'Invoice not generated for this order !')
+    
+    try:
+        order_products = OrderProduct.objects.filter(order = invoice.order,is_ordered = True)
+
+    except Exception as e:
+        print(e)
+    sub_total = 0
+    for item in order_products:
+        sub_total += item.product_price * item.quantity
+        print(sub_total)
+
+    template_path = 'base/user_side/invoice.html'
+    context = {
+        'invoice': invoice,
+        'ordered_products': order_products,
+        'sub_total': sub_total,
+        'payable_amount': invoice.order.order_total,
+        'order': invoice.order,
+        }
+    # Create a Django response object, and specify content_type as pdf
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="{invoice.invoice_number}.pdf"'
+    # find the template and render it.
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # create a pdf
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    # if error then show some funny view
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

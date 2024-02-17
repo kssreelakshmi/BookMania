@@ -12,11 +12,12 @@ Account Management - Create User
 <main class="main-wrap">
 {% include 'base/admin_side/admin_includes/admin_header.html' %}
 
-    <section class="content-main mt-80 mb-80">
-        <div class="card mx-auto card-box">
-            <div class="card-body ">
-                <h4 class="card-title mb-4">Create an Account</h4>
-                
+<section class="content-main mt-80 mb-80">
+    <div class="card mx-auto card-box">
+        <div class="card-body ">
+            <h4 class="card-title mb-4">Create an Account</h4>
+            
+            {% include 'base/admin_side/includes/alerts.html' %}
                 <form method="post">
                     {% csrf_token %}
                     <div class="container">

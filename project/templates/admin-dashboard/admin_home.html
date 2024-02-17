@@ -30,7 +30,7 @@ Admin - Dashboard
                         <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
                         <div class="text">
                             <h6 class="mb-1 card-title">Revenue</h6>
-                            <span>$13,456.5</span>
+                            <span></span>
                             <span class="text-sm">
                                 Shipping fees are not included
                             </span>
@@ -43,7 +43,7 @@ Admin - Dashboard
                     <article class="icontext">
                         <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
                         <div class="text">
-                            <h6 class="mb-1 card-title">Orders</h6> <span>53.668</span>
+                            <h6 class="mb-1 card-title">Orders</h6> <span>{{orders}}</span>
                             <span class="text-sm">
                                 Excluding orders in transit
                             </span>
@@ -56,9 +56,9 @@ Admin - Dashboard
                     <article class="icontext">
                         <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
                         <div class="text">
-                            <h6 class="mb-1 card-title">Products</h6> <span>9.856</span>
+                            <h6 class="mb-1 card-title">Products</h6> <span>{{products}}</span>
                             <span class="text-sm">
-                                In 19 Categories
+                                In {{category}} Categories
                             </span>
                         </div>
                     </article>
@@ -83,6 +83,15 @@ Admin - Dashboard
                 <div class="card mb-4">
                     <article class="card-body">
                         <h5 class="card-title">Sale statistics</h5>
+                        <div class="col-md-3 col-12 me-auto mb-md-0 mb-3 ">
+                            <div class="custom_select ">
+                                <select class="form-select select-nice">
+                                    <option ><a>Monthly</a></option>
+                                    <option><a>Daily</a></option>
+                                    
+                                </select>
+                            </div>
+                        </div>
                         <canvas id="myChart" height="120px"></canvas>
                     </article>
                 </div>

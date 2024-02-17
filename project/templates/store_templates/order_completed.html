@@ -60,9 +60,9 @@ Order Completed
     <div class="tick-symbol mx-auto mb-4">&#10004;</div>
     <h2 class="success-message">Order Placed Successfully!</h2>
     <p>Your order has been confirmed. Thank you for shopping with us.</p><br>
-    <a href="{% url 'order_detail'%}" class="btn btn-dark mr-2">Order Details</a>
+    <a href="{% url 'order_detail' order_id %}" class="btn btn-dark mr-2">Order Details</a>
     <a href="{% url 'shop' %}" class="btn btn-dark">Continue Shopping</a>
-    <a href="{% url 'user_dashboard' %}" class="btn btn-dark">My Orders</a>
+    <a href="{% url 'generate_invoice' invoice.invoice_number %}" class="btn btn-dark">Download Invoice</a>
 </div>
 
 <div class=" container_11 ">

@@ -18,18 +18,21 @@ def home(request, cat_slug=None):
     
     categories = Category.objects.filter(is_active = True)
     products = Product.objects.filter(is_available = True)
-    product_variants = ProductVariant.objects.select_related('product').prefetch_related('attribute').filter(is_active = True)[:8]
-    wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
-    if wishlist_exists:
-        try:
-            wishlist = Wishlist.objects.get(user = request.user)
-        except Exception as e:
-            pass
-        wishlist_items = WishlistItem.objects.filter(wishlist = wishlist)
+    product_variants = ProductVariant.objects.select_related('product').prefetch_related('attribute').filter(is_active = True)
+    if request.user.is_authenticated:
+        wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
+        if wishlist_exists:
+            try:
+                wishlist = Wishlist.objects.get(user = request.user)
+            except Exception as e:
+                pass
+            wishlist_items = WishlistItem.objects.filter(wishlist = wishlist)
+            wishlist_products = []
+            for item in wishlist_items:
+                wishlist_products.append(item.product_variant)
+    else:
         wishlist_products = []
-        for item in wishlist_items:
-            wishlist_products.append(item.product_variant)
-   
+    
     if cat_slug:
         try:
             category = Category.objects.get(slug = cat_slug)
@@ -39,17 +42,16 @@ def home(request, cat_slug=None):
                 sub_product_variants = product_variants.filter(product__category__in = sub_categories)
                 main_product_variants = product_variants.filter(product__category = category)
                 
-                product_variants = sub_product_variants.union(main_product_variants)[:8]
+                product_variants = sub_product_variants.union(main_product_variants)
 
             else:
                 sub_categories = [i for i in categories if i.parent_cat == category]
                 if sub_categories:
                     sub_product_variants = product_variants.filter(product__category__in = sub_categories)
                     main_product_variants = product_variants.filter(product__category = category)
-                    product_variants = sub_product_variants.union(main_product_variants)[:8]
+                    product_variants = sub_product_variants.union(main_product_variants)
                 else:
-                    product_variants = product_variants.filter(product__category = category)[:8]
-            print(sub_categories)        
+                    product_variants = product_variants.filter(product__category = category)
 
         except Exception as e:
             print(e)
@@ -57,7 +59,7 @@ def home(request, cat_slug=None):
     context = {
         'categories': categories,
         'products' : products,
-        'product_variants' : product_variants,
+        'product_variants' : product_variants[:8],
         'wishlist_products': wishlist_products
         
     }
@@ -66,64 +68,108 @@ def home(request, cat_slug=None):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def shop(request, cat_slug = None):
+
     categories = Category.objects.filter(is_active = True)
     price_min = request.GET.get('price-min')
     price_max = request.GET.get('price-max')
+    sort_by = request. GET.get('sort')
+    name = request.GET.get('new')
+    
+    product_variants = ProductVariant.objects.all().filter(is_active = True).order_by('-created_date').select_related('product').prefetch_related('attribute')
+    
+    paginator = Paginator(product_variants,6)
+    page = request.GET.get('page')
+    paged_products = paginator.get_page(page)
     
     if 'keyword' in request.GET:
 
         keyword = request.GET['keyword']
         if keyword:
-            product_variants = ProductVariant.objects.order_by('-created_date').filter(Q(product__description__icontains=keyword) | Q(product_variant_slug__icontains = keyword) | Q(product__product_name__icontains = keyword) | Q(product__category__category_name__icontains = keyword)).filter(is_active=True)
+            product_variants = product_variants.filter(Q(product__description__icontains=keyword) | Q(product_variant_slug__icontains = keyword) | Q(product__product_name__icontains = keyword) | Q(product__category__category_name__icontains = keyword))
             # product_variants_count = product_variants.count()
         paginator = Paginator(product_variants,6)
         page = request.GET.get('page')
         paged_products = paginator.get_page(page)
 
-    elif cat_slug:
-        category = Category.objects.get(slug = cat_slug)
-        product_variants = ProductVariant.objects.filter(product__category=category, is_active = True).order_by('-created_date').select_related('product').prefetch_related('attribute')
-        
-        paginator = Paginator(product_variants,6)
-        page = request.GET.get('page')
-        paged_products = paginator.get_page(page)
+    if cat_slug:
+        try:
+            category = Category.objects.get(slug = cat_slug)
+            # product_variants = product_variants.filter(product__category=category)
+            
+            if not category.parent_cat:
+                sub_categories = [i for i in categories if i.parent_cat == category]
+                
+                sub_product_variants = product_variants.filter(product__category__in = sub_categories)
+                main_product_variants = product_variants.filter(product__category = category)
+                
+                product_variants = sub_product_variants.union(main_product_variants)
 
-    else:
-        product_variants = ProductVariant.objects.all().filter(is_active = True).order_by('-created_date').select_related('product').prefetch_related('attribute')
-        
-        paginator = Paginator(product_variants,6)
-        page = request.GET.get('page')
-        paged_products = paginator.get_page(page)
+                paginator = Paginator(product_variants,6)
+                page = request.GET.get('page')
+                paged_products = paginator.get_page(page)
+
+            else:
+                sub_categories = [i for i in categories if i.parent_cat == category]
+                if sub_categories:
+                    sub_product_variants = product_variants.filter(product__category__in = sub_categories)
+                    main_product_variants = product_variants.filter(product__category = category)
+                    product_variants = sub_product_variants.union(main_product_variants)
+                    paginator = Paginator(product_variants,6)
+                    page = request.GET.get('page')
+                    paged_products = paginator.get_page(page)
+                
+                else:
+                    product_variants = product_variants.filter(product__category = category)
+                    paginator = Paginator(product_variants,6)
+                    page = request.GET.get('page')
+                    paged_products = paginator.get_page(page)
+
+        except Exception as e:
+            print(e)
+
 
     #wishlist
-    wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
-    if wishlist_exists:
-        try:
-            wishlist = Wishlist.objects.get(user = request.user)
-        except Exception as e:
-            pass
-        wishlist_items = WishlistItem.objects.filter(wishlist = wishlist)
+    if request.user.is_authenticated:
+
+        wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
+        if wishlist_exists:
+            try:
+                wishlist = Wishlist.objects.get(user = request.user)
+            except Exception as e:
+                pass
+            wishlist_items = WishlistItem.objects.filter(wishlist = wishlist)
+            wishlist_products = []
+            for item in wishlist_items:
+                wishlist_products.append(item.product_variant)
+    else:
         wishlist_products = []
-        for item in wishlist_items:
-            wishlist_products.append(item.product_variant)
-         
 
-    # price filter
-    if price_min:
-        product_variants = product_variants.filter(sale_price__gte=price_min)
-    if price_max:
-        product_variants = product_variants.filter(sale_price__lte=price_max)  
 
-    attribute_names = [key for key in request.GET.keys() if key not in ['query','price-min','price-max','RATING']]
 
-    for attribute_name in attribute_names:
-        attribute_values = request.GET.getlist(attribute_name)
-        if attribute_values:
-            product_variants=product_variants.filter(attribute__attribute_value__in=attribute_values)
-    
-          
+    #price filter
+    if price_max and price_min:
+        paged_products = product_variants.filter(sale_price__lte=price_max, sale_price__gte=price_min)
+
+    elif price_min:
+        
+        paged_products = product_variants.filter(sale_price__gte=price_min)
+    elif price_max:
+        paged_products = product_variants.filter(sale_price__lte=price_max)
+
+    #price sort
+    if sort_by == "Low-to-High":
+        paged_products = product_variants.order_by('sale_price')
+    elif sort_by == "High-to-Low":
+        paged_products = product_variants.order_by('-sale_price')
+
+    #Sort by new
+    if name == 'New':
+        paged_products = product_variants.order_by('-created_date')
+
+
         
     context = {
+       
         'product_variants': paged_products,
         'categories': categories,
         'price_min':price_min,

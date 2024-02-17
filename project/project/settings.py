@@ -77,6 +77,7 @@ TEMPLATES = [
                 'cart.context_processor.counter',
                 'category.context_processor.category_list',
                 'category.context_processor.attribute_list',
+                'category.context_processor.attribute_value_list',
                 
             ],
         },

@@ -16,6 +16,11 @@ from django.db.models import OuterRef, Subquery
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import JsonResponse
 import json
+import datetime
+import calendar
+import pytz
+from django.utils import timezone
+
 
 # Create your views here.
 User = get_user_model()
@@ -39,8 +44,48 @@ def check_isadmin(view_func, redirect_url="admin_login"):
 @check_isadmin
 @login_required(login_url='admin_login')
 def admin_home(request):
+
+    begin_date = datetime.date(2023,10, 1)
+    orders = Order.objects.all()
+    products = ProductVariant.objects.all()
+    category = Category.objects.all().count()
     
-    return render(request,'admin-dashboard/admin_home.html')
+    # desired_timezone = pytz.timezone('Asia/Kolkata')
+    # today = timezone.now().astimezone(desired_timezone)
+    # print(today)
+    # start_date = today - datetime.timedelta(days=15)
+    # print(start_date)
+    # recent_orders = orders.filter(created_at__range=(start_date, today)).order_by('-created_at')
+    # year = today.year
+
+    
+    # delivered_orders = orders.filter(order_status='Delivered', created_at__year = year).prefetch_related('payment')
+    # COD_orders = delivered_orders.filter(payment__method__method_name = 'COD')
+    # razorpay_orders = delivered_orders.exclude(payment__method__method_name = 'COD')
+
+    # monthdata_razorpay = {key:0 for key in list(calendar.month_abbr[1:])}
+    # monthdata_COD = {key:0 for key in list(calendar.month_abbr[1:])}
+
+    # for order in razorpay_orders:
+    #     monthdata_razorpay[datetime.datetime.strftime(order.created_at, "%b")] += 1
+
+    # for order in COD_orders:
+    #     monthdata_COD[datetime.datetime.strftime(order.created_at, "%b")] += 1
+
+    context = {
+            'orders':orders.count(),
+            'products' : products.count(),
+            'category' : category,
+    #     'recent_orders': recent_orders,
+    #     'months': list(calendar.month_abbr[1:]),
+    #     'razorpay_orders': list(monthdata_razorpay.values()),
+    #     'COD_orders': list(monthdata_COD.values()),
+    #     'years': [today.year - i for i in range(today.year-begin_date.year+1)],
+    #     'y_limit': max(max(monthdata_razorpay.values()), max(monthdata_COD.values())) + 5
+    }
+
+
+    return render(request,'admin-dashboard/admin_home.html',context)
 
 # @check_isadmin
 def admin_login(request):
@@ -126,7 +171,6 @@ def update_user(request,user_id):
             messages.success(request, 'User edited successfully')
             return redirect('all_users')
         else:
-            print(form.errors)
             messages.error(request,form.errors)
             return render(request,'admin-dashboard/account_management/update_user.html',{'form': form})
 
@@ -401,7 +445,6 @@ def create_product_variant(request,slug):
             variant.attribute.set(attribute_ids)
             variant.save()
             additional_images = request.FILES.getlist('additional_images')
-            print(additional_images)
             for image in additional_images:
                 AdditionalProductImages.objects.create(product_variant=variant, image=image)    
            
@@ -439,7 +482,6 @@ def product_variant_update(request, product_variant_slug):
     variant_attributes = product_variant.attribute.all()
 
     for value in variant_attributes:
-        print('hoiio',value)
         variant_attributes_list.append(value.attribute_value)
 
     
@@ -509,7 +551,6 @@ def product_variant_update(request, product_variant_slug):
             messages.error(request, 'Invalid credentials !')
             return redirect('product_variant_update', product_variant_slug)
         
-    print(variant_attributes_list)
     context = {
         'variant_form': variant_form,
         'product_variant_slug': product_variant_slug,
@@ -522,7 +563,6 @@ def product_variant_update(request, product_variant_slug):
 
 @login_required(login_url='admin_login')
 def delete_product_variant(request,product_variant_slug):
-    print("fhgbbjhsdghfbsdahfvhasdvfsdhvfhj")
     try:
         product_variant = ProductVariant.objects.get(product_variant_slug=product_variant_slug)
     except ProductVariant.DoesNotExist:
@@ -548,7 +588,6 @@ def all_publication(request):
 
 @login_required(login_url='admin_login')
 def publication_control(request, id):
-    print('reached here')
     try:
         publication = Publication.objects.get(id=id)
     except Exception as e:
@@ -670,18 +709,25 @@ def update_author(request,id):
 def all_orders(request):
     order_status = request.GET.get('status')
     
+
     if order_status:
+        order_status = order_status.replace("-", " ")
         orders = Order.objects.filter(order_status__icontains=order_status).order_by('-created_at')
-        paginator = Paginator(orders,10)
-        page = request.GET.get('page')
-        paged_orders = paginator.get_page(page)
     else: 
         orders = Order.objects.all().order_by('-created_at')
-        paginator = Paginator(orders,10)
-        page = request.GET.get('page')
-        paged_orders = paginator.get_page(page)
+
+    paginator = Paginator(orders,10)
+    page = request.GET.get('page')
+    paged_orders = paginator.get_page(page)
+    order = Order()
+    choices = order.ORDER_STATUS_CHOICES
+
+    order_status_choices = [choice[0].replace(' ', '-') for choice in choices]
+    print(order_status_choices)
+
     context = {
         'orders': paged_orders,
+        'order_status_choices' : order_status_choices
     }
     return render(request, 'admin-dashboard/order_management/all_orders.html',context)
 
@@ -698,8 +744,6 @@ def update_order(request, order_id):
     if request.method == "POST" and is_ajax:
         data = json.load(request)
         selected_option = data.get('selected_option')
-        print("selected option is  :",selected_option)
-
         order.order_status = selected_option
         order.save()
         return JsonResponse({"status": "success", "selected_option": selected_option})

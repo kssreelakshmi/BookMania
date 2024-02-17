@@ -125,12 +125,12 @@ Place Order
 
                         <div class="card-body">
                             {% if payment_method.method_name == 'RAZORPAY' %}
-                            <div class="m-3">
+                            <div class="d-flex justify-content-center align-items-center p-2">
                                 <img src="{% static 'user/images/icons/razorpay-icon.png' %}" width="100px"
                                     alt="Razor Pay">
                             </div>
                             {% elif payment_method.method_name == 'COD' %}
-                            <div>
+                            <div class="d-flex justify-content-center align-items-center p-2" >
                                 <img src="{% static 'user/images/icons/cash-on-delivery.png' %}" width="50px"
                                     height="50px" alt="Cash on Delivery">
                             </div>
@@ -179,11 +179,11 @@ Place Order
                                 Pay &#8377;{{order.order_total}} & Place Order
                             </button>
 
-                            {% elif payment_method.method_name == 'COD' %}
-                            <button type="button" id="cash_on_delivery"
-                                class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
-                                Confirm COD and Place order
-                            </button>
+                            {% elif payment_method.method_name == 'COD'%}
+                                <button type="button" id="cash_on_delivery"
+                                    class="flex-c-m stext-101 cl0 size-116 bg3 bor14 hov-btn3 p-lr-15 trans-04 pointer">
+                                    Confirm COD and Place order
+                                </button>
                             {% endif %}
                         </div>
                     </div>
@@ -229,14 +229,7 @@ Place Order
     };
     var rzp1 = new Razorpay(options);
     rzp1.on('payment.failed', function (response) {
-        alert(response.error.code);
-        alert(response.error.description);
-        alert(response.error.source);
-        alert(response.error.step);
-        alert(response.error.reason);
-        alert(response.error.metadata.order_id);
-        alert(response.error.metadata.payment_id);
-        window.location.href = `{{ failed_url }}?error_code = ${response.error.code}&error_description=${response.error.description}&error_reason=${response.error.reason}&error_payment_id=${response.error.metadata.payment_id}&error_order_id=${response.error.metadata.order_id}&method=COD`
+        window.location.href = `{{ failed_url }}?order_id={{order.order_id}}&error_description=${response.error.description}&error_reason=${response.error.reason}&error_payment_id=${response.error.metadata.payment_id}&error_order_id=${response.error.metadata.order_id}&method=RAZORPAY&payment_amount={{payment.amount}}`
     });
     document.getElementById('rzp-button1').onclick = function (e) {
         rzp1.open();

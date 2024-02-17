@@ -312,7 +312,7 @@ Home
 							</div>
 
 							<div class="block2-txt-child2 flex-r p-t-3">
-								<button class="btn-addwish-b2 dis-block pos-relative" onclick="update_wishlist('{{ product.id }}', '{{forloop.counter}}')">
+								<button class="btn-addwish-b2 dis-block pos-relative" onclick="update_wishlist('{{ product.id }}', '{{forloop.counter}}', '{{request.user.is_authenticated}}')">
 									<img id="wishlist_icon{{forloop.counter}}" class="dis-block trans-04" 
 										{% if product in wishlist_products %} 
 											src="{% static 'user/images/icons/icon-heart-02.png' %}"

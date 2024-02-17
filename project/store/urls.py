@@ -10,6 +10,5 @@ urlpatterns = [
 
     path('store/all-products/by-category/<slug:cat_slug>/', views.shop, name="shop_by_cat" ),
     path('search/', views.shop, name="search" ),
-    # path('sort-by/', views.sort_by, name="sort_by"),
 
 ]

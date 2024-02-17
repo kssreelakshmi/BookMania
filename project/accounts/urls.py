@@ -33,5 +33,10 @@ urlpatterns = [
     path('update-address/',views.update_address,name='update_address'),
     path('default-address/<int:id>/', views.default_address, name= 'default_address'),
     path('delete-address/<int:id>/', views.delete_address, name='delete_address'),
+
+
+
+    path('product-cancel-request/',views.product_cancel_request, name='product_cancel_request'),
+    path('product-return-request/',views.product_return_request, name='product_return_request'),
     
 ]

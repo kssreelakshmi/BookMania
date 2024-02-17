@@ -16,9 +16,33 @@ Order Management - All orders
   
       <div class="content-header">
           <div>
-              <h2 class="content-title card-title">Users List</h2>
+
+            {% if request.GET.status == 'New' %}
+              <h2 class="content-title card-title">New Orders</h2>
+            {% elif request.GET.status == 'Cancel-or-Return-Requested' %}
+              <h2 class="content-title card-title">Cancellation or Return Requested Orders</h2>
+            {% elif request.GET.status == 'Cancelled' %}
+              <h2 class="content-title card-title">Cancelled Orders</h2>
+            {% elif request.GET.status == 'Returned' %}
+                <h2 class="content-title card-title">Returned Orders</h2>
+            {% elif not request.GET %}
+                <h2 class="content-title card-title">All Orders</h2>
+            {% endif %}
           </div>
       </div>
+      <div class="col-md-3 col-12 me-auto mb-md-0 mb-30">
+        <div class="custom_select">
+          <select name="OrderStatusFilter" onchange="filterByOrderStatus()" id="OrderStatusFilter" class="form-select">
+
+            <option class="p-2 m-1">Select</option>
+            {% for choice in order_status_choices %}
+              <option class="p-2 m-1" value="{{ choice }}" {% if choice in request.GET.status %}selected {% endif %}>
+                  {{ choice }}
+              </option>
+            {% endfor %}
+            </select>
+        </div>
+    </div>
       <div class="card mb-4">
           <div class="card-body">
               <div class="table-responsive ">
@@ -119,4 +143,12 @@ Order Management - All orders
       </div> <!-- card end// -->
   </section> <!-- content-main end// -->
 </main>
+<script>
+  function filterByOrderStatus(){
+    let value = document.getElementById('OrderStatusFilter').value
+    
+    window.location.href = `{% url 'all_orders' %}?status=${value}`
+  }
+</script>
+
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from .forms import UserSignupForm,AddressForm,UserProfilePicForm, AddressCountryForm
+from .forms import UserSignupForm,AddressForm,UserProfilePicForm
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.contrib.auth import authenticate
@@ -147,7 +147,6 @@ def user_login(request):
                                     user_cart_item.delete()
                             cart_item.user = user
                             cart_item.save()
-                            print(cart_item.user)
                                                     
                 except Exception as e:
                     pass
@@ -155,7 +154,6 @@ def user_login(request):
                     wishlist_exist = Wishlist.objects.filter(user=user).exists()
                     if not wishlist_exist:
                         wishlist = Wishlist.objects.create(user=user)   
-                        print(wishlist,'ffgduhasidoiopisoiSOIOisIHDUGSAGDSFGYDGSYFGDUFHUHUHS')
                 except Exception as e:
                     print (e)
                 login(request,user)
@@ -232,7 +230,6 @@ def verify_otp(request, uid):
     except Exception as e:
         print(e)
     otp = request.GET['otp']        
-    print(otp)
     if otp == user_profile.otp:
         login(request, user_profile.user)
         messages.success(request, 'Login successfull !!!')
@@ -409,7 +406,6 @@ def mobile_number_change_verify(request):
         print(e)
 
     otp = request.GET['otp']        
-    print(otp)
     if otp == user_profile.otp:
         login(request, user_profile.user)
         messages.success(request, 'Login successfull !!!')
@@ -429,7 +425,6 @@ def email_change(request):
         
         try:
             user = User.objects.get(email = request.user.email)
-            print(user)
             otp=random.randint(100000,999999)
             user_otp,created = UserProfile.objects.update_or_create(user=user, defaults={'otp': f'{otp}'})
             current_site = get_current_site(request)
@@ -441,9 +436,7 @@ def email_change(request):
             }
             message = render_to_string ('base/user_side/verification/email_change.html',data)
             to_email = get_new_email
-            print(to_email)
             send_email = EmailMessage(mail_subject,message,to=[to_email])
-            print(send_email)
             send_email.content_subtype = 'html'
             send_email.send() 
 
@@ -546,7 +539,6 @@ def password_change(request):
             redirect_to =redirect('password_change', uid=user_otp.uid)
             redirect_to.set_cookie("can_otp_enter",True,max_age=600)
             redirect_url = reverse('password_change', kwargs={'uid':user_otp.uid})
-            print(redirect_url)
             return JsonResponse({"status": "success", "redirect_url": redirect_url})
     else:
         # Return a JSON response indicating an invalid request
@@ -578,34 +570,51 @@ def change_password_with_email(request,uid):
 
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('created_at')
-    paginator = Paginator(orders,3)
+    paginator = Paginator(orders,5)
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)
+    inprogress_choices = ['Cancel or Return Requested', 'Partially Cancelled', 'Partially Returned']
 
     context={
         'orders':paged_products,
+        'inprogress_choices' : inprogress_choices
     }
     return render(request,'base/user_side/order_history.html', context)
 
 def order_detail(request,order_id):
     try:
         order = Order.objects.get(order_id = order_id)
-        products = OrderProduct.objects.filter(order = order)
+        products = OrderProduct.objects.filter(order = order).order_by('-created_at')
         sub_total = 0
         tax = 0
         grand_total = 0
+        all_return_reasons = products[0].ORDER_RETURN_CHOICES
+        return_reasons = [reason[0] for reason in all_return_reasons]
+
+        all_cancel_reasons = products[0].ORDER_CANCEL_CHOICES
+        cancel_reasons = [reason[0] for reason in all_cancel_reasons]
 
         for product in products:
             sub_total += product.variant.sale_price * product.quantity
         tax += (5 * sub_total)/100     
         grand_total += sub_total + tax
-
     except:
         messages.warning(request,'The details of this order is not available')
         return redirect('order_history')
 
+
+    when_cancel = ['New', 'Order placed', 'Accepted']
+    when_return = ['Delivered']
+    other_choices = ['Cancelled', 'Partially Cancelled', 'Returned', 'Partially Returned', 'Cancel or Return Requested']
+    inprogress_choices = ['Cancel or Return Requested', 'Partially Cancelled', 'Partially Returned']
     context={
-        'order':order, 
+        'return_reasons' : return_reasons,
+        'cancel_reasons' : cancel_reasons,
+        'when_return' : when_return,
+        'when_cancel' : when_cancel,
+        'other_choices': other_choices,
+        'inprogress_choices' : inprogress_choices,
+        'order': order, 
         'products' : products,
         'payment' : order.payment,
         'sub_total' : sub_total,
@@ -615,8 +624,82 @@ def order_detail(request,order_id):
     }
     return render(request,'base/user_side/order_details.html',context)
 
-def order_cancel_or_return(request):
-    pass
+
+def product_cancel_request(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        order_product_id = request.POST.get('order_product_id')
+
+        try:
+            order = Order.objects.get(order_id = order_id)
+            order_product = OrderProduct.objects.get(id = order_product_id)
+        except Exception as e:
+            print(e)
+        cancel_reason = request.POST.get('reason')
+        order.order_status = 'Cancel or Return Requested'
+        
+
+        order_product.order_status = 'Cancellation Requested'
+
+        if cancel_reason == 'other':
+            other_reason = request.POST.get('other-reason')
+            order_product.cancellation_reason = 'other'
+            order_product.others = other_reason
+        else:
+            order_product.cancellation_reason = cancel_reason
+        order_product.save()
+        order.save()
+        messages.info(request, 'Your request for cancellation has been submitted. Kindly wait for the verification and confirmation !!')
+        return redirect('order_detail', order_id)
+
+
+def product_return_request(request):
+    if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        order_product_id = request.POST.get('order_product_id')
+        try:
+            order = Order.objects.get(order_id = order_id)
+            order_product = OrderProduct.objects.get(id = order_product_id)
+        except Exception as e:
+            print(e)
+
+
+        return_reason = request.POST.get('reason')
+        order.order_status = 'Cancel or Return Requested'
+        order_product.order_status = 'Return Requested'
+
+        if return_reason == 'other':
+            other_reason = request.POST.get('other-reason')
+            order_product.return_reason = 'other'
+            order_product.others = other_reason
+        else:
+            order_product.return_reason = return_reason
+        order_product.save()
+        order.save()
+        messages.info(request, 'Your request for return has been submitted. Kindly wait for the verification and confirmation !!')
+        return redirect('order_detail', order_id)
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def my_address(request):
     current_user = request.user
@@ -676,7 +759,6 @@ def update_address(request):
         form_data = model_to_dict(address_form.instance)
         form_data.pop('country')
         form_data['country'] = address.country.name
-        print(form_data)
 
         country_choices = get_country_choices()
         countries = json.dumps(country_choices)
@@ -702,7 +784,6 @@ def update_address(request):
         address_id = request.POST.get('id')
         try:
             address = Addresses.objects.get(id = address_id)
-            print(address)
         except Exception as e:
             print(e)
 

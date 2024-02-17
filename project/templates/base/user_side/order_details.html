@@ -23,6 +23,27 @@ Orders Details
         bottom: 0;
         left: 0;
     }
+    .dropdown-toggle{
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        transition-duration: 0.5s;
+    }
+    td{
+        vertical-align: middle !important;
+    }
+    .dropdown-custom{
+        text-align: center;
+    }
+    .dropdown-toggle:hover{
+        background-color: #000;
+        color: #fff;
+        transition-duration: 0.5s;
+    }
+
+    .table-row-bg{
+        background-color: rgba(0,0,0,.03);
+    }
 </style>
   
 
@@ -47,7 +68,7 @@ Orders Details
                         <div class="">
                         <ul class="list-unstyled mb0">
                             <li><strong>Order Date: </strong> {{order.created_at}}</li>
-                            <li><strong>Status: </strong> {{order.order_status}}</li>
+                            <li><strong>Status: </strong>{% if order.order_status in inprogress_choices %} In progress {% else %} {{order.order_status}} {% endif %}</li>
                         </ul>
                         </div>
                     </div>
@@ -64,44 +85,120 @@ Orders Details
                                         <th class="column-1">Product</th>
                                         <th class="column-3">Price</th>
                                         <th class="column-4 text-center">Quantity</th>
+                                        <th class="column-4 text-center">More</th>
                                     </tr>
                                  </thead>
                             <tbody>
                                 {% for product in products %}
                                 
-                                <tr class="table_row">
-                                    <td class="column-1">
-                                        <div class="d-flex justify-content-start bd-highlight mb-3">
-                                            <div class=" how-itemcart1">
-                                                <img src="{{ product.variant.thumbnail_image.url }}" alt="IMG">
+                                    <tr class="table-row-bg table_row">
+                                        <td class="column-1">
+                                            <div class="d-flex justify-content-start bd-highlight mb-3">
+                                                <div class=" how-itemcart1">
+                                                    <img src="{{ product.variant.thumbnail_image.url }}" alt="IMG">
+                                                </div>
+                                                <figcaption class="info">
+                                                    <a href="{{ product.variant.get_url }}" class="title text-dark">{{product.variant.product}}
+                                                </a>
+                                                    <p class="text-muted small">
+                                                        {% for value in product.variant.attribute.all %}
+                                                        {{value.attribute}}: {{value.attribute_value}}
+                                                        <br>
+                                                        
+                                                        {% endfor %}
+                                                        
+                                                        Publication: {{product.variant.product.publication}}
+                                                    </p>
+                                                </figcaption>
                                             </div>
-                                            <figcaption class="info">
-                                                <a href="{{ product.variant.get_url }}" class="title text-dark">{{product.variant.product}}
+                                        </td>
+                                        <td class="column-3">
+                                            Rs.{{product.variant.sale_price}}
+                                        </td>
+                                        <td class="column-4">
+                                            <h6 class="text-center">{{product.quantity}}</h6>
+                                        </td>
+                                        <td class="dropdown-custom btn-num-product-down column-4 dropdown-toggle" data-toggle="collapse" data-target="#collapse{{forloop.counter}}"></td>
+                                    </tr>
+                                    <tr class="collapse" id="collapse{{forloop.counter}}">
+                                        <td>   
+                                            <p class="p-2">Product status : <span>{{product.order_status}}</span> </p>
+                                            {% if  product.order_status == 'Cancellation Requested' %}
+                                            <p class="text-danger p-2">Your Request for cancellation is in review state... </p>
+                                            {% elif product.order_status == 'Return Requested' %}
+                                            <p class="text-danger p-2">Your Request for return is in review state... </p>
+                                            {% endif %}
+
+                                            
+                                            {% if product.order_status in when_return and not product.order_status == 'Return Requested'%}
+                                            <a type="button" class="btn btn-outline-dark" data-toggle="modal" onclick="order_operation('return', '{{forloop.counter}}')" data-target="#reasonModal{{forloop.counter}}" id="return">
+                                                Return Order
                                             </a>
-                                                <p class="text-muted small">
-                                                    {% for value in product.variant.attribute.all %}
-                                                    {{value.attribute}}: {{value.attribute_value}}
-                                                    <br>
-                                                    
-                                                    {% endfor %}
-                                                    
-                                                    Publication: {{product.variant.product.publication}}
-                                                </p>
-                                            </figcaption>
+                                            {% elif product.order_status in when_cancel and not product.order_status == 'Cancellation Requested' %}
+                                            <a type="button" class="btn btn-danger text-light" data-toggle="modal" onclick="order_operation('cancel', '{{forloop.counter}}')" data-target="#reasonModal{{forloop.counter}}" id="cancel">
+                                                Cancel Order
+                                            </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <!-- Modal -->
+                                    
+                                    <div class="modal fade modal-custom" id="reasonModal{{forloop.counter}}" tabindex="-1" role="dialog" aria-labelledby="reasonModalTitle{{forloop.counter}}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-dark">
+                                                    <h5 class="modal-title text-white" id="reasonModalTitle{{forloop.counter}}"></h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <form {% if product.order_status in when_cancel %} action="{% url 'product_cancel_request' %}" {% elif product.order_status in when_return %} action="{% url 'product_return_request' %}" {% endif %} method="post">
+                                                    {% csrf_token %}
+                                                    <div class="modal-body p-2 m-2">
+                                                        <div>
+                                                            <div class="d-flex flex-col align-items-start p-4 m-1">
+                                                                {% if product.order_status in when_cancel %}
+                                                                    <label for="cancel-reason"> Cancelling because of...</label>
+                                                                {% elif product.order_status in when_return %}
+                                                                    <label for="cancel-reason"> Returning because of...</label>
+                                                                {% endif %}
+                                                                <select class="form-control" onchange="reasonControl('{{forloop.counter}}')" name="reason" id="reason{{forloop.counter}}">
+                                                                    <option value="">Select your reason</option>
+                                                                    {% if product.order_status in when_cancel %}
+                                                                        {% for reason in cancel_reasons %}
+                                                                        <option value="{{reason}}">{{reason}}</option>
+                                                                        {% endfor %}
+                                                                    
+                                                                    {% else %}
+                                                                        {% for reason in return_reasons %}
+                                                                            <option value="{{reason}}">{{reason}}</option>
+                                                                        {% endfor %}
+            
+                                                                    {% endif %}
+                                                                </select>
+                                                                <input type="text" hidden name="order_product_id" value="{{product.id}}">
+                                                                <input type="text" hidden name="order_id" value="{{order.order_id}}">
+                                                            </div>
+                                                            
+                                                            <div class="d-flex flex-col align-items-start p-4 m-1">
+                                                                <label for="other-reason" class="form-control-label">Others</label>
+                                                                <textarea disabled name="other-reason" id="other-reason{{forloop.counter}}" cols="30" rows="10" class="form-control"></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-dark">Request</button>
+                                                    </div>
+                                                </form>
+
+                                            </div>
                                         </div>
-                                    </td>
-                                    <td class="column-3">
-                                        Rs.{{product.variant.sale_price}}
-                                    </td>
-                                    <td class="column-4">
-                                        <h6 class="text-center">{{product.quantity}}</h6>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th colspan="2" class="text-right">Sub Total:</th>
+                                    </div>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2" class="text-right">Sub Total:</th>
                                     <th class="text-center ">&#8377;{{sub_total}}</th>
                                 </tr>
                                 <tr>
@@ -114,6 +211,9 @@ Orders Details
                                 </tr>
                             </tfoot>
                         </table>
+                        
+                        
+
                     </div>
                     </div>
                     <div class="flex-column">
@@ -140,61 +240,38 @@ Orders Details
                             <div class="card-body form-group p-3 m-3 ">
                                 Payment Method : {{payment.method.method_name}}<br>
                                 Payment ID : {{payment.payment_order_id}}
-                                Payment Signature : {{payment.signature}}
+                                Payment Status : {{payment.payment_status}}
+                                {% if payment.payment_status == 'FAILED' %}
+                                <br>
+                                <div class="card p-3 my-3">
+                                    <span class=" text-danger">
+                                        {{payment.error_description}}
+                                    </span>
+                                </div>
+                                <div class="card border-0  my-3">
+                                    <button type="submit" onclick="retry_payment('{{order.order_id}}')" 
+                                    class="flex-c-m  cl0  bg3 bor14 hov-btn3 p-3 trans-04 pointer">
+                                    Retry Payment &#8377;{{order.order_total}}
+                                    </button>
+                                </div>
                                 
+                                
+                                {% endif %}
                             </div>
                         </div>
                         
                     </div> 
                 </div>
-                <div class="card m-2 p-2">
-                    <div class="card-title ">
-                        
-                                                
-                                                <!-- Button trigger modal -->
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#cancelModalCenter">
-                            Cancel Order
-                        </button>
-                        
-                        <!-- Modal -->
-                        <div class="modal fade modal-custom" id="cancelModalCenter" tabindex="-1" role="dialog" aria-labelledby="cancelModalCenterTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                                </div>
-                                <div class="modal-body">
-                                ...
-                                </div>
-                                <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Save changes</button>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
 
-
-
-
-
-                        <!-- <span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
-                                <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
-                            </svg>
-                        </span> -->
-                    </div>
-
-                </div>
-        </div>
-        <br>
-        <br>
-        <br>
-
+            </div>
+            <br>
+            <br>
+            <br>
         </div>
     </div>
 </div>
+<script>
+    let logoPath = "{% static 'user/images/icons/logo-01.png' %}"
+</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 {% endblock %}

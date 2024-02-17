@@ -219,10 +219,26 @@
 								<div class="mtext-102 cl2 p-b-15">
 									Sort By
 								</div>
-
+								
 								<ul>
 									
 									<li class="p-b-6">
+										<button type="button" onclick="SortByPrice('High-to-Low')" class="filter-link stext-106 trans-04">
+											Price:	High to Low
+										</button>
+									</li>
+	
+									<li class="p-b-6">
+										<button type="button" onclick="SortByPrice('Low-to-High')" class="filter-link stext-106 trans-04">
+											Price: Low to High
+										</button>
+									</li>
+									<li class="p-b-6">
+										<button type="button" onclick="SortByNew('New')" class="filter-link stext-106 trans-04 ">
+											Newness
+										</button>
+									</li>
+									<!-- <li class="p-b-6">
 										<a href="#" class="filter-link stext-106 trans-04">
 											Popularity
 										</a>
@@ -232,25 +248,10 @@
 										<a href="#" class="filter-link stext-106 trans-04">
 											Average rating
 										</a>
-									</li>
+									</li> -->
 
-									<li class="p-b-6">
-										<a href="#" class="filter-link stext-106 trans-04 filter-link-active">
-											Newness
-										</a>
-									</li>
 									
-									<li class="p-b-6">
-										<a href="" class="filter-link stext-106 trans-04" id="price_asc">
-											Price: Low to High 
-										</a>
-									</li>
-
-									<li class="p-b-6">
-										<a href="" class="filter-link stext-106 trans-04" id="price_desc">
-											Price: High to Low
-										</a>
-									</li>
+									
 								</ul>
 							</div>
 
@@ -258,27 +259,45 @@
 								<div class="mtext-102 cl2 p-b-15">
 									Price Range
 								</div>
-
+ 
 								<div class="form-row">
 									<div class="form-group col-md-5">
 										<label>Min</label>
-										<input type="range " class="form-control" placeholder="Rs 0" type="number" id="price-range-min" value="{% if price_min %}{{ price_min }}{% endif %}">
-										
+										<input type="" class="form-control" placeholder="Rs 0" type="number" id="price-range-min" value="{% if price_min %}{{ price_min }}{% endif %}">
+										 
 									</div>
 									<div class="form-group text-right col-md-5">
 										<label>Max</label>
 										<input class="form-control" placeholder="Rs 1000" type="number" id="price-range-max" value="{% if price_max %}{{ price_max }}{% endif %}">
 									</div>
-									</div> <!-- form-row.// -->
-									<button class="btn btn-block btn-dark my-3 w-50" onclick="filterWithPrice('price-range-min','price-range-max')">Apply</button>
-								
+								</div>
+								<!-- form-row.// -->
+								<button class="btn btn-block btn-dark my-3 w-50" onclick="filterWithPrice('price-range-min','price-range-max')">
+									Apply
+								</button>
 							</div>
-							{% for attribute in attribute_list %}
+							<div class="filter-col4 p-b-27">
+								<div class="mtext-102 cl2 p-b-15">
+									Sub Categories
+								</div>
+
+								<div class="flex-w p-t-4 m-r--5">
+									<ul class="list-menu">
+										<li><a href="{% url 'shop' %}">All Categories </a></li>
+										{% for category in category_list %}
+											{% if category.parent_cat %}
+											<li><a href="{% url 'shop_by_cat' category.slug %}">{{category.category_name}} </a></li>
+											{% endif %}
+										{% endfor %}
+									</ul>
+								</div>
+							</div>
+
 								<div class="filter-col3 p-r-15 p-b-27">
 									<div class="mtext-102 cl2 p-b-15">
-										{{attribute.attribute_name}}
+										{{attribute_list.0}}
 										</div>
-										{% for value in attribute.attribute_values_set.all %}
+										{% for value in attribute_value_list %}
 										<ul>
 											<li class="p-b-6">
 												<!-- <span class="fs-15 lh-12 m-r-6" style="color: #222;">
@@ -286,11 +305,9 @@
 												</span> -->
 
 												<a href="#" class="filter-link stext-106 trans-04">
-													
-					
 													{% if value.is_active %}
 														<label class="checkbox-btn my-1">
-															<input type="checkbox" class="filter-checkbox" value="{{attribute.attribute_name}}={{value.attribute_value}}">
+															<input type="checkbox" class="filter-checkbox" value="{{value.attribute.attribute_name}}={{value.attribute_value}}">
 															<span class="btn btn-light"> {{value.attribute_value}} </span>
 														</label>
 												  	{% endif %} 
@@ -298,12 +315,25 @@
 												<p>-</p>
 												</a>
 											</li>
-
 											
 										</ul>
-								</div>
-							{% endfor %}
+									</div>
 							<div class="filter-col4 p-b-27">
+								<div class="mtext-102 cl2 p-b-15">
+									{{ attribute_list.1 }}
+								</div>
+								
+									<div class="flex-w p-t-4 m-r--5">
+										
+											<ul class="list-menu">
+												<li><a href="">{{attribute.attribute_value}}</a></li>
+												<li><a href="{{category.get_url}}"> </a></li>
+													
+											</ul>
+									</div>
+							</div>
+						
+							<!-- <div class="filter-col4 p-b-27">
 								<div class="mtext-102 cl2 p-b-15">
 										Categories
 								</div>
@@ -318,28 +348,17 @@
 												{% endfor %}
 											</ul>
 									</div>
-							</div>
-							<div class="filter-col4 p-b-27">
-									<div class="mtext-102 cl2 p-b-15">
-										Sub Categories
-									</div>
-
-									<div class="flex-w p-t-4 m-r--5">
-										<ul class="list-menu">
-											<li><a href="{% url 'shop' %}">All Categories </a></li>
-											{% for category in category_list %}
-												{% if category.parent_cat %}
-												<li><a href="{{category.get_url}}">{{category.category_name}} </a></li>
-												{% endif %}
-											{% endfor %}
-										</ul>
-									</div>
-							</div>
+							</div> -->
+						
 						</div>
 					</div>
 				</div>
 	
 			<div class="row isotope-grid">
+				{% if not product_variants %}
+				empty
+
+				{% else %}
 
 					{% for product in product_variants %}
 
@@ -365,20 +384,21 @@
 									
 								</div>
 								<div class="block2-txt-child2 flex-r p-t-3">
-									<button class="btn-addwish-b2 dis-block pos-relative" onclick="update_wishlist('{{ product.id }}', '{{forloop.counter}}')">
+									<button role="button" class="btn-addwish-b2 dis-block pos-relative" onclick="update_wishlist('{{ product.id }}', '{{forloop.counter}}', '{{request.user.is_authenticated}}')">
 										<img id="wishlist_icon{{forloop.counter}}" class="dis-block trans-04" 
 											{% if product in wishlist_products %} 
 												src="{% static 'user/images/icons/icon-heart-02.png' %}"
 											{% else %}
 												src="{% static 'user/images/icons/icon-heart-01.png' %}"
 											{% endif %}
-										alt="ICdfdfsON">
+										alt="Wishlist">
 									</button>
 								</div>
 							</div>
 						</div>
 					</div>
 					{% endfor %}
+					{% endif %}
 			</div>
 	
 			<!-- Load more -->
@@ -424,57 +444,7 @@
 			</nav>
 		</div>
 	</div>
-	<script>
-
-		// Get all the checkbox inputs
-		const checkboxes = document.querySelectorAll('input.filter-checkbox[type="checkbox"]');
-		
-		// Set the initial active state of checkboxes based on the URL parameters
-		const urlParams = new URLSearchParams(window.location.search);
-		checkboxes.forEach(checkbox => {
-		  const paramName = checkbox.value.split('=')[0];
-		  const paramValue = checkbox.value.split('=')[1];
-		  if (urlParams.has(paramName) && urlParams.getAll(paramName).includes(paramValue)) {
-			checkbox.checked = true;
-			
-		  }
-		  checkbox.parentNode.classList.add('active');
-		});
-		
-		// Handle checkbox click event
-		checkboxes.forEach(checkbox => {
-		  checkbox.addEventListener('click', function() {
-			const paramName = this.value.split('=')[0];
-			const paramValue = this.value.split('=')[1];
-			const urlParams = new URLSearchParams(window.location.search);
-			
-			// Check if checkbox is checked or unchecked
-			if (this.checked) {
-			  // Get existing parameter value(s) and append the new value
-			  const existingValues = urlParams.getAll(paramName);
-			  existingValues.push(paramValue);
-			  urlParams.delete(paramName);
-			  existingValues.forEach(value => urlParams.append(paramName, value));
-			} else {
-			  // Remove the specific value from the parameter
-			  const existingValues = urlParams.getAll(paramName);
-			  const updatedValues = existingValues.filter(value => value !== paramValue);
-			  urlParams.delete(paramName);
-			  updatedValues.forEach(value => urlParams.append(paramName, value));
-			}
-			
-			// Update the URL with the modified parameters
-			const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-			window.history.replaceState(null, '', newUrl);
-		
-			// Reload the page with the updated URL
-			window.location.href = newUrl;
-		  });
-		});
-		
-		
-		
-	</script>
+	
 	<script>
 		let addedImagePath = "{% static 'user/images/icons/icon-heart-02.png' %}"
 		let removedImagePath = "{% static 'user/images/icons/icon-heart-01.png' %}"

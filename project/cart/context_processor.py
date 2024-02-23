@@ -20,6 +20,6 @@ def counter(request):
         total = 0
         for cart_item in cartItems:
             total += cart_item.sub_total()
-            
+        tax = (total * 5) / 100
     
-    return dict(cartItems = cartItems, total = total)
+    return dict(cartItems = cartItems, total = total, tax = tax)

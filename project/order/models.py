@@ -2,6 +2,7 @@ from django.db import models
 from accounts.models import Account
 from accounts.models import Addresses
 from store.models import ProductVariant
+from coupon.models import Coupon
 
 # Create your models here.
 
@@ -48,15 +49,15 @@ class Order(models.Model):
         ("Payment Pending", "Payment Pending"),
         ("Partially Cancelled", "Partially Cancelled"),
         ("Partially Returned", "Partially Returned"),
+        ("Completed", "Completed"),
         # user choices
         ('Cancel or Return Requested', 'Cancel or Return Requested'),
         )
 
-
-       
-    
     user = models.ForeignKey(Account,on_delete=models.CASCADE)
     order_id = models.CharField(max_length=100)
+    coupon = models.OneToOneField(Coupon, on_delete = models.CASCADE, null=True, blank = True)
+    coupon_discount = models.DecimalField(max_digits=50, decimal_places=2, null=True, blank=True)
     address = models.ForeignKey(Addresses,on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment,on_delete=models.SET_NULL, null=True, blank=True)
     order_instruction = models.CharField(max_length=100, blank=True, null=True)
@@ -83,7 +84,9 @@ class OrderProduct(models.Model):
         ("Cancelled", "Cancelled"),
         ("Returned", "Returned"),
         ('Cancellation Requested', 'Cancellation Requested'),
-        ('Return Requested', 'Return Requested')
+        ('Cancellation Rejected', 'Cancellation Rejected'),
+        ('Return Requested', 'Return Requested'),
+        ('Return Rejected', 'Return Rejected')
         )
     
     ORDER_CANCEL_CHOICES = (
@@ -137,7 +140,7 @@ class OrderProduct(models.Model):
 
 class Invoice(models.Model):
     invoice_number = models.CharField(max_length=30)
-    order = models.ForeignKey(Order, on_delete=models.DO_NOTHING)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
@@ -146,3 +149,5 @@ class Invoice(models.Model):
     def save(self, *args, **kwargs):
         self.invoice_number = 'BMIV-0' + str(Invoice.objects.all().count() + 1)
         super(Invoice, self).save(*args, **kwargs)
+
+

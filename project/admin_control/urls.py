@@ -52,6 +52,7 @@ urlpatterns = [
 # Order management
     path('order-management/all-orders', views.all_orders, name="all_orders"),
     path('order-management/order-details/<str:order_id>/', views.update_order, name="order_details"),
+    path('order-management/order-cancel-or-return/', views.order_handle, name="order_cancel_return"),
 
 
     

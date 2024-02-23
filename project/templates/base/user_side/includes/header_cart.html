@@ -18,7 +18,7 @@
             <ul class="header-cart-wrapitem w-full">
 
                 {% for cart_item in cartItems %}
-
+                
                     <li class="header-cart-item flex-w flex-t m-b-12">
                         <div class="header-cart-item-img">
                             <img src="{{cart_item.product.thumbnail_image.url}}" alt="IMG">
@@ -37,12 +37,17 @@
                     
                 {% endfor %}
 
-
             </ul>
             
             <div class="w-full">
+                
                 <div class="header-cart-total w-full p-tb-40">
-                    Total: &#8377; {{total}}
+                    <div>
+                        Tax: &#8377; {{tax}}
+                    </div>
+                    <div>
+                        Total: &#8377; {{total}}
+                    </div>
                 </div>
 
                 <div class="header-cart-buttons flex-w w-full">

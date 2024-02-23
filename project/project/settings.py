@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'order',
     'django_countries',
     'wishlist',
+    'coupon',
 ]
 
 MIDDLEWARE = [

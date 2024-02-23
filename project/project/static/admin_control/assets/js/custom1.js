@@ -87,28 +87,121 @@ function getCookie(name) {
 
 
     }
-
+    
     function showSelectedOption(selectElement, order_number) {
-        var selectedOption = selectElement.value
-        console.log (selectedOption);
-        var data = {
-            selected_option: selectedOption
-        };
-        $.ajax({
-            type: "POST",
-            url: `/admin-control/order-management/order-details/${order_number}/`,
-            dataType: "json", 
-            data: JSON.stringify(data),
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-                "X-CSRFToken": getCookie("csrftoken"), 
-              },
-            success: (data) => {
-                console.log(data);
-              },
-            error: (error) => {
+      var selectedOption = selectElement.value
+      console.log (selectedOption);
+      var data = {
+        selected_option: selectedOption
+      };
+      $.ajax({
+        type: "POST",
+        url: `/admin-control/order-management/order-details/${order_number}/`,
+        dataType: "json", 
+        data: JSON.stringify(data),
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": getCookie("csrftoken"), 
+        },
+        success: (data) => {
+          console.log(data);
+          swal(data.status, `Order has been updated with the status : ${data.selected_option}`);
+          
+        },
+        error: (error) => {
                 console.log(error);
                 alert(error)
               }
         });
+      }
+
+// order detail page on modal operation order_product_id accessing to handleOperation function  
+      
+$(document).ready(function(){
+  $('#reasonsModal').on('show.bs.modal', function (e) {
+    console.log('showwwwww');
+    const reasonDiv = document.getElementById('reason-div')
+    const tempInput = document.createElement('input')
+    tempInput.id = 'temp-input'
+    tempInput.hidden = true
+
+    reasonDiv.appendChild(tempInput)
+    
+  });
+  
+  $('#reasonsModal').on('hide.bs.modal', function (e) {
+    console.log('leave');
+    document.getElementById('temp-input').remove();
+  });
+});
+
+    
+    
+function order_operation(order_product_id, operation, reason, otherReason = null){
+  console.log('working');
+  const title = document.getElementById('reasonsModalTitle')
+  const reasonElement = document.getElementById('user-reason')
+  document.getElementById('temp-input').value = order_product_id
+      
+      
+  if(operation === 'cancel')
+  {
+    title.innerHTML = 'Inspect Cancellation Reason and Proceed...'
+    console.log('sdfrttgyhujikolp');
+    if(otherReason){
+      reasonElement.innerHTML = 'REASON : ' + reason;
+      reasonElement.classList.add('reason_others');
+      document.getElementById('user-other-reason').innerHTML = otherReason;
     }
+    else{
+      reasonElement.innerHTML = reason;
+    }
+  }
+  else if(operation === 'return'){
+    title.innerHTML = 'Inspect  Return Reason and Proceed...'
+    if(otherReason){
+      reasonElement.innerHTML = 'REASON : ' + reason;
+      reasonElement.classList.add('reason_others');
+      document.getElementById('user-other-reason').innerHTML = otherReason;
+    }
+    else{
+      reasonElement.innerHTML = reason;
+    }
+  }
+  
+  
+  
+}
+
+function handleOperation(operation){
+  let order_product_id = document.getElementById('temp-input').value
+  
+
+  var data = {
+    order_product_id: order_product_id,
+    operation: operation
+  };
+  $.ajax({
+      type: "POST",
+      url: '/admin-control/order-management/order-cancel-or-return/',
+      dataType: "json", 
+      data: JSON.stringify(data),
+      headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": getCookie("csrftoken"), 
+        },
+      success: (data) => {
+          console.log(data);
+          swal(data.message, data.additional_message);
+          setTimeout(() =>{
+            window.location.reload();
+          }, 3000)
+        },
+      error: (error) => {
+          console.log(error);
+          alert(error)
+        }
+  });
+  document.getElementById('modal-close').click();
+
+}

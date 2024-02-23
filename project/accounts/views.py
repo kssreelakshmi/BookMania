@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.core.mail import EmailMessage
 from accounts.models import UserProfile
-from order.models import Order,OrderProduct,Payment,PaymentMethod
+from order.models import Order,OrderProduct,Payment,PaymentMethod,Invoice
 import requests, json, random
 from django.views.decorators.cache import cache_control
 from wishlist.models import Wishlist
@@ -27,6 +27,7 @@ from django_countries.fields import CountryField
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import update_session_auth_hash
 from django.urls import reverse
+
 # Create your views here.
 
 User = get_user_model()
@@ -115,6 +116,9 @@ def user_login(request):
     if request.user.is_authenticated and request.user.is_admin:
         return redirect('admin_home')
     
+    if request.user.is_authenticated:
+        return redirect ('user_home')
+
     if request.method == 'POST':
         email = request.POST['email']
         password = request.POST['password']
@@ -607,7 +611,15 @@ def order_detail(request,order_id):
     when_return = ['Delivered']
     other_choices = ['Cancelled', 'Partially Cancelled', 'Returned', 'Partially Returned', 'Cancel or Return Requested']
     inprogress_choices = ['Cancel or Return Requested', 'Partially Cancelled', 'Partially Returned']
+    if order.is_ordered:
+        print("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+        try:
+            invoice = Invoice.objects.get(order=order)
+        except Exception as e:  
+            print(e)
+
     context={
+        'invoice' : invoice,
         'return_reasons' : return_reasons,
         'cancel_reasons' : cancel_reasons,
         'when_return' : when_return,
@@ -637,8 +649,6 @@ def product_cancel_request(request):
             print(e)
         cancel_reason = request.POST.get('reason')
         order.order_status = 'Cancel or Return Requested'
-        
-
         order_product.order_status = 'Cancellation Requested'
 
         if cancel_reason == 'other':
@@ -679,27 +689,7 @@ def product_return_request(request):
         messages.info(request, 'Your request for return has been submitted. Kindly wait for the verification and confirmation !!')
         return redirect('order_detail', order_id)
 
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 def my_address(request):
     current_user = request.user
@@ -820,4 +810,8 @@ def delete_address(request,id):
     except Addresses.DoesNotExist:
         return redirect('my_address')                
     
-    
+
+def blog(request):
+
+
+    return render(request,'store_templates.html/biblolater.html')   

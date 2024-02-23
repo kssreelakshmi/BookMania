@@ -9,12 +9,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.cache import cache_control
 from category.models import Category
+from accounts.models import Account
 from store.models import Product,ProductVariant,Attribute,AttributeValue,Author,AdditionalProductImages,Publication
-from order.models import Order, OrderProduct, Payment, PaymentMethod
+from order.models import Order, OrderProduct, Payment, PaymentMethod,Invoice
 from order.forms import OrderStatusForm
 from django.db.models import OuterRef, Subquery
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import JsonResponse
+from django.db.models import Count, F, Sum, Avg
 import json
 import datetime
 import calendar
@@ -45,47 +47,49 @@ def check_isadmin(view_func, redirect_url="admin_login"):
 @login_required(login_url='admin_login')
 def admin_home(request):
 
-    begin_date = datetime.date(2023,10, 1)
-    orders = Order.objects.all()
-    products = ProductVariant.objects.all()
-    category = Category.objects.all().count()
-    
-    # desired_timezone = pytz.timezone('Asia/Kolkata')
-    # today = timezone.now().astimezone(desired_timezone)
-    # print(today)
-    # start_date = today - datetime.timedelta(days=15)
-    # print(start_date)
-    # recent_orders = orders.filter(created_at__range=(start_date, today)).order_by('-created_at')
-    # year = today.year
+    orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
+    orders_count =orders.count()
+    order_product = OrderProduct.objects.filter(is_ordered=True)
+    user = Account.objects.filter(is_active = True).exclude(is_admin = True)
+    products = ProductVariant.objects.filter(is_active = True)
+    category = Category.objects.filter(is_active = True).count()
+    total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
+    extracted_total_revenue = total_revenue['total_revenue']
+    delivered_oders = orders.filter(order_status="Delivered")
 
-    
-    # delivered_orders = orders.filter(order_status='Delivered', created_at__year = year).prefetch_related('payment')
-    # COD_orders = delivered_orders.filter(payment__method__method_name = 'COD')
-    # razorpay_orders = delivered_orders.exclude(payment__method__method_name = 'COD')
 
-    # monthdata_razorpay = {key:0 for key in list(calendar.month_abbr[1:])}
-    # monthdata_COD = {key:0 for key in list(calendar.month_abbr[1:])}
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
-    # for order in razorpay_orders:
-    #     monthdata_razorpay[datetime.datetime.strftime(order.created_at, "%b")] += 1
 
-    # for order in COD_orders:
-    #     monthdata_COD[datetime.datetime.strftime(order.created_at, "%b")] += 1
 
+
+
+    # sale_products = OrderProduct.objects.filter(is_ordered=True)
+    # product_count_dict = {}
+    # for sale_product in sale_products:
+    #     if product_count_dict[sale_product.variant.sku_id]:
+    #         product_count_dict[sale_product.variant.sku_id]+1
+    #     else:
+    #         product_count_dict[sale_product.variant.sku_id] = 1
+
+   
     context = {
-            'orders':orders.count(),
+        
+            'orders':orders[:8],
+            'orders_count' : orders_count,
             'products' : products.count(),
             'category' : category,
-    #     'recent_orders': recent_orders,
-    #     'months': list(calendar.month_abbr[1:]),
-    #     'razorpay_orders': list(monthdata_razorpay.values()),
-    #     'COD_orders': list(monthdata_COD.values()),
-    #     'years': [today.year - i for i in range(today.year-begin_date.year+1)],
-    #     'y_limit': max(max(monthdata_razorpay.values()), max(monthdata_COD.values())) + 5
+            'total_revenue': extracted_total_revenue,
+            'users' : user.count(),
+            'delivered_oders' : delivered_oders,
+            # 'sale_products' : sale_products,
+            # 'product_count_dict' : product_count_dict,
     }
 
 
     return render(request,'admin-dashboard/admin_home.html',context)
+
 
 # @check_isadmin
 def admin_login(request):
@@ -723,7 +727,6 @@ def all_orders(request):
     choices = order.ORDER_STATUS_CHOICES
 
     order_status_choices = [choice[0].replace(' ', '-') for choice in choices]
-    print(order_status_choices)
 
     context = {
         'orders': paged_orders,
@@ -759,7 +762,15 @@ def update_order(request, order_id):
     except:
         payment = None
     form = OrderStatusForm(instance = order)
+
+
+
+    print(order.is_ordered)
+    if order.is_ordered:
+        invoice = Invoice.objects.get(order=order)
+
     context = {
+        'invoice' :invoice,
         'order': order,
         'order_products': order_products,
         'total': total,
@@ -767,6 +778,60 @@ def update_order(request, order_id):
         'form': form,
     }
     return render(request, 'admin-dashboard/order_management/order_details.html',context)
+
+
+def order_handle(request):
+    data = json.load(request)
+    print(data)
+    # order_product_id = request.GET.get('order_product_id')
+    try:
+        order_product = OrderProduct.objects.get(id=data.get('order_product_id'))
+    except Exception as e:
+        print(e)
+
+    print(order_product)
+    if order_product.order_status == 'Cancellation Requested':
+        if data.get('operation') == 'accept':
+            order_product.order_status = 'Cancelled'
+            order_product.variant.stock += 1
+            order_product.variant.save()
+            order_product.save()
+            return JsonResponse({
+                'status' : 'success',
+                'message': 'Reason validated, product cancelled from order',
+                'additional_message': 'Cancellation approved'
+            })
+        elif data.get('operation') == 'reject':
+            order_product.order_status = 'Cancellation Rejected'
+            order_product.save()
+            return JsonResponse({
+                'status' : 'success',
+                'message': 'Cancellation request has been rejected',
+                'additional_message': 'Rejected'
+            })
+
+
+    elif order_product.order_status == 'Return Requested':
+        if data.get('operation') == 'accept':
+            order_product.order_status = 'Returned'
+            order_product.variant.stock += 1
+            order_product.variant.save()
+            order_product.save()
+            return JsonResponse({
+                'status' : 'success',
+                'message': 'Reason validated',
+                'additional_message': 'product return approved'
+            })
+        elif data.get('operation') == 'reject':
+            order_product.order_status = 'Return Rejected'
+            order_product.save()
+            return JsonResponse({
+                'status' : 'success',
+                'message': 'Return request has been rejected',
+                'additional_message': 'Rejected'
+            })
+
+    return redirect('order_details')
 
 def all_attributes(request):
     attribute =Attribute.objects.all()

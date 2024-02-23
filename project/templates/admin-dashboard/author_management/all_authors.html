@@ -65,13 +65,13 @@ Author Management - All Authors
                 </td>
                 <td class="border-bottom-0">
                   {% if attr.is_active %}
-                    <a href="{% url 'author_control' author.id %}">
-                        <button class="btn btn-danger mb-1 px-3">Disable</button>
-                    </a>
+                  <a href="{% url 'author_control' author.id %}">
+                    <button class="btn btn-success mb-1">Enable</button>
+                  </a>
                   {% else %}
-                     <a href="{% url 'author_control' author.id %}">
-                        <button class="btn btn-success mb-1">Enable</button>
-                    </a>
+                  <a href="{% url 'author_control' author.id %}">
+                      <button class="btn btn-danger mb-1 px-3">Disable</button>
+                  </a>
                   {% endif %}
                 </td>
               </tr> 

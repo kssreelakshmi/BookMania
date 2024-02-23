@@ -165,6 +165,7 @@ def cart(request,total=0,quantity=0,cart_items=None):
         grand_total = total + tax
     except ObjectDoesNotExist:
         pass
+    print(tax)
     context = {
         'total' : total,
         'cart_items' : cart_items,

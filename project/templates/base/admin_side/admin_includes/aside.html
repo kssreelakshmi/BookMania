@@ -60,7 +60,6 @@
                 <div class="submenu">
                     <a href="{% url 'all_orders' %}">All orders</a>
                     <a href="{% url 'all_orders' %}?status=New">New orders</a>
-                    <a href="{% url 'all_orders' %}?status=New">New orders</a>
                 </div>
             </li>
             
@@ -84,10 +83,16 @@
                     <a href="{% url 'add_authors' %}">Add Author</a>
                 </div>
             </li>
+            
             <li class="menu-item">
                 <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
-                    <span class="text">Statistics</span>
+                    <span class="text">Coupon Management</span>
                 </a>
+                <div class="submenu">
+                    <a href="">All Coupons</a>
+                    <a href="">Create Coupon</a>
+                    <a href="">Delete Coupon</a>
+                </div>
             </li>
         </ul>
         <hr>

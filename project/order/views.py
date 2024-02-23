@@ -15,6 +15,11 @@ from django.http import HttpResponse
 from io import BytesIO
 from django.template.loader import get_template,render_to_string
 from xhtml2pdf import pisa
+from django.db.models import Sum
+import datetime
+import calendar
+import pytz
+from django.utils import timezone
 
 
 
@@ -381,7 +386,6 @@ def order_completed(request):
                 ordered_products = OrderProduct.objects.filter(order_id = order.id)
                 total = 0
                 tax = 0 
-                print('cfcjjlkdlkldkkdxtfyuuiuoiokklajk')   
                 
                 for item in ordered_products:
                     total += item.product_price * item.quantity
@@ -419,6 +423,7 @@ def order_completed(request):
         return redirect('user_home')
     
 def generate_invoice(request,invoice_number):
+    print('hiiiiiii')
     try:
         invoice = Invoice.objects.get(invoice_number = invoice_number)
         print(invoice)
@@ -456,3 +461,5 @@ def generate_invoice(request,invoice_number):
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
+
+

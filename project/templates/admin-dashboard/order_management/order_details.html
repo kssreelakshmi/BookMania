@@ -8,8 +8,43 @@ Order Management - All orders
 
 {% block content %}
 {% include 'base/admin_side/admin_includes/aside.html' %}
+<style>
+    .reason_others{
+        font-weight: 500;
+        color: black;
+    }
+</style>
 <main class="main-wrap">
     {% include 'base/admin_side/admin_includes/admin_header.html' %}
+
+    <!-- modal -->
+    <div class="modal fade modal-custom" id="reasonsModal" on on tabindex="-1" role="dialog" aria-labelledby="reasonModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-dark">
+                    <h5 class="modal-title text-white" id="reasonsModalTitle"></h5>
+                    <button type="button" class="close" id="modal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                    <div class="modal-body text-dark p-2 m-2">
+                            <!-- <div class="d-flex flex-col align-items-start p-4 m-1"> -->
+                            <!-- </div>-->
+                            <div class="p-3">
+                                <h4 class="text-dark py-4 px-1">Reason</h4>
+                                <div id ="reason-div" class="card-body text-danger p-4 border rounded">
+                                    <p id="user-reason"></p>
+                                    <p class="p-2" id="user-other-reason"></p>
+                                </div>
+                            </div>
+                        </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="handleOperation('accept')" class="btn btn-success">Accept</button>
+                        <button type="button" onclick="handleOperation('reject')" class="btn btn-danger">Reject</button>
+                    </div>
+            </div>
+        </div>
+    </div>
 
 
     <section class="content-main mt-80 mb-80">
@@ -95,16 +130,23 @@ Order Management - All orders
 
                                 <div class="table-responsive">
                                     <table class="table table-style-admin table-hover">
+                                        <tr>
+                                            <th>Thumbnail</th>
+                                            <th class="pl-50">Product Detail</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th class="pl-50">Order Status</th>
+                                        </tr>
                                         {% for order_product in order_products %}
-                                          <tr class="d-flex justify-content-between align-content-center">
-                                            <td>
+                                          <tr>
+                                            <td class="align-middle">
                                                 <div>
                                                     <img src="{{order_product.variant.thumbnail_image.url}}" style="object-fit: contain; height: 100px;">
 
                                                 </div>
                                             </td>
                           
-                                            <td> 
+                                            <td class=" pl-50 align-middle">
                                                   <p class="title mb-0">
                                                    
                                                       {{order_product.variant.product.publication}}
@@ -115,17 +157,49 @@ Order Management - All orders
                                                       Category: {{order_product.variant.product.category.category_name}}
                                                   </p>
                                             </td>
-                                            <td> Quantity <br> {{order_product.quantity}} </td>
-                                            <td> Each Price <br>Rs {{order_product.product_price}}
-                                              <!-- <br> -->
-                                            <!-- <small> <del> Rs max price </del></small> -->
-                                           </td>
+                                            <td class="align-middle"> {{order_product.quantity}} </td>
+                                            <td class="align-middle"> Rs {{order_product.product_price}}
+                                                <!-- <br> -->
+                                                <!-- <small> <del> Rs max price </del></small> -->
+                                            </td>
+                                            <td class="align-middle pl-50">
+                                                <p >
+                                                   
+                                                    {{order_product.order_status}}
+                                                    
+                                                    <!-- Button trigger modal -->
+                                                    {% if order_product.order_status == 'Cancellation Requested'%}
+                                                    <br>
+                                                    <br>
+                                                    <a role="button" class="text-decoration" {% if order_product.cancellation_reason == 'other' %} onclick="order_operation('{{order_product.id}}', 'cancel', '{{order_product.cancellation_reason}}', '{{order_product.others}}')" {% else %} onclick="order_operation('{{order_product.id}}', 'cancel', '{{order_product.cancellation_reason}}')" {% endif %}  data-bs-toggle="modal"  data-bs-target="#reasonsModal">
+                                                        See Reason</a>
+                                                        
+                                                        
+                                                    {% elif order_product.order_status == 'Return Requested'  %}
+                                                        <br>
+                                                    <a role="button" class="text-decoration" {% if order_product.return_reason == 'other' %} onclick="order_operation('{{order_product.id}}', 'return', '{{order_product.return_reason}}', '{{order_product.others}}')" {% else %} onclick="order_operation('{{order_product.id}}', 'return', '{{order_product.return_reason}}')" {% endif %} data-bs-toggle="modal" data-bs-target="#reasonsModal">
+                                                        See Reason</a>
+                                                    
+                                                    {% endif %}
+                                                    <!--Modal-->
+
+                                                </p>
+                                            </td>
+                                           
+
                                           </tr>
                                         {% endfor %}
                                     </table>
                                     
                                     </div> <!-- table-responsive .end// -->
-
+                                    <div class=" m-2 p-2">
+                                        {% if invoice %}
+                                        <a role="button" class=" btn btn-dark flex-c-m cl0 g3 bor14 hov-btn3 py-2 px-3 trans-04 pointer" href="{% url 'generate_invoice' invoice.invoice_number %}">
+                                            Download Invoice
+                                        </a>
+                                        {% endif %}
+            
+                                    </div>
 
 
                             </div>

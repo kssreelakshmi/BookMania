@@ -150,6 +150,7 @@ Order Summary
                         <div class="card border-0">
                             <div class="card-header bg-none p-2 m-2">
                                 <h6><strong>Choose a Payment Method</strong></h6>
+                                
                             </div>
                             <div class="card-body p-3">
                                 {% for payment_method in payment_methods %}
@@ -180,20 +181,45 @@ Order Summary
                     <br>
                     <div class="bor10 m-l-63 m-lr-0-xl p-lr-15-sm">
                         <div class="card border-0">
-                            <div class="card-header bg-none p-2 m-2">
+                            <div class="d-flex justify-content-between card-header bg-none p-2 m-2">
                                 <h6><strong>Have a Coupon ?</strong></h6>
+                                <a role="button" class="dropdown-toggle pointer" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">See Available Coupons</a>
+                                <!-- <div class="btn-group"> -->
+                                    
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                    {% for coupon in coupons %}
+                                    <button onclick="selectCoupon('{{coupon.coupon_code}}', '{{coupon.description}}')" class="dropdown-item" type="button">{{coupon.coupon_code}}</button>
+                                    {% endfor %}
+                                </div>
+                                <!-- </div> -->
                             </div>
                             <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
-                                <div class="flex-w flex-m m-r-20 m-tb-5">
-                                    <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-30 m-tb-5" type="text" name="coupon" placeholder="Coupon Code">
+                                <!-- coupon apply card -->
+                                <div id="coupon_apply_card" class="d-flex flex-column m-r-20 m-tb-5">
+                                    <div class="flex-w flex-m">
+                                        <input class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-30 m-tb-5" type="text" name="coupon" id="couponIn"  placeholder="Coupon Code">
                                         
-                                    <button type="button" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
-                                        Apply coupon
-                                    </button>
-                                    <button type="button" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5">
-                                        Remove coupon
-                                    </button>
+                                        <button type="button" onclick="couponHandle('apply_coupon','{{order.order_id}}')" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5" >
+                                            Apply coupon
+                                        </button>
+                                    </div>
+                                    <div class="flex-w flex-m m-r-20 p-2 m-tb-5">
+                                        <p id="couponDesc"></p>
+                                    </div>
                                 </div>
+                                <!-- coupon card -->
+                                <div id="coupon_card" hidden class="card-header col-12  m-r-20 m-tb-5">
+                                    <div class="col-5">
+                                        <h4 class="text-light bg-dark p-3 fw-bolder">Coupon applied</h4>
+                                        
+                                    </div>
+                                    <div class="col-12">
+
+                                        <p id="coupDescCard" class="p-3 text-success">{{order.coupon.description}}</p>
+                                        <a class="p-3 text-danger" href="#" onclick="couponHandle('remove_coupon','{{order.order_id}}')"> Click to remove </a>
+                                    </div>
+                                </div>
+
 
 
                             </div>
@@ -231,22 +257,29 @@ Order Summary
                                 </div>
 
                                 <div class="size-209">
-                                    <span id="tax" class="mtext-110 cl2">
+                                    <p id="tax" class="mtext-110 cl2">
                                         &#8377; {{tax}}
-                                    </span>
+                                    </p>
                                 </div>
                             </div>
                             <div class="flex-w flex-t bor12 p-b-13">
                                 <div class="size-208">
-                                    <span class="stext-110 cl2">
+                                    <span  class="stext-110 cl2">
                                         Discount:
                                     </span>
                                 </div>
-
+                                
                                 <div class="size-209">
-                                    <span id="tax" class="mtext-110 cl2">
+                                    <p id="discount" class="mtext-110 cl2">
+                                        {% if not coupon_discount %}
+                                        &#8377; 0
+                                        {% else %}
                                         &#8377; {{coupon_discount}}
-                                    </span>
+                                        {% endif %}
+                                        
+                                        
+                                        
+                                    </p>
                                 </div>
                             </div>
 
@@ -258,9 +291,9 @@ Order Summary
                                 </dl>
 
                                 <div class="size-209 p-t-1">
-                                    <span id="grand_total" class="mtext-110 cl2">
+                                    <p id="grand_total" class="mtext-110 cl2">
                                         &#8377; {{grand_total}}
-                                    </span>
+                                    </p>
                                 </div>
                             </div>
 

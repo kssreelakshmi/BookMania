@@ -5,7 +5,10 @@ from accounts.forms import AddressForm
 from cart.models import Cart,Cart_item
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from order.models import Order
 import json
+import datetime
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 
@@ -195,8 +198,29 @@ def Cart_checkout(request,total=0,cart_items=None,quantity=0):
     
     address_form = AddressForm()
     address = Addresses.objects.filter(user = request.user, is_active = True).order_by('-is_default')
+
+    order = Order()
+    order.user = request.user
+    order.tax = tax
+    order.order_total = grand_total
+    order.ip = request.META.get('REMOTE_ADDR')
+    order.save()
     
-    context ={
+    current_datetime = datetime.datetime.now()
+    current_year = current_datetime.strftime("%Y")
+    current_month = current_datetime.strftime("%m")
+    current_day = current_datetime.strftime("%d")
+    current_hour = current_datetime.strftime("%H")
+    current_minute = current_datetime.strftime("%M")
+    concatenated_datetime = current_year + current_month + current_day + current_hour + current_minute
+    
+    order_number = 'BM-ORD'+concatenated_datetime+str(order.pk)
+    order.order_id = order_number
+    order.save()
+    print(order)
+
+    context = {
+        'order_id' : order.order_id,
         'total': total,
         'qty' : quantity,
         'cart_items' : cart_items,

@@ -10,6 +10,7 @@ urlpatterns = [
     path('user-management/create-user/', views.create_user, name="create_user"),
     path('user-management/update-user/<int:user_id>', views.update_user, name="update_user"),
     path('user-control/<int:user_id>', views.user_control, name="user_control"),
+    path('sales-report/', views.sales_report, name="sales_report"),
     
 #category management
     path('category-management/all-category/',views.all_category, name="all_category"),
@@ -55,7 +56,11 @@ urlpatterns = [
     path('order-management/order-cancel-or-return/', views.order_handle, name="order_cancel_return"),
 
 
-    
+#coupon management   
+    path('coupon-management/all-coupons', views.all_coupon, name="all_coupon"),
+    path('coupon-management/create-coupon/', views.create_coupon, name="create_coupon"),
+    path('coupon-management/coupon-update/<int:id>/', views.coupon_update, name="coupon_update"),
+    path('coupon-management/delete-coupon//<int:id>/', views.delete_coupon, name="delete_coupon"),
     
     
 

@@ -9,14 +9,19 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.cache import cache_control
 from category.models import Category
+from coupon.models import Coupon
 from accounts.models import Account
 from store.models import Product,ProductVariant,Attribute,AttributeValue,Author,AdditionalProductImages,Publication
 from order.models import Order, OrderProduct, Payment, PaymentMethod,Invoice
 from order.forms import OrderStatusForm
 from django.db.models import OuterRef, Subquery
+from admin_control.forms import CouponForm
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import JsonResponse
 from django.db.models import Count, F, Sum, Avg
+from io import BytesIO
+from django.template.loader import get_template,render_to_string
+from xhtml2pdf import pisa
 import json
 import datetime
 import calendar
@@ -49,33 +54,29 @@ def admin_home(request):
 
     orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
     orders_count =orders.count()
-    order_product = OrderProduct.objects.filter(is_ordered=True)
+    order_products = OrderProduct.objects.filter(is_ordered=True)
     user = Account.objects.filter(is_active = True).exclude(is_admin = True)
     products = ProductVariant.objects.filter(is_active = True)
     category = Category.objects.filter(is_active = True).count()
     total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
     extracted_total_revenue = total_revenue['total_revenue']
     delivered_oders = orders.filter(order_status="Delivered")
-
-
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
+    coupons = Coupon.objects.filter(is_active = True)
+    coupon_count= coupons.count()
+    print(coupons)
 
 
 
 
 
     # sale_products = OrderProduct.objects.filter(is_ordered=True)
-    # product_count_dict = {}
-    # for sale_product in sale_products:
-    #     if product_count_dict[sale_product.variant.sku_id]:
-    #         product_count_dict[sale_product.variant.sku_id]+1
-    #     else:
-    #         product_count_dict[sale_product.variant.sku_id] = 1
-
+    #
    
     context = {
-        
+
+            'coupons ' : coupons ,
+            'coupon_count ' : coupon_count ,
+            'order_products': order_products,
             'orders':orders[:8],
             'orders_count' : orders_count,
             'products' : products.count(),
@@ -89,6 +90,49 @@ def admin_home(request):
 
 
     return render(request,'admin-dashboard/admin_home.html',context)
+
+
+def sales_report(request):
+    order_products = OrderProduct.objects.filter(is_ordered=True)
+    # for product in order_products:
+    #     if product_count_dict[product.variant.sku_id]:
+    #         product_count_dict[product.variant.sku_id]+1
+    #     else:
+    #         product_count_dict[product.variant.sku_id] = 1
+    product_counts = order_products.values('variant_id').annotate(count=Count('variant_id'))
+    print(product_counts)
+    for i in product_counts:
+        print(i)
+    product_names = {variant.id: variant.product.product_name for variant in ProductVariant.objects.all()}
+    product_count_dict = {}
+    for product_count in product_counts:
+        variant_id = product_count['variant_id']
+        count = product_count['count']
+        product_name = product_names.get(variant_id, 'Unknown')
+        product_count_dict[product_name] = count
+
+
+
+    orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
+    orders_count =orders.count()
+    product_variants = ProductVariant.objects.filter(is_active = True)
+    user = Account.objects.filter(is_active = True).exclude(is_admin = True)
+    total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
+    extracted_total_revenue = total_revenue['total_revenue']    
+
+    context = {
+        'product_variants': product_variants,
+        'product_count_dict' : product_count_dict,
+        ' orders_count' : orders_count,
+         'users' : user.count(),
+    }
+
+
+    return render(request,'admin-dashboard/sales_report.html',context)
+
+
+    
+
 
 
 # @check_isadmin
@@ -307,6 +351,10 @@ def all_products(request):
     image=Subquery(
         ProductVariant.objects.filter(product_id=OuterRef('pk')).values('thumbnail_image')[:1]
     ))
+    # for product in products:
+    #     if not product.author.is_active:
+    #         product.is_available =  product.is_available
+    
     paginator = Paginator(products,10)
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)
@@ -660,7 +708,7 @@ def all_authors(request):
 
 def author_control(request,id):
     try:
-        author = author.objects.get(id = id)
+        author = Author.objects.get(id = id)
     except Exception as e:
         print(e)
     
@@ -763,13 +811,12 @@ def update_order(request, order_id):
         payment = None
     form = OrderStatusForm(instance = order)
 
-
-
     print(order.is_ordered)
     if order.is_ordered:
-        invoice = Invoice.objects.get(order=order)
+        invoice = Invoice.objects.filter(order=order)
 
     context = {
+
         'invoice' :invoice,
         'order': order,
         'order_products': order_products,
@@ -955,4 +1002,72 @@ def update_attribute_values(request,id):
         'attribute_value_form' : attribute_value_form,
         }
     return render(request,'admin-dashboard/product_management/update_attribute_values.html',context)
+
+
+def all_coupon(request):
+    coupons = Coupon.objects.all()
+    paginator = Paginator(coupons,10)
+    page = request.GET.get('page')
+    paged_coupons = paginator.get_page(page)
+
+    context= {
+        'coupons' :paged_coupons, 
+    }
+    return render(request,'admin-dashboard/coupon_management/available_coupons.html',context)
+
+
+def create_coupon(request):
+
+    if request.method =='POST':
+        form = CouponForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request,'Coupon added successsfully')
+            return redirect('all_coupon')
+        else:
+
+            messages.error(request, form.errors)
+            return redirect('create_coupon')
+        
+    form = CouponForm()
+    context = {
+        'form': form,
+    }  
+    return render(request,'admin-dashboard/coupon_management/create_coupon.html',context)
+
+def coupon_update(request,id):
+    try:
+        coupon = Coupon.objects.get(id=id)
+    except Exception as e:
+            print(e)
+
+    form = CouponForm(instance = coupon)
+        
+    if request.method == 'POST':    
+        form = CouponForm(request.POST, instance=coupon)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Coupon updated")
+            return redirect('all_coupon')
+        else:
+            messages.error(request, form.errors)
+            return redirect('update_attribute')
+    form = CouponForm(instance = coupon)
+    context = {
+        'form' : form,
+    }
+    return render(request,'admin-dashboard/coupon_management/coupon_update.html',context)
+
+
+def delete_coupon(request,id):
+    try:
+        coupon = Coupon.objects.get(id=id)
+    except Coupon.DoesNotExist:
+        return redirect('all_coupon')
+    except ValueError:
+        return redirect('all_coupon')
+    coupon.delete()
+    messages.error(request, "Coupon Deleted")
+    return redirect('all_coupon')
 

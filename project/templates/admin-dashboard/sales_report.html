@@ -1,0 +1,145 @@
+{% extends 'base/admin_side/admin_base.html' %}
+ 
+{% block title %}
+Admin - Dashboard
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+
+<main class="main-wrap">
+   
+{% include 'base/admin_side/admin_includes/admin_header.html' %}
+
+<section class="content-main">
+
+
+<div class="card mb-4">
+    <header class="card-header">
+        <h4 class="card-title">Sales Report</h4>
+        <div class="row align-items-center">
+            <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+                <div class="custom_select">
+                    <select class="form-select ">
+                        <option selected>All Categories</option>
+                        <option>Women's Clothing</option>
+                        <option>Men's Clothing</option>
+                        <option>Cellphones</option>
+                        <option>Computer & Office</option>
+                        <option>Consumer Electronics</option>
+                        <option>Jewelry & Accessories</option>
+                        <option>Home & Garden</option>
+                        <option>Luggage & Bags</option>
+                        <option>Shoes</option>
+                        <option>Mother & Kids</option>
+                    </select>
+                </div>
+            </div>
+          
+                <div class="col-md-2 col-6">
+                    <input type="date" value="02.05.2021"  class="form-control" id="start_date" placeholder="Start Date">
+                </div>
+                <div class="col-md-2 col-6">
+                    <input type="date" value="02.05.2021"  class="form-control" id="end_date" placeholder="End Date">
+                </div>
+                <!-- <button type="button">Show</button> -->
+            <div class="col-md-2 col-6">
+                <div class="custom_select">
+                    <select class="form-select select-nice">
+                        <option selected>Status</option>
+                        <option>All</option>
+                        <option>Paid</option>
+                        <option>Chargeback</option>
+                        <option>Refund</option>
+                    </select>
+                </div>
+            </div> 
+            <div class="col-md-2 col-6">
+                <a href="#" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create report</a>
+            </div>
+        </div>
+    </header>
+    <div class="card-body">
+        <div class="table-responsive">
+            <div class="table-responsive">
+                <table class="table align-middle table-nowrap mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <!-- <th scope="col" class="text-center">
+                                <div class="form-check align-middle">
+                                    <input class="form-check-input" type="checkbox" id="transactionCheck01">
+                                    <label class="form-check-label" for="transactionCheck01"></label>
+                                </div>
+                            </th> -->
+                            <th class="align-middle" scope="col">Sl.No</th>
+                            <th class="align-middle" scope="col">Product Name</th>
+                            <th class="align-middle" scope="col">Variant</th>
+                            <th class="align-middle" scope="col">Stock</th>
+                            <th class="align-middle" scope="col">Sold count</th>
+                            <th class="align-middle" scope="col">Amount received</th>
+                            <th class="align-middle" scope="col"></th>
+                        </tr>
+                    </thead>
+                    {% for variant in product_variants %}
+                    <tbody>
+                        <tr>
+                            <td>
+                                 {{forloop.counter}}
+                            </td>
+                            <td>{{variant.product.product_name}}</td>
+                            <td>{{variant.get_product_name}}</td>
+                            <td>
+                            {{variant.stock}}
+                            </td>
+                            <td>
+                            
+                            </td>
+                            <td>
+
+                            </td>                            
+                        </tr>
+                    </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+        </div> <!-- table-responsive end// -->
+    </div>
+</div>
+<div class="card mb-4">
+    <header class="card-header">
+        <h4 class="card-title">Statics</h4>
+        <div class="row align-items-center">
+            <article class="card-body">
+                
+                <div class="new-member-list">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <h6 class="text-white">{{coupon.coupon_code}}</h6>
+                                <p class="text-white font-xs">
+                                    {{coupon.description}}
+                                </p>
+                                <h6 class="text-white">{{coupon.coupon_code}}</h6>
+                                <p class="text-white font-xs">
+                                    {{coupon.description}}
+                                </p>
+                                <h6 class="text-white">{{coupon.coupon_code}}</h6>
+                                <p class="text-white font-xs">
+                                    {{coupon.description}}
+                                </p>
+                                <h6 class="text-white">{{coupon.coupon_code}}</h6>
+                                <p class="text-white font-xs">
+                                    {{coupon.description}}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+        </div>   
+</header>
+</section>
+{% endblock %}

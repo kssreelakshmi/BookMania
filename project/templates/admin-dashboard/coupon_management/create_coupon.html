@@ -1,0 +1,89 @@
+{% extends 'base/admin_side/admin_base.html' %}
+
+{% block title %}
+Coupon Management - Create Coupon 
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+<main class="main-wrap">
+    {% include 'base/admin_side/admin_includes/admin_header.html' %}
+
+
+    <section class="content-main mt-80 mb-80">
+    {% include 'base/admin_side/admin_includes/alerts.html' %}
+    
+    
+    <div class="card mx-auto card-box">
+        <div class="card-body ">
+            <h4 class="card-header bg-none mb-4">Create Coupon </h4>
+
+                <form method="post" >
+                    {% csrf_token %}
+                    <div class="container">
+                        <div class="row ">
+                            
+                            <div class="col-lg-4 p-3">
+                                <label class="form-label" for="id_first_name">Coupon Code</label>
+                                {{form.coupon_code}}
+                            </div> <!-- form-group// -->
+                            
+                            <div class="col-lg-4 p-3">
+                                <label class="form-label">Discount Percentage</label>
+                                {{form.discount_percentage}}
+                            </div> <!-- form-group// -->
+
+                        </div>
+                            <div class="row ">
+
+                                <div class="col-lg-4 p-3">
+                                    <label class="form-label">Minimum Amount</label>
+                                    {{form.minimum_amount}}
+                                </div> <!-- form-group// -->
+
+                            </div>
+                            <div class="row">
+
+                                <div class="col-lg-4 p-3">
+                                    <label class="form-label">Description</label>
+                                    <div class="row gx-2">
+                                        {{form.description}}
+                                    </div>
+                                </div> <!-- form-group// -->
+
+                                <div class="col-lg-4 mb-3">
+                                    <div class="form-control p-3">
+                                        {{form.is_active}}
+                                    <label class="ms-3" for="id_is_active">
+                                        Is Active
+                                    </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-lg-4 p-3">
+                                    <label class="form-label">Expiry Date</label>
+                                    {{form.expire_date}}
+                                </div> <!-- form-group// -->
+                                
+                            </div>
+                            
+
+                        <div class="row my-5">
+                            
+                            <div class="col-lg-4">
+                                <button type="submit" class="btn btn-primary w-50 rounded-pill"> Create Coupon </button>
+                            </div> <!-- form-group// -->
+                        </div>
+                    </div>
+                </form>
+            
+        </div>
+    </div>
+</section>    
+</main>
+
+{% endblock %}

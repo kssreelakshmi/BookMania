@@ -1,7 +1,7 @@
 {% extends 'base/admin_side/admin_base.html' %}
 
 {% block title %}
-Account Management - Update User Details
+Coupon Management - Coupon Update
 {% endblock %}
 
 {% load static %}
@@ -12,13 +12,13 @@ Account Management - Update User Details
     {% include 'base/admin_side/admin_includes/admin_header.html' %}
 
 
-<section class="content-main mt-80 mb-80">
+    <section class="content-main mt-80 mb-80">
+    {% include 'base/admin_side/admin_includes/alerts.html' %}
     
     
     <div class="card mx-auto card-box">
         <div class="card-body ">
-            <h4 class="card-title mb-4">Update User</h4>
-            {% include 'base/admin_side/admin_includes/alerts.html' %}
+            <h4 class="card-header bg-none mb-4">Coupon Update</h4>
 
                 <form method="post" >
                     {% csrf_token %}
@@ -26,49 +26,33 @@ Account Management - Update User Details
                         <div class="row ">
                             
                             <div class="col-lg-4 p-3">
-                                <label class="form-label" for="id_first_name">First Name</label>
-                                {{form.first_name}}
+                                <label class="form-label" for="id_first_name">Coupon Code</label>
+                                {{form.coupon_code}}
                             </div> <!-- form-group// -->
                             
                             <div class="col-lg-4 p-3">
-                                <label class="form-label">Last Name</label>
-                                {{form.last_name}}
+                                <label class="form-label">Discount Percentage</label>
+                                {{form.discount_percentage}}
                             </div> <!-- form-group// -->
 
                         </div>
                             <div class="row ">
 
                                 <div class="col-lg-4 p-3">
-                                    <label class="form-label">Username</label>
-                                    {{form.username}}
+                                    <label class="form-label">Minimum Amount</label>
+                                    {{form.minimum_amount}}
                                 </div> <!-- form-group// -->
 
                             </div>
                             <div class="row">
 
                                 <div class="col-lg-4 p-3">
-                                    <label class="form-label">Phone</label>
+                                    <label class="form-label">Description</label>
                                     <div class="row gx-2">
-                                        <!-- <div class="col-4"> <input class="form-control" value="+998" type="text"> </div> -->
-                                        {{form.phone_number}}
+                                        {{form.description}}
                                     </div>
                                 </div> <!-- form-group// -->
 
-                                <div class="col-lg-4 p-3">
-                                    <label class="form-label">Email</label>
-                                    {{form.email}}
-                                </div> <!-- form-group// -->
-                            </div>
-                        
-                            <div class="row">
-                                <div class="col-lg-4 mb-3">
-                                    <div class="form-control p-3">
-                                        {{form.is_admin}}
-                                        <label class="ms-3" for="id_is_admin">
-                                            Super User Status
-                                        </label>
-                                    </div>
-                                </div>
                                 <div class="col-lg-4 mb-3">
                                     <div class="form-control p-3">
                                         {{form.is_active}}
@@ -78,16 +62,15 @@ Account Management - Update User Details
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-lg-4 mb-3">
-                                    <div class="form-control p-3">
-                                        {{form.is_staff}}
-                                        <label class="ms-3" for="is_staff">
-                                            Staff Status
-                                        </label>
-                                    </div>
-                                </div>
+                            
+                            <div class="row">
+                                <div class="col-lg-4 p-3">
+                                    <label class="form-label">Expiry Date</label>
+                                    {{form.expire_date}}
+                                </div> <!-- form-group// -->
+                                
                             </div>
+                            
 
                         <div class="row my-5">
                             

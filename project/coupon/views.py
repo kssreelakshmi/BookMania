@@ -15,9 +15,10 @@ def coupon_control(request):
             
         action = data.get('action')
         coupon_code = data.get('coupon_code')
-        order_number = data.get('order_number')
+        print(coupon_code)
+        order_number = data.get('order_id')
         print(action)
-        order = Order.objects.get(is_ordered=False,order_number=order_number)
+        order = Order.objects.get(is_ordered = False, order_id = order_number)
         # Update the order status based on the order_number and selected_option
         coupon = Coupon.objects.filter(coupon_code__iexact=coupon_code, is_active=True, expire_date__gt=date.today())
         if not coupon.exists():
@@ -25,8 +26,6 @@ def coupon_control(request):
         
         total_incl_tax = order.order_total
         total = total_incl_tax - order.tax
-        
-        
         
         if action == 'apply_coupon':
 
@@ -53,6 +52,7 @@ def coupon_control(request):
                 'tax': order.tax,
                 "grand_total": order.order_total,
                 })
+        
         elif action == 'remove_coupon':
             total += order.coupon_discount
             tax = (5 * total) / 100

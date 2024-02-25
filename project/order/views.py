@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from .models import Order,PaymentMethod,Payment,OrderProduct,Invoice
 from store.models import Product,ProductVariant
+from coupon.models import Coupon
 import datetime
 from accounts.forms import Addresses
 import razorpay
@@ -12,11 +13,11 @@ import json
 from django.http import JsonResponse
 from django.conf import settings
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from io import BytesIO
 from django.template.loader import get_template,render_to_string
 from xhtml2pdf import pisa
 from django.db.models import Sum
-import datetime
 import calendar
 import pytz
 from django.utils import timezone
@@ -24,7 +25,7 @@ from django.utils import timezone
 
 
 # Create your views here.
-
+@login_required(login_url='signin')
 def order_summary(request):
     current_user =request.user
     cart_items = Cart_item.objects.filter(user = current_user)
@@ -33,21 +34,25 @@ def order_summary(request):
     if cart_count <= 0:
         return redirect("shop")
     order_total = 0
-    tax = 0
-    grand_total = 0    
     
     for cart_item in cart_items:
          order_total += cart_item.sub_total()
-    tax = (5 * order_total) / 100
-    grand_total = order_total + tax
     
     if request.method == 'POST':
+        order_id = request.POST.get('order_id')
+        try:
+            data = Order.objects.get(order_id = order_id, is_ordered = False)
+        except Exception as e:
+            data = Order()
+            print(e)
+
         address_id = int(request.POST.get('address1'))
         if address_id is None:
             messages.error(request, "Please choose an address")
             return redirect('cart_checkout')
-        Order.objects.filter(user = current_user, payment = None).delete()
-        data = Order()
+        
+        Order.objects.filter(user = current_user, payment = None).exclude(order_id = data.order_id).delete()
+        
         
         try:
             shipping_address = Addresses.objects.get(id=address_id)
@@ -55,36 +60,23 @@ def order_summary(request):
             messages.error(request, "Please choose an address")
             return redirect('cart_checkout')
         
-        data.user = current_user
-        data.tax = tax
-        data.order_total = grand_total
+
         data.address = shipping_address
         data.order_instruction = request.POST.get("delivery_note")
-        data.ip = request.META.get('REMOTE_ADDR')
         data.save()
-    
-        current_datetime = datetime.datetime.now()
-        current_year = current_datetime.strftime("%Y")
-        current_month = current_datetime.strftime("%m")
-        current_day = current_datetime.strftime("%d")
-        current_hour = current_datetime.strftime("%H")
-        current_minute = current_datetime.strftime("%M")
-        concatenated_datetime = current_year + current_month + current_day + current_hour + current_minute
         
-        order_number = 'BM-ORD'+concatenated_datetime+str(data.pk)
-        data.order_id = order_number
-        data.save()
-
-        
-        order = Order.objects.get(user=current_user,is_ordered=False,order_id=order_number)
         payment_method = PaymentMethod.objects.filter(is_active=True)
-        
+        coupons = Coupon.objects.filter(is_active=True, expire_date__gt=datetime.date.today())
+        print(coupons)
+        print(data.order_id)
         context = { 
-            'order': order,
+            'coupons' : coupons,
+            'order': data,
             'cart_items': cart_items,
-            'grand_total': grand_total,
+            'grand_total': data.order_total,
             'total': order_total,
-            'tax': tax,
+            'tax': data.tax,
+            'coupon_discount': data.coupon_discount,
             'shipping_address': shipping_address,
             'payment_methods': payment_method,
             }
@@ -111,8 +103,6 @@ def place_order(request):
     
     for cart_item in cart_items:
         order_total += cart_item.sub_total()
-    tax =(5 * order_total)/100
-    grand_total = order_total + tax
     if request.method == "POST":  
         order_id = request.POST.get('order_id_summary')
         payment_id= request.POST.get('payment1')
@@ -145,12 +135,13 @@ def place_order(request):
         context = {
             'order': order,
             'cart_items': cart_items,
-            'grand_total': grand_total,
+            'grand_total': order.order_total,
             'razor_pay_key_id': settings.RAZOR_PAY_KEY_ID,
             'razor_pay_secret_key': settings.KEY_SECRET,
             'total': order_total,
             'payment': payment,
-            'tax': tax,
+            'tax': order.tax,
+            'coupon_discount' : order.coupon_discount,
             'shipping_address': order.address,
             'payment_method': payment_method,
             'success_url': success_url,
@@ -375,7 +366,6 @@ def retry_payment(request):
 
 
 def order_completed(request):
-    print('cfcjjlkdlkldkkkklajk')
     try:
         if (request.session['order_id'] and request.session['payment_id']):
             order_id = request.session['order_id']
@@ -389,8 +379,6 @@ def order_completed(request):
                 
                 for item in ordered_products:
                     total += item.product_price * item.quantity
-                tax = (5*total)/100
-                grand_total = total + tax
                 payment = Payment.objects.get(payment_id=payment_id)
 
                 invoice = Invoice()
@@ -402,8 +390,9 @@ def order_completed(request):
                     'order' : order,
                     'order_id' :order_id,
                     'total' :total,
-                    'tax' : tax,
-                    'grand_total' : grand_total,
+                    'tax' : order.tax,
+                    'coupon_discount' : order.coupon_discount,
+                    'grand_total' : order.order_total,
                     'payable_amount' : order.order_total,
                     'ordered_products' : ordered_products,
                     'payment' :payment,
@@ -423,7 +412,6 @@ def order_completed(request):
         return redirect('user_home')
     
 def generate_invoice(request,invoice_number):
-    print('hiiiiiii')
     try:
         invoice = Invoice.objects.get(invoice_number = invoice_number)
         print(invoice)
@@ -438,7 +426,6 @@ def generate_invoice(request,invoice_number):
     sub_total = 0
     for item in order_products:
         sub_total += item.product_price * item.quantity
-        print(sub_total)
 
     template_path = 'base/user_side/invoice.html'
     context = {
@@ -447,6 +434,8 @@ def generate_invoice(request,invoice_number):
         'sub_total': sub_total,
         'payable_amount': invoice.order.order_total,
         'order': invoice.order,
+        'coupon_discount' : invoice.order.coupon_discount,
+
         }
     # Create a Django response object, and specify content_type as pdf
     response = HttpResponse(content_type='application/pdf')

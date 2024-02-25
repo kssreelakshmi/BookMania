@@ -205,3 +205,31 @@ function handleOperation(operation){
   document.getElementById('modal-close').click();
 
 }
+
+function saleHandle() {
+  var startDate = document.getElementById('start_date');
+  var endDate = document.getElementById('end_date').;
+ console.log(startDate);
+  var data = {
+      'start_date': startDate,
+      'end_date': endDate
+  };
+
+  // Send data to Python backend using AJAX
+  $.ajax({
+      type: 'POST',
+      url:`/admin-control/`,
+      data: JSON.stringify(data),
+      
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": getCookie("csrftoken"), 
+      },
+      success: function(response) {
+          console.log(response);
+      },
+      error: function(error) {
+          console.log(error);
+      }
+  });
+}

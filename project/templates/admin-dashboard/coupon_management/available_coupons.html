@@ -1,0 +1,135 @@
+{% extends 'base/admin_side/admin_base.html' %}
+
+{% block title %}
+Coupon Management - All Coupons
+{% endblock %}
+
+{% load static %}
+
+{% block content %}
+{% include 'base/admin_side/admin_includes/aside.html' %}
+<main class="main-wrap">
+{% include 'base/admin_side/admin_includes/admin_header.html' %}
+
+{% include 'base/admin_side/admin_includes/alerts.html' %}
+<section class="content-main">
+  
+      <div class="content-header">
+          <div>
+                <h2 class="content-title card-title">All Coupons</h2>
+          </div>
+          <div class="col-md-2 col-6">
+            <!-- Button trigger modal -->
+            <a href="{% url 'create_coupon' %}" role="button" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>
+              Create Coupon
+            </a>
+        </div>
+      </div>
+     
+      <div class="card mb-4">
+          <div class="card-body">
+              <div class="table-responsive ">
+                  <table class="table table-white" id="all-users-table">
+                    <thead>
+                      <tr>    
+                        <th scope="col">Sl.No</th>
+                        <th scope="col">Coupon Code</th>
+                        <th scope="col">Discount Percentage</th>
+                        <th scope="col">Minimum Amount</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Active</th>
+                        <th scope="col">Expiry Date</th>
+                        <th scope="col">Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for coupon in coupons %}
+                      <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+            
+                        <td>
+                          <a href="{% url 'coupon_update' coupon.id %}">
+                            {{coupon.coupon_code}}
+                          </a>
+                          
+                        </td>
+                        <td> {{coupon.discount_percentage}}</td>
+                        <td> {{coupon.minimum_amount}}</td>
+                        <td> {{coupon.description}}</td>
+                        <td>
+                          {% if coupon.is_active %}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                              <path fill="green" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                            </svg>
+                          {% else %}
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                              <path fill="red" d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+                            </svg>
+                          {% endif %}
+                        </td>
+                       
+                        <td> {{coupon.expire_date}}</td>
+                        
+                        <td><a href="{% url 'delete_coupon' coupon.id %}" class="btn btn-dark text-decoration-none">Delete Coupon</a></td>
+                      </tr>
+                      {% endfor %}
+              
+                     
+                    </tbody>
+                  </table>
+                </div>
+                <nav class="flex-c-m flex-w w-full p-t-45">
+                  {% if orders.has_other_pages %}
+                    <ul class="pagination">
+                      {% if orders.has_previous %}
+                      <li class="page-item">
+                        <a href="?page={{orders.previous_page_number}}" class="page-link ">
+                          Previous
+                        </a>
+                      </li>
+                      {% else %}
+                      <li class="page-item disabled">
+                        <a href="#" class="page-link ">
+                          <span>Previous</span>
+                        </a>
+                      </li>
+                      {% endif %}
+                      
+                      {% for i in orders.paginator.page_range %}
+                      {% if orders.number == i %}
+                      <li class="page-item active">
+                        <a href="#" class="page-link ">
+                          <span>{{i}}</span>
+                        </a>
+                      </li>
+                      {% else %}
+                      <li class="page-item ">
+                        <a href="?page={{i}}" class="page-link ">
+                          <span>{{i}}</span>
+                        </a>
+                      </li>
+                      {% endif %}
+                      {% endfor %}
+                      {% if orders.has_next %}
+                      <li class="page-item"><a class="page-link" href="?page={{orders.next_page_number}}">Next</a></li>
+                      {% else %}
+                        <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+                      {% endif %}
+                    </ul>
+                  {% endif %}
+                </nav>
+  
+  
+          </div> <!-- card-body end// -->
+      </div> <!-- card end// -->
+  </section> <!-- content-main end// -->
+</main>
+<script>
+  function filterByOrderStatus(){
+    let value = document.getElementById('OrderStatusFilter').value
+    
+    window.location.href = `{% url 'all_orders' %}?status=${value}`
+  }
+</script>
+
+{% endblock %}

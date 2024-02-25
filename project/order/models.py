@@ -58,7 +58,7 @@ class Order(models.Model):
     order_id = models.CharField(max_length=100)
     coupon = models.OneToOneField(Coupon, on_delete = models.CASCADE, null=True, blank = True)
     coupon_discount = models.DecimalField(max_digits=50, decimal_places=2, null=True, blank=True)
-    address = models.ForeignKey(Addresses,on_delete=models.CASCADE)
+    address = models.ForeignKey(Addresses,on_delete=models.CASCADE, null=True, blank=True)
     payment = models.ForeignKey(Payment,on_delete=models.SET_NULL, null=True, blank=True)
     order_instruction = models.CharField(max_length=100, blank=True, null=True)
     order_total = models.DecimalField(max_digits=50, decimal_places=2)

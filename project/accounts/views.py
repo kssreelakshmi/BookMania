@@ -590,8 +590,6 @@ def order_detail(request,order_id):
         order = Order.objects.get(order_id = order_id)
         products = OrderProduct.objects.filter(order = order).order_by('-created_at')
         sub_total = 0
-        tax = 0
-        grand_total = 0
         all_return_reasons = products[0].ORDER_RETURN_CHOICES
         return_reasons = [reason[0] for reason in all_return_reasons]
 
@@ -600,8 +598,6 @@ def order_detail(request,order_id):
 
         for product in products:
             sub_total += product.variant.sale_price * product.quantity
-        tax += (5 * sub_total)/100     
-        grand_total += sub_total + tax
     except:
         messages.warning(request,'The details of this order is not available')
         return redirect('order_history')
@@ -630,8 +626,8 @@ def order_detail(request,order_id):
         'products' : products,
         'payment' : order.payment,
         'sub_total' : sub_total,
-        'tax' : tax,
-        'grand_total' : grand_total,
+        'tax' : order.tax,
+        'grand_total' : order.order_total,
 
     }
     return render(request,'base/user_side/order_details.html',context)

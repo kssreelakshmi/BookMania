@@ -607,19 +607,15 @@ function order_operation(operation, idNumber){
   }
 }
 
-
-
 function retry_payment(order_id){
 
   const data = {
     'order_id' : order_id 
   }
 
-
-
   $.ajax({
         type: "POST",
-        url: `/order/retry-payment/`,  // Replace with the actual URL for your view
+        url: `/order/retry-payment/`, 
         dataType: "json",
         data: data,
 
@@ -627,8 +623,6 @@ function retry_payment(order_id){
             "X-Requested-With": "XMLHttpRequest",
             "X-CSRFToken": getCookie("csrftoken"), 
           },
-
-
 
         success: (responseData) => {
           if (responseData.status === "SUCCESS") {
@@ -679,6 +673,66 @@ function retry_payment(order_id){
   });
 }
 
+
+
+
+
+//coupon 
+
+function selectCoupon(code, desc){
+
+  document.getElementById("couponIn").value = code
+  document.getElementById("couponDesc").innerHTML = desc
+  
+}
+
+function couponHandle(action, order_id){
+  console.log(action);
+  console.log(order_id);
+  couponCode = document.getElementById("couponIn").value
+
+  let data = {
+    action : action,
+    coupon_code : couponCode,
+    order_id :order_id
+  }
+
+  $.ajax({
+    type: "POST",
+    url: `/order/order-summary/coupon/`, 
+    dataType: "json", 
+    data: JSON.stringify(data),
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": getCookie("csrftoken"), 
+    },
+  
+      //response from backend
+    success: (data) => {
+      console.log(data);
+      if(data.status === 'coupon_applied'){
+        document.getElementById('coupon_card').hidden = false;
+        document.getElementById('coupDescCard').innerHTML = couponCode;
+        document.getElementById('coupon_apply_card').setAttribute('style', 'display:none !important');
+        document.getElementById('tax').innerText = data.tax;
+        document.getElementById('discount').innerHTML = data.coupon_discount;
+        document.getElementById('grand_total').innerHTML = data.grand_total;
+        console.log(document.getElementById('grand_total'));
+      }
+      if(data.status === 'coupon_removed'){
+        document.getElementById('coupon_card').hidden = true;
+        document.getElementById('coupDescCard').innerHTML = '';
+        document.getElementById('tax').innerHTML = data.tax
+        document.getElementById('cdiscount').innerHTML = data.coupon_discount
+        document.getElementById('grand_total').innerHTML = data.grand_total
+      }
+    },
+    error: (error) => {
+      console.log(error);
+      alert(error)
+    }
+  });
+}
 
 
 

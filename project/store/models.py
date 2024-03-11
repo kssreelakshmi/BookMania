@@ -97,6 +97,7 @@ class ProductVariant(models.Model):
     def get_product_name(self):
         return f'{self.product.product_name}-{self.sku_id} - {", ".join([value[0] for value in self.attribute.all().values_list("attribute_value")])} by {self.product.publication}'
 
+
     def __str__(self):
         return self.product_variant_slug
     

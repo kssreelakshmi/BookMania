@@ -42,8 +42,6 @@ function getCookie(name) {
       });
     }
 
-    
-
 
     const handleImage = (id) =>{
       const image_input_field = document.getElementById(id)
@@ -119,7 +117,6 @@ function getCookie(name) {
       
 $(document).ready(function(){
   $('#reasonsModal').on('show.bs.modal', function (e) {
-    console.log('showwwwww');
     const reasonDiv = document.getElementById('reason-div')
     const tempInput = document.createElement('input')
     tempInput.id = 'temp-input'
@@ -138,7 +135,6 @@ $(document).ready(function(){
     
     
 function order_operation(order_product_id, operation, reason, otherReason = null){
-  console.log('working');
   const title = document.getElementById('reasonsModalTitle')
   const reasonElement = document.getElementById('user-reason')
   document.getElementById('temp-input').value = order_product_id
@@ -147,7 +143,6 @@ function order_operation(order_product_id, operation, reason, otherReason = null
   if(operation === 'cancel')
   {
     title.innerHTML = 'Inspect Cancellation Reason and Proceed...'
-    console.log('sdfrttgyhujikolp');
     if(otherReason){
       reasonElement.innerHTML = 'REASON : ' + reason;
       reasonElement.classList.add('reason_others');
@@ -207,29 +202,139 @@ function handleOperation(operation){
 }
 
 function saleHandle() {
-  var startDate = document.getElementById('start_date');
-  var endDate = document.getElementById('end_date').;
- console.log(startDate);
-  var data = {
-      'start_date': startDate,
-      'end_date': endDate
+     
+  let startDate = document.getElementById('start_date').value;
+  let endDate = document.getElementById('end_date').value;
+
+  if(! startDate){
+    document.getElementById('start_date_error').hidden = false;
+    return
+  }
+  else{
+    document.getElementById('filterbutton').disabled = false;
+  }
+
+  if(! endDate){
+    endDate = ''
+  }
+  const url = new URL(window.location.href)
+  url.search =''
+  const urlParams = new URLSearchParams(window.location.search);
+  urlParams.set('start-date', startDate);
+  urlParams.set('end-date', endDate);
+  const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+
+  console.log(url);
+  window.location.href = newUrl;
+
   };
 
-  // Send data to Python backend using AJAX
+
+  
+function getDashboardSalesData(){
   $.ajax({
-      type: 'POST',
-      url:`/admin-control/`,
-      data: JSON.stringify(data),
+    type: "GET",
+    url: "/admin-control/api/dashboard/data/sales",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    success: (data) => {
+      if (data.status === "success") {
+          setChartSalesData(data.data)
+      } else {
+        console.log(data);
+    }
       
-      headers: {
-        "X-Requested-With": "XMLHttpRequest",
-        "X-CSRFToken": getCookie("csrftoken"), 
-      },
-      success: function(response) {
-          console.log(response);
-      },
-      error: function(error) {
-          console.log(error);
+  },
+  error: (xhr, status, error) => {
+      // Display the error message on the page
+      console.log("error");
+      console.log(error);
+  }
+});
+}
+
+
+function setChartSalesData(data)
+{
+  const salesChart = document.getElementById('sales-chart');
+  const labels = Object.keys(data);
+  const datasetData = Object.values(data);
+  new Chart(salesChart, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: datasetData,
+        backgroundColor:['#ABEBC6','#AED6F1','#F5B7B1','#FCF3CF','#F6DDCC','#D5D8DC'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
       }
+    }
   });
 }
+
+// Bar chart of top 5 selling products(variants)
+function getDashboardProduct2SalesData(){
+  console.log('sdfghjkl');
+  $.ajax({
+    type: "GET",
+    url: "/admin-control/api/dashboard/data/product2sales",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    success: (data) => {
+      if (data.status === "success") {
+        console.log(data);
+        setDashboardProduct2SalesData(data.data)
+        
+      } else {
+        console.log(data);
+    }
+      
+  },
+  error: (xhr, status, error) => {
+      // Display the error message on the page
+      console.log("error");
+      console.log(error);
+  }
+});
+} 
+
+function setDashboardProduct2SalesData(data)
+{
+  
+  const topProductsChart = document.getElementById('top-products-sale');
+  const labels = Object.keys(data);  
+ 
+  const datasetData = Object.values(data);
+  
+  new Chart(topProductsChart, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'No Of Sales vs Products',
+        data: datasetData,
+        backgroundColor:['#ABEBC6','#AED6F1','#F5B7B1','#FCF3CF','#F6DDCC','#D5D8DC','#EDBB99','#CD6155','#5D6D7E','#1ABC9C','#BB8FCE'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  }
+  );
+
+}
+

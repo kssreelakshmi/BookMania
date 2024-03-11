@@ -10,7 +10,11 @@ urlpatterns = [
     path('user-management/create-user/', views.create_user, name="create_user"),
     path('user-management/update-user/<int:user_id>', views.update_user, name="update_user"),
     path('user-control/<int:user_id>', views.user_control, name="user_control"),
-    path('sales-report/', views.sales_report, name="sales_report"),
+    path('sales-report', views.sales_report, name="sales_report"),
+
+    path("api/dashboard/data/sales", views.DashboardSalesData.as_view(), name="api-dashboard-sales"),
+    path("api/dashboard/data/product2sales", views.DashboardProductVsOrderData.as_view(), name="api-dashboard-productvsorder"),
+    
     
 #category management
     path('category-management/all-category/',views.all_category, name="all_category"),

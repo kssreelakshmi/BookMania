@@ -178,7 +178,6 @@ $(".custom-carousel").owlCarousel({
       $(this).toggleClass("active");
     });
   });
-
   
   
 
@@ -534,7 +533,6 @@ function filterWithPrice(min,max) {
   catch
     {
       var price_max = ''
-      console.log('fudhgoidfshgofhd');
     }
     if(price_max){
       urlParams.set('price-max', price_max.toString());

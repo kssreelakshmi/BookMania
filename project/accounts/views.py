@@ -412,8 +412,8 @@ def mobile_number_change_verify(request):
     otp = request.GET['otp']        
     if otp == user_profile.otp:
         login(request, user_profile.user)
-        messages.success(request, 'Login successfull !!!')
-        return redirect('user_home')
+        messages.success(request, 'mobile number change successful')
+        return redirect('user_dashboard')
     else:
         messages.error(request, 'Invalid OTP !!!')
 
@@ -485,35 +485,35 @@ def change_email_verify(request):
                 "status": "error", 
                 "message": 'Invalid Otp'})
 
-# def password_change(request):
-#     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-#     if request.method == "POST" and is_ajax:
-#         data = json.load(request)
+def password_change(request):
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if request.method == "POST" and is_ajax:
+        data = json.load(request)
                 
-#         try:
-#             current_password= request.user.password #user's current password
-#             current_password_entered= data['old_password']
-#             password2= data['password2']
+        try:
+            current_password= request.user.password #user's current password
+            current_password_entered= data['old_password']
+            password2= data['password2']
 
-#             matchcheck= check_password(current_password_entered, current_password)
+            matchcheck= check_password(current_password_entered, current_password)
             
-#             if matchcheck:
-#                 user = User.objects.get(id=request.user.id)
-#                 user.set_password(password2)
-#                 user.save()  
-#                 update_session_auth_hash(request, user)
+            if matchcheck:
+                user = User.objects.get(id=request.user.id)
+                user.set_password(password2)
+                user.save()  
+                update_session_auth_hash(request, user)
 
-#                 messages.success(request, "Password Change Successfully")
-#                 return JsonResponse({"status": "success"})
-#             else:
-#                 return JsonResponse({"status": "error","message": "Invalid Old Password"})
+                messages.success(request, "Password Change Successfully")
+                return JsonResponse({"status": "success"})
+            else:
+                return JsonResponse({"status": "error","message": "Invalid Old Password"})
         
-#         except:
-#             return JsonResponse({"status": "error", "message": "Contact Admin"})
+        except:
+            return JsonResponse({"status": "error", "message": "Contact Admin"})
 
-#     else:
-#         # Return a JSON response indicating an invalid request
-#         return JsonResponse({"status": "error", "message": "Invalid request"})
+    else:
+        # Return a JSON response indicating an invalid request
+        return JsonResponse({"status": "error", "message": "Invalid request"})
     
 def password_change(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -523,7 +523,7 @@ def password_change(request):
             user = User.objects.get(email__exact=email)
             
             #SEND OTP TO MAIL
-            otp=random.randint(1000,9999)
+            otp=random.randint(100000,999999)
             user_otp,created = UserProfile.objects.update_or_create(user=user, defaults={'otp': f'{otp}'})
             
             current_site = get_current_site(request)
@@ -559,7 +559,7 @@ def change_password_with_email(request,uid):
                 user.set_password(request.POST['password1'])
                 user.save()  
                 messages.success(request, "Password Changed Successfully")
-                return redirect('user-dashboard')      
+                return redirect('user_dashboard')      
             else:
                 messages.error(request, "Invalid Otp")
                 return render(request,'accounts/change_password_with_mail.html')
@@ -754,17 +754,6 @@ def update_address(request):
             'countries': countries
         })
     
-        # return JsonResponse({
-        #     'id': address.id,
-        #     'name': address.name,
-        #     'phone_number':address.phone_number,
-        #     'addrl1': address.address_line_1,
-        #     'addrl2': address.address_line_2,
-        #     'city': address.city,
-        #     'state': address.state,
-        #     'country': address.get_country_display(),
-        #     'pincode': address.pincode,
-        # })
     elif request.method =='POST':
         
         address_id = request.POST.get('id')

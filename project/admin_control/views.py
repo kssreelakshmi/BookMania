@@ -6,6 +6,7 @@ from store.forms import ProductForm,ProductVariantForm,PublicationForm,AuthorFor
 from django.contrib.auth import login, logout
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_control
 from django.contrib import messages
 from django.views.decorators.cache import cache_control
 from category.models import Category
@@ -22,12 +23,17 @@ from django.db.models import Count, F, Sum, Avg
 from io import BytesIO
 from django.template.loader import get_template,render_to_string
 from xhtml2pdf import pisa
+from django.http import HttpResponse
 import json
 import datetime
+import itertools
 import calendar
 import pytz
 from django.utils import timezone
-
+from datetime import timedelta, date
+from django.views.generic import TemplateView
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 # Create your views here.
 User = get_user_model()
@@ -50,6 +56,8 @@ def check_isadmin(view_func, redirect_url="admin_login"):
 
 @check_isadmin
 @login_required(login_url='admin_login')
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
 def admin_home(request):
 
     orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
@@ -63,17 +71,9 @@ def admin_home(request):
     delivered_oders = orders.filter(order_status="Delivered")
     coupons = Coupon.objects.filter(is_active = True)
     coupon_count= coupons.count()
-    print(coupons)
-
-
-
-
-
-    # sale_products = OrderProduct.objects.filter(is_ordered=True)
-    #
+    
    
     context = {
-
             'coupons ' : coupons ,
             'coupon_count ' : coupon_count ,
             'order_products': order_products,
@@ -84,55 +84,122 @@ def admin_home(request):
             'total_revenue': extracted_total_revenue,
             'users' : user.count(),
             'delivered_oders' : delivered_oders,
-            # 'sale_products' : sale_products,
-            # 'product_count_dict' : product_count_dict,
     }
-
-
     return render(request,'admin-dashboard/admin_home.html',context)
+
+class DashboardSalesData(APIView):
+    authentication_classes = []
+    permission_classes = []
+    
+    def get(self, request, format=None):    
+        print('reached efrerferf3ef')
+        total_orders_count  = OrderProduct.objects.filter(is_ordered=True).count()
+        new_orders_count  = OrderProduct.objects.filter(is_ordered=True,order_status='New').count()
+        cancelled_orders_count  = OrderProduct.objects.filter(is_ordered=True,order_status__in=["Cancelled"]).count()
+        returned_orders_count  = OrderProduct.objects.filter(is_ordered=True,order_status=['Returned']).count()
+        cancellation_requested_count  = OrderProduct.objects.filter(is_ordered=True,order_status__in=["Cancelled"]).count()
+        return__requested_count  = OrderProduct.objects.filter(is_ordered=True,order_status=['Returned']).count()
+        delivered_orders_count  = OrderProduct.objects.filter(is_ordered=True,order_status='Delivered').count()
+        data = {
+                'status':'success',
+                'data':{
+                    'Total Orders':total_orders_count,
+                    'New Orders':new_orders_count,
+                    'cancelled Orders':cancelled_orders_count,
+                    'Returned Orders':returned_orders_count,
+                    'Cancellation Requested' : cancellation_requested_count,
+                    'Return Requested' : return__requested_count,
+                    'Delivered Orders':delivered_orders_count,
+                    }    
+            }
+        return Response(data)
+    
+
+class DashboardProductVsOrderData(APIView):
+    authentication_classes = []
+    permission_classes = []
+    
+    def get(self, request, format=None):
+        
+        order_products = OrderProduct.objects.filter(is_ordered=True).order_by('-created_at')
+        variants = ProductVariant.objects.filter(is_active = True)
+        sale_data = {str(variant.sku_id): 0 for variant in variants }
+
+            
+        for order_product in order_products:
+            key = str(order_product.variant.sku_id)
+            if sale_data[key]:
+                sale_data[key] += order_product.quantity
+            else:
+                sale_data[key] = order_product.quantity
+        
+        sale_data = dict(itertools.islice({key: value for key, value in sorted(sale_data.items(), key=lambda item: item[1], reverse = True)}.items(), 5))
+
+        print(sale_data)
+    
+        data = {
+            'status': 'success',
+            'data': sale_data
+        }
+        return Response(data, content_type="application/json")
+
+
 
 
 def sales_report(request):
-    order_products = OrderProduct.objects.filter(is_ordered=True)
-    # for product in order_products:
-    #     if product_count_dict[product.variant.sku_id]:
-    #         product_count_dict[product.variant.sku_id]+1
-    #     else:
-    #         product_count_dict[product.variant.sku_id] = 1
-    product_counts = order_products.values('variant_id').annotate(count=Count('variant_id'))
-    print(product_counts)
-    for i in product_counts:
-        print(i)
-    product_names = {variant.id: variant.product.product_name for variant in ProductVariant.objects.all()}
-    product_count_dict = {}
-    for product_count in product_counts:
-        variant_id = product_count['variant_id']
-        count = product_count['count']
-        product_name = product_names.get(variant_id, 'Unknown')
-        product_count_dict[product_name] = count
+    if request.GET:
+        start_date = request.GET['start-date']
+        end_date = request.GET['end-date']
+       
+        if not end_date:
+            end_date = datetime.date.today()
+        
+        order_products = OrderProduct.objects.filter(is_ordered=True, created_at__date__range=(start_date, end_date)).order_by('-created_at')
+    else:
+        order_products = OrderProduct.objects.filter(is_ordered=True).order_by('-created_at')
 
 
+    variants = ProductVariant.objects.filter(is_active = True)
+    stock = {}
+    for variant in variants:
+        stock[variant.get_product_name()] = {
+            'product_name' : variant.product.product_name,
+            'total_stock' : variant.stock,
+            'sale_price' : int(variant.sale_price)
+            }
+
+    # stock data is in stock dictionary
+    sale_data = {variant.get_product_name(): 0 for variant in variants }
+
+    for order_product in order_products:
+        if sale_data[order_product.variant.get_product_name()]:
+            sale_data[order_product.variant.get_product_name()] += order_product.quantity
+        else:
+            sale_data[order_product.variant.get_product_name()] = order_product.quantity
+    for data in stock:
+        stock[data]['sold_quantity'] = sale_data[data]
+        stock[data]['total_revenue'] = stock[data]['sold_quantity'] * stock[data]['sale_price']
+
+    
 
     orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
-    orders_count =orders.count()
+    orders_count = orders.count()
     product_variants = ProductVariant.objects.filter(is_active = True)
     user = Account.objects.filter(is_active = True).exclude(is_admin = True)
     total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
     extracted_total_revenue = total_revenue['total_revenue']    
 
     context = {
+        'variant_sale_data' : stock,
         'product_variants': product_variants,
-        'product_count_dict' : product_count_dict,
-        ' orders_count' : orders_count,
-         'users' : user.count(),
+        'orders_count' : orders_count,
+        'users' : user.count(),
+        'revenue' : extracted_total_revenue,
+
     }
 
 
     return render(request,'admin-dashboard/sales_report.html',context)
-
-
-    
-
 
 
 # @check_isadmin
@@ -351,9 +418,7 @@ def all_products(request):
     image=Subquery(
         ProductVariant.objects.filter(product_id=OuterRef('pk')).values('thumbnail_image')[:1]
     ))
-    # for product in products:
-    #     if not product.author.is_active:
-    #         product.is_available =  product.is_available
+   
     
     paginator = Paginator(products,10)
     page = request.GET.get('page')
@@ -761,7 +826,6 @@ def update_author(request,id):
 def all_orders(request):
     order_status = request.GET.get('status')
     
-
     if order_status:
         order_status = order_status.replace("-", " ")
         orders = Order.objects.filter(order_status__icontains=order_status).order_by('-created_at')

@@ -260,7 +260,7 @@ Orders Details
                         </div>
                         <div class=" m-2 p-2">
                             {% if invoice %}
-                            <a role="button" class="flex-c-m  cl0  bg3 bor14 hov-btn3 p-3 trans-04 pointer" href="{% url 'generate_invoice' invoice.invoice_number %}">
+                            <a role="button" target="_blank" class="flex-c-m  cl0  bg3 bor14 hov-btn3 p-3 trans-04 pointer" href="{% url 'generate_invoice' invoice.invoice_number %}">
                                 Download Invoice
                             </a>
                             {% endif %}

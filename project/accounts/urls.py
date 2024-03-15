@@ -10,7 +10,7 @@ urlpatterns = [
     path('user-login-with-otp/verify/<str:uid>/', views.verify_otp, name='verify_otp'),
     
     path('forgot-password/', views.forgot_password, name='forgot_password'),
-    path("reset/password/<uidb64>/<token>/", views.reset_password_verify, name="reset_password_verify"),
+    path("reset/password/<uid>/<token>/", views.reset_password_verify, name="reset_password_verify"),
     path('reset-password/', views.reset_password, name='reset_password'),
     path('user-logout/', views.user_logout, name='user_logout'),
     
@@ -22,8 +22,9 @@ urlpatterns = [
     path('mobile-number-change/', views.mobile_number_change, name='mobile_number_change'),
     path('mobile-number-change/verify/', views.mobile_number_change_verify, name='mobile_number_change_verify'),
     path('email-change/', views.email_change, name='email_change'),
-    path('email-change/verify', views.email_change, name='change_email_verify'),
+    path('email-change/verify/', views.change_email_verify, name='change_email_verify'),
     path('password-change/', views.password_change, name='password_change'),
+    path('password-change/verify/<str:uid>/', views.change_password_with_email, name='change_password_with_email'),
 
 
     path('order-history/', views.order_history, name='order_history'),

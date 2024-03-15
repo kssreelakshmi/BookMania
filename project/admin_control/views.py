@@ -144,8 +144,6 @@ class DashboardProductVsOrderData(APIView):
         return Response(data, content_type="application/json")
 
 
-
-
 def sales_report(request):
     if request.GET:
         start_date = request.GET['start-date']
@@ -176,6 +174,7 @@ def sales_report(request):
             sale_data[order_product.variant.get_product_name()] += order_product.quantity
         else:
             sale_data[order_product.variant.get_product_name()] = order_product.quantity
+            
     for data in stock:
         stock[data]['sold_quantity'] = sale_data[data]
         stock[data]['total_revenue'] = stock[data]['sold_quantity'] * stock[data]['sale_price']
@@ -189,13 +188,19 @@ def sales_report(request):
     total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
     extracted_total_revenue = total_revenue['total_revenue']    
 
+    cancelled_order_total = OrderProduct.objects.filter(is_ordered=True, order_status='Cancelled').aggregate(cancelled_order_total=Sum(F('product_price') * F('quantity')))
+    cancelled_amount = cancelled_order_total['cancelled_order_total']
+    returned_order_total = OrderProduct.objects.filter(is_ordered=True, order_status='Returned').aggregate(returned_order_total=Sum(F('product_price') * F('quantity')))
+    returned_amount = returned_order_total['returned_order_total']
+    final_amount = extracted_total_revenue - (returned_amount+cancelled_amount)
+
     context = {
         'variant_sale_data' : stock,
         'product_variants': product_variants,
         'orders_count' : orders_count,
         'users' : user.count(),
         'revenue' : extracted_total_revenue,
-
+        'final_amount': final_amount,
     }
 
 
@@ -352,8 +357,27 @@ def category_control(request, cat_slug):
         category = Category.objects.get(slug = cat_slug)
     except Exception as e:
         print(e)
-    
-    category.is_active = not category.is_active
+
+    products = Product.objects.filter(category = category)
+    if category.is_active:
+        category.is_active = False
+
+        for product in products:
+            product.is_available = False
+            product.save()
+            for variant in product.productvariant_set.all():
+                variant.is_active = False
+                variant.save()
+
+    else:
+        category.is_active = True
+
+        for product in products:
+            product.is_available = True
+            product.save()
+            for variant in product.productvariant_set.all():
+                variant.is_active = True
+                variant.save()
     category.save()
     return redirect('all_category')
 
@@ -710,7 +734,27 @@ def publication_control(request, id):
     except Exception as e:
         print(e)
     
-    publication.is_active = not publication.is_active
+    products = Product.objects.filter(publication = publication)
+    if publication.is_active:
+        publication.is_active = False
+
+        for product in products:
+            product.is_available = False
+            product.save()
+            for variant in product.productvariant_set.all():
+                variant.is_active = False
+                variant.save()
+
+    else:
+        publication.is_active = True
+
+        for product in products:
+            product.is_available = True
+            product.save()
+            for variant in product.productvariant_set.all():
+                variant.is_active = True
+                variant.save()
+   
     publication.save()
     return redirect('all_publication')
 
@@ -777,7 +821,27 @@ def author_control(request,id):
     except Exception as e:
         print(e)
     
-    author.is_active = not author.is_active
+    products = Product.objects.filter(author = author)
+    if author.is_active:
+        author.is_active = False
+
+        for product in products:
+            product.is_available = False
+            product.save()
+            for variant in product.productvariant_set.all():
+                variant.is_active = False
+                variant.save()
+
+    else:
+        author.is_active = True
+
+        for product in products:
+            product.is_available = True
+            product.save()
+            for variant in product.productvariant_set.all():
+                variant.is_active = True
+                variant.save()
+
     author.save()
     return redirect('all_authors')
     
@@ -877,7 +941,7 @@ def update_order(request, order_id):
 
     print(order.is_ordered)
     if order.is_ordered:
-        invoice = Invoice.objects.filter(order=order)
+        invoice = Invoice.objects.filter(order=order).first()
 
     context = {
 

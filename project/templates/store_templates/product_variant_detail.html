@@ -136,8 +136,8 @@ Product Detail
 							   
 								
 								<div class="flex-w flex-m p-b-10 my-5 ">
-									<a class="btn btn-success text-decoration-none" href="#">Added to Cart</a>
-									<a class="btn btn-danger text-decoration-none mx-5" href="{% url 'cart' %}">View Cart</a>
+									<a class="btn btn-dark text-decoration-none" href="#">Added to Cart</a>
+									<a class="btn btn-dark text-decoration-none mx-5" href="{% url 'cart' %}">View Cart</a>
 								</div>
 								  
 
@@ -213,35 +213,37 @@ Product Detail
 									<ul class="p-lr-28 p-lr-15-sm">
 										<li class="flex-w flex-t p-b-7">
 											<span class="stext-102 cl3 size-205">
-												Weight
+												Author
 											</span>
 
 											<span class="stext-102 cl6 size-206">
-												0.79 kg
+												{{single_product.product.author}}
 											</span>
 										</li>
 
 										<li class="flex-w flex-t p-b-7">
 											<span class="stext-102 cl3 size-205">
-												Dimensions
+												Category
 											</span>
 
 											<span class="stext-102 cl6 size-206">
-												110 x 33 x 100 cm
+												{{single_product.product.category}}
 											</span>
 										</li>
 
 										<li class="flex-w flex-t p-b-7">
+											{% for value in single_product.attribute.all %}
 											<span class="stext-102 cl3 size-205">
-												Materials
+												{{value.attribute.attribute_name}}
 											</span>
 
 											<span class="stext-102 cl6 size-206">
-												60% cotton
+												{{value.attribute_value}}
 											</span>
+											{% endfor %}
 										</li>
 
-										<li class="flex-w flex-t p-b-7">
+										<!-- <li class="flex-w flex-t p-b-7">
 											<span class="stext-102 cl3 size-205">
 												Color
 											</span>
@@ -259,7 +261,7 @@ Product Detail
 											<span class="stext-102 cl6 size-206">
 												XL, L, M, S
 											</span>
-										</li>
+										</li> -->
 									</ul>
 								</div>
 							</div>
@@ -354,7 +356,7 @@ Product Detail
 
 		</div>
 
-		<div class="bg6 flex-c-m flex-w size-302 m-t-73 p-tb-15">
+		<!-- <div class="bg6 flex-c-m flex-w size-302 m-t-73 p-tb-15">
 			<span class="stext-107 cl6 p-lr-25">
 				SKU: JAK-01
 			</span>
@@ -362,21 +364,21 @@ Product Detail
 			<span class="stext-107 cl6 p-lr-25">
 				Categories: Jacket, Men
 			</span>
-		</div>
+		</div> -->
 	</section>
 
 
 	<!-- Related Products -->
-	<!-- <section class="sec-relate-product bg0 p-t-45 p-b-105">
+	 <section class="sec-relate-product bg0 p-t-45 p-b-105">
 		<div class="container">
 			<div class="p-b-45">
 				<h3 class="ltext-106 cl5 txt-center">
 					Related Products
 				</h3>
-			</div> -->
+			</div>
 
 			<!-- Slide2 -->
-			<!-- <div class="wrap-slick2">
+			<div class="wrap-slick2">
 				<div class="slick2">
 					<div class="item-slick2 p-l-15 p-r-15 p-t-15 p-b-15">
 						<!-- Block2 -->
@@ -636,6 +638,6 @@ Product Detail
 				</div>
 			</div>
 		</div>
-	</section> -->
+	</section> 
 
 {% endblock %}    

@@ -1,13 +1,13 @@
 
 {% if messages %}
     {% for message in messages %}
-    <div id="mesfsage" class="container-fluid p-0">
+    <div id="message" class="container-fluid p-0">
         <div {% if message.tags %} class="py-4 alert alert-{% if message.tags == 'error'%}danger{% else %}{{ message.tags }}{% endif %}"{% endif %} role="alert">
-            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-            <div>
+            <div class="d-flex justify-content-between">
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-            <button type="button" class="btn-close float-end" data-bs-dismiss="alert"></button>
         </div>
     </div>
     {% endfor %}

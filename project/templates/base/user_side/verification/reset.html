@@ -26,10 +26,10 @@ Reset Password
                             {% csrf_token %}
 
                             <div class="col-lg-12 p-3">
-                                <input class="form-control hov1" id="id_password" type="password" name="password" placeholder="Password">
+                                <input class="form-control hov1" id="id_password" type="password" name="password" required placeholder="Password">
                             </div>
                             <div class="col-lg-12 p-3">
-                                <input class="form-control hov1" id="id_confirm_password" type="password" name="confirm_password" placeholder="Confirm Password">
+                                <input class="form-control hov1" id="id_confirm_password" type="password" name="confirm_password" required placeholder="Confirm Password">
                             </div>
                             <div class="col-lg-12 d-flex justify-content-center my-4">
                                 <button type="submit" class="btn btn-outline-secondary px-5">

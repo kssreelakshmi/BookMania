@@ -153,31 +153,38 @@ User Dashboard
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
+        <form method="post">
+          {% csrf_token %}
           <div class="modal-body">
-            <p>You are going to change your current Mobile Number to a new Mobile Number .</p>
-            <label for="MobileNumberChange" class="mt-2">New Mobile Number</label> 
-            <input class="form-control" type="tel" id="MobileNumberChange" name="phone" pattern="[+]{1}[0-9]{11,14}" required >
+            <p>You are going to change your current Mobile Number to a new Mobile Number.</p>
+            
+            <label for="" class="mt-2">New Mobile Number</label> 
+            <input class="form-control" type="tel" id="MobileNumberChange" name="phone" required  placeholder="New Mobile Number" value="">
             <p class="text-danger small m-0 p-0" id="MobileNumberChangeOtpError"></p>
-          </div>
+            
+            <a class="btn btn-dark mt-2 text-light" onclick="SendMobileNumberChangeOtp()" id="MobileNumberChangeOtpbtn">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+              Confirm
+            </a>
 
-          <a class="btn btn-dark " onclick="SendMobileNumberChangeOtp()" id="MobileNumberChangeOtpbtn">
-            <div class="d-flex p-2 d-none" role="status" aria-hidden="true"></div>
-            Confirm
-          </a>
+            <div id="MobileNumberChangeOtpDiv" class="d-none">
 
-          <div id="MobileNumberChangeOtpDiv" class="d-none">
-            <label for="" class="mt-2">Enter Otp</label> 
-            <input type="number" id="MobileNumberChangeOtp" class="form-control " placeholder="OTP" value="" >
-            <p class="text-danger small m-0 p-0" id="MobileNumberChangeOtpErrors"></p>
-            <button class="btn btn-dark mt-2" onclick="MobileNumberChangeOtpVerify()">
-                Change
-            </button>
+              <label for="" class="mt-2">Enter Otp</label> 
+              <input type="number" id="MobileNumberChangeOtp" class="form-control " placeholder="OTP" value="" >
+              <p class="text-danger small m-0 p-0" id="MobileNumberChangeOtpErrors"></p>
+              <button type="button" class="btn btn-dark mt-2" onclick="MobileNumberChangeOtpVerify()">
+                  Change
+              </button>
+            </div>
+  
+            <div class="modal-footer">
+              <button type="button" class="btn btn-dark" data-dismiss="modal" onclick="location.reload();" >Close</button>
+              <!-- <button type="button" class="btn btn-dark">Update Mobile Number</button> -->
+            </div>
           </div>
+        </form>
 
-          <div class="modal-footer">
-            <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
-            <!-- <button type="button" class="btn btn-dark">Update Mobile Number</button> -->
-          </div>
+
       </div>
     </div>
   </div>
@@ -195,7 +202,10 @@ User Dashboard
         <form method="post">
           {% csrf_token %}
           <div class="modal-body">
-            <p>You are going to change your current Email ID to a new Email ID. After filling the new Email ID a verification mail send to your new Email ID.</p>
+            
+            <p>You are going to change your current Email ID to a new Email ID. After filling the new 
+              Email ID a verification mail send to your new Email ID.</p>
+            
             <label for="" class="mt-2"> <small>New Email Id</small></label> 
             <input type="email" id="EmailChangeOtpNewMail"  class="form-control " placeholder="New Email Address" value="" >
             <p class="text-danger small m-0 p-0" id="sendEmailChangeOtpMailNewMailError"></p>
@@ -207,10 +217,10 @@ User Dashboard
             <div id="EmailChangeOtpNewMailDiv" class="d-none">
               <label for="" class="mt-2"> <small>Enter Otp</small></label> 
                   <input type="number" id="EmailChangeOtpNewMailOtp" class="form-control " placeholder="OTP" value="" >
-                  <p class="text-danger small m-0 p-0" id="sendEmailChangeOtpMailNewMailError"></p>
+                  <p class="text-danger small m-0 p-0" id="sendEmailChangeOtpMailNewMailotpError"></p>
               <button type="button" class="btn btn-dark mt-2" onclick="sendEmailChangeOtpVerify()">
                   Change
-              </button>1
+              </button>
           </div>
   
           </div>
@@ -222,12 +232,13 @@ User Dashboard
     </div>
   </div>
   
+  
   <!-- Modal for password change -->
   <div class="modal fade modal-custom" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="passwordModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="passwordModalLabel">Password Change</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -248,6 +259,9 @@ User Dashboard
       </div>
     </div>
   </div>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+
+
 
 
 {% endblock %}

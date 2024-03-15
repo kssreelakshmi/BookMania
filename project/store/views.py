@@ -8,6 +8,8 @@ from cart.views import _cart_id
 from django.db.models import Q
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.views.decorators.cache import cache_control
+from order.models import Order,OrderProduct
+import itertools
 # from django.http import HttpResponse
 
 # Create your views here.
@@ -19,6 +21,26 @@ def home(request, cat_slug=None):
     categories = Category.objects.filter(is_active = True)
     products = Product.objects.filter(is_available = True)
     product_variants = ProductVariant.objects.select_related('product').prefetch_related('attribute').filter(is_active = True)
+
+    order_products = OrderProduct.objects.filter(is_ordered=True).order_by('-created_at')
+    variants = ProductVariant.objects.filter(is_active = True)
+    sale_data = {str(variant.get_product_name()): 0 for variant in variants }
+
+            
+    for order_product in order_products:
+        key = str(order_product.variant.get_product_name())
+        if sale_data[key]:
+            sale_data[key] += order_product.quantity
+        else:
+            sale_data[key] = order_product.quantity
+    
+    sale_data = dict(itertools.islice({key: value for key, value in sorted(sale_data.items(), key=lambda item: item[1], reverse = True)}.items(), 5))
+
+    print(sale_data)
+
+
+
+
     if request.user.is_authenticated:
         wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
         if wishlist_exists:
@@ -57,6 +79,7 @@ def home(request, cat_slug=None):
             print(e)
     
     context = {
+        'sales_data' : sale_data,
         'categories': categories,
         'products' : products,
         'product_variants' : product_variants[:8],

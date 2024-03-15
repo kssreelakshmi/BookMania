@@ -220,28 +220,30 @@ function EditProfileField(number){
 }
 
 function SendMobileNumberChangeOtp(){
-  var new_number = document.getElementById('MobileNumberChange')
-  document.getElementById('MobileNumberChangeError').innerText = ""
-  if(!new_number.value){
-    document.getElementById('MobileNumberChangeError').innerText = "Please Enter Your New Number"
+  var new_number = document.getElementById('MobileNumberChange').value
+  console.log(new_number)
+  document.getElementById('MobileNumberChangeOtpError').innerText = ''
+  if(!new_number){
+    document.getElementById('MobileNumberChangeOtpError').innerText = "Please Enter Your New Number"
     return
   }
+  swal('OTP send','An OTP is send to your registered email. Kindly ');
   var data = {
-    new_number : new_number.value,
+    new_number : new_number,
   }
   $.ajax({
     type : "POST",
-    url: `/accounts/mobile-number-change/ `,  // Replace with the actual URL for your view
+    url: `/accounts/mobile-number-change/`, 
     dataType: "json", 
     data: JSON.stringify(data),
     headers: {
       "X-Requested-With": "XMLHttpRequest",
       "X-CSRFToken": getCookie("csrftoken"), 
     },
-
-      //response from backend
+    
+    //response from backend
     success: (data) => {
-      if (data.status === "success"){
+        if (data.status === "success"){
         console.log(data)
         document.getElementById('MobileNumberChangeOtpDiv').classList.remove('d-none')
         document.getElementById('MobileNumberChangeOtpbtn').classList.add('d-none')
@@ -266,9 +268,9 @@ function MobileNumberChangeOtpVerify(){
   var new_number = document.getElementById('MobileNumberChange')
   var otp = document.getElementById('MobileNumberChangeOtp')
 
-  document.getElementById('MobileNumberChangeError').innerText = ""
+  document.getElementById('MobileNumberChangeOtpErrors').innerText = ""
   if(!otp.value){
-    document.getElementById('MobileNumberChangeError').innerText = "Please Enter Your New Number"
+    document.getElementById('MobileNumberChangeOtpErrors').innerText = "Please Enter Your OTP."
     return
   }
   var data = {
@@ -277,7 +279,7 @@ function MobileNumberChangeOtpVerify(){
   }
   $.ajax({
     type : "POST",
-    url: `/accounts/mobile-number-change/verify/ `,  // Replace with the actual URL for your view
+    url: `/accounts/mobile-number-change/verify/ `,  
     dataType: "json", 
     data: JSON.stringify(data),
     headers: {
@@ -289,7 +291,12 @@ function MobileNumberChangeOtpVerify(){
     success: (data) => {
       if (data.status === "success"){
         console.log(data);
-        location.reload();
+        swal(data.status, data.message);
+
+        setTimeout(()=>{
+          location.reload();
+        }, 2000)
+
       }
       else{
         console.log(data);
@@ -306,7 +313,7 @@ function MobileNumberChangeOtpVerify(){
 }
 
 function sendEmailChangeOtpMail(){
-  console.log('asdfghjkldfghj');
+
   var email_id = document.getElementById('EmailChangeOtpNewMail')
   console.log(email_id)
   document.getElementById('sendEmailChangeOtpMailNewMailError').innerText = ''
@@ -321,7 +328,7 @@ function sendEmailChangeOtpMail(){
 
   $.ajax({
     type: "POST",
-    url: `/accounts/email-change/`,  // Replace with the actual URL for your view
+    url: `/accounts/email-change/`,  
     dataType: "json",
     data: JSON.stringify(data),
     headers: {
@@ -333,7 +340,7 @@ function sendEmailChangeOtpMail(){
           console.log(data);
           document.getElementById('EmailChangeOtpNewMailDiv').classList.remove('d-none')
           document.getElementById('EmailChangeOtpNewMailbtn').classList.add('d-none')
-          document.getElementById('EmailChangeOtpNewMailOtp').setAttribute('readonly', true);
+          document.getElementById('EmailChangeOtpNewMail').setAttribute('readonly', true);
 
       } else {
           console.log(data);
@@ -351,14 +358,14 @@ function sendEmailChangeOtpMail(){
 }
 
 
-function sendEmailChangeOtpMailVerify(){
-  console.log("ok");
+function sendEmailChangeOtpVerify(){
+  console.log('okkkk');
   var email_id = document.getElementById('EmailChangeOtpNewMail')
-  var otp = document.getElementById('EmailChangeOtpMailOtp')
+  var otp = document.getElementById('EmailChangeOtpNewMailOtp')
 
-  document.getElementById('EmailChangeOtpMailOtpError').innerText = ''
+  document.getElementById('sendEmailChangeOtpMailNewMailotpError').innerText = ''
   if (!otp.value){
-    document.getElementById('EmailChangeOtpMailOtpError').innerText = 'Please enter the '
+    document.getElementById('sendEmailChangeOtpMailNewMailotpError').innerText = 'Please enter the otp'
     return
   }
 
@@ -397,77 +404,8 @@ function sendEmailChangeOtpMailVerify(){
   
 }
 
-function UpdateFieldUserProfilePassword(get_old_password,get_password1,get_password2) {
-
-  document.getElementById(get_old_password+'Error').innerText = ''
-  document.getElementById(get_password1+'Error').innerText = ''
-  document.getElementById(get_password2+'Error').innerText = ''
-
-  var old_password = document.getElementById(get_old_password)
-  var password1 = document.getElementById(get_password1)
-  var password2 = document.getElementById(get_password2)
-
-  if (!old_password.value){
-    document.getElementById(get_old_password+'Error').innerText = 'Please Enter Password'
-    return
-  }
-
-  if (!password1.value){
-    document.getElementById(get_password1+'Error').innerText = 'Please Enter Password'
-    return
-  }
-
-  if (!password2.value){
-    document.getElementById(get_password2+'Error').innerText = 'Please Enter Password'
-    return
-  }
-
-  if(matchPassword(get_password1,get_password2))
-  {
-    url = '/users/basic/changepassword'
-    var data = {
-      old_password: old_password.value,
-      password2: password2.value,
-    };
-    
-    $.ajax({
-        type: "POST",
-        url: url,  // Replace with the actual URL for your view
-        dataType: "json",
-        data: JSON.stringify(data),
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "X-CSRFToken": getCookie("csrftoken"), 
-          },
-          success: (data) => {
-            if (data.status === "success") {
-              // Password change success
-              console.log(data);
-              location.reload();
-          } else {
-              // Password change error
-              console.log(data);
-              // Display the error message on the page
-              document.getElementById(get_old_password + 'Error').innerText =data.message;
-          }
-        },
-        error: (xhr, status, error) => {
-            // Display the error message on the page
-            document.getElementById(get_old_password + 'Error').innerText = 'Error: ' + xhr.responseText;
-            console.log("error");
-            console.log(error);
-        }
-    });
-    
-  }
-  else{
-    document.getElementById(get_password2+'Error').innerText = 'Password Not Match'
-  }
-
-};
 
 
-//password change user send mail 
 function sendPasswordResetOtpMail() {
   document.getElementById('sendPasswordResetOtpMailSpinnner').classList.remove('d-none')
   document.getElementById('sendPasswordResetOtpMailBtn').classList.add('disabled')
@@ -476,7 +414,7 @@ function sendPasswordResetOtpMail() {
 
   $.ajax({
       type: "POST",
-      url: `accounts/password-change/`,  // Replace with the actual URL for your view
+      url: `/accounts/password-change/`,  // Replace with the actual URL for your view
       dataType: "json",
       // data: JSON.stringify(data),
       headers: {
@@ -487,6 +425,7 @@ function sendPasswordResetOtpMail() {
           if (data.status === "success") {
             // Password change success
             var inTwoMinutes = new Date(new Date().getTime() + 2 * 60 * 1000);
+            
             Cookies.set('can_otp_enter', 'True', { expires: inTwoMinutes, path: '/' });
             window.location = data.redirect_url;
         } else {
@@ -721,7 +660,7 @@ function couponHandle(action, order_id){
         document.getElementById('coupon_card').hidden = true;
         document.getElementById('coupDescCard').innerHTML = '';
         document.getElementById('tax').innerHTML = data.tax
-        document.getElementById('cdiscount').innerHTML = data.coupon_discount
+        document.getElementById('discount').innerHTML = data.coupon_discount
         document.getElementById('grand_total').innerHTML = data.grand_total
       }
     },
@@ -731,6 +670,8 @@ function couponHandle(action, order_id){
     }
   });
 }
+
+
 
 
 

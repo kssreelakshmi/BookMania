@@ -139,7 +139,15 @@ class Addresses(models.Model):
 #     user = models.ForeignKey(Account,on_delete=models.CASCADE)
 #     product_variant = models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
     
+class ContactMessage(models.Model):
+    user = models.ForeignKey(Account,max_length=100, on_delete = models.CASCADE)
+    email = models.EmailField()
+    subject = models.CharField(max_length=128)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.user    
                                                                                                                                                                               
     
     

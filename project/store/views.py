@@ -21,25 +21,22 @@ def home(request, cat_slug=None):
     categories = Category.objects.filter(is_active = True)
     products = Product.objects.filter(is_available = True)
     product_variants = ProductVariant.objects.select_related('product').prefetch_related('attribute').filter(is_active = True)
-
     order_products = OrderProduct.objects.filter(is_ordered=True).order_by('-created_at')
     variants = ProductVariant.objects.filter(is_active = True)
-    sale_data = {str(variant.get_product_name()): 0 for variant in variants }
+    sale_data = {str(variant.sku_id): 0 for variant in variants }
 
             
     for order_product in order_products:
-        key = str(order_product.variant.get_product_name())
-        if sale_data[key]:
+        key = str(order_product.variant.sku_id)
+        if key in sale_data:
             sale_data[key] += order_product.quantity
         else:
             sale_data[key] = order_product.quantity
     
     sale_data = dict(itertools.islice({key: value for key, value in sorted(sale_data.items(), key=lambda item: item[1], reverse = True)}.items(), 5))
+    most_sold_variants = [product_variants.get(sku_id = i) for i in sale_data.keys()]
 
-    print(sale_data)
-
-
-
+    print("Hello the sale data is  :",sale_data)
 
     if request.user.is_authenticated:
         wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
@@ -79,11 +76,11 @@ def home(request, cat_slug=None):
             print(e)
     
     context = {
-        'sales_data' : sale_data,
+        'popular_products' : most_sold_variants,
         'categories': categories,
         'products' : products,
         'product_variants' : product_variants[:8],
-        'wishlist_products': wishlist_products
+        'wishlist_products': wishlist_products,
         
     }
     
@@ -99,8 +96,10 @@ def shop(request, cat_slug = None):
     name = request.GET.get('new')
     
     product_variants = ProductVariant.objects.all().filter(is_active = True).order_by('-created_date').select_related('product').prefetch_related('attribute')
+   
+
     
-    paginator = Paginator(product_variants,6)
+    paginator = Paginator(product_variants,4)
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)
     
@@ -188,9 +187,7 @@ def shop(request, cat_slug = None):
     #Sort by new
     if name == 'New':
         paged_products = product_variants.order_by('-created_date')
-
-
-        
+  
     context = {
        
         'product_variants': paged_products,
@@ -210,11 +207,29 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
         add_images = AdditionalProductImages.objects.filter(product_variant = single_product)
         product_variants = ProductVariant.objects.filter(product=single_product.product,is_active=True)
         product_variants_count=product_variants.count()
+
+        product_variant = ProductVariant.objects.all().filter(is_active = True).order_by('-created_date').select_related('product').prefetch_related('attribute')
+        order_products = OrderProduct.objects.filter(is_ordered=True).order_by('-created_at')
+        variants = ProductVariant.objects.filter(is_active = True)
+        sale_data = {str(variant.sku_id): 0 for variant in variants }
+
+            
+        for order_product in order_products:
+            key = str(order_product.variant.sku_id)
+            if key in sale_data:
+                sale_data[key] += order_product.quantity
+            else:
+                sale_data[key] = order_product.quantity
+    
+        sale_data = dict(itertools.islice({key: value for key, value in sorted(sale_data.items(), key=lambda item: item[1], reverse = True)}.items(), 5))
+        most_sold_variants = [product_variant.get(sku_id = i) for i in sale_data.keys()]
+
        
     except Exception as e:
         raise e
         
     context = {
+        'popular_products' : most_sold_variants ,
         'single_product': single_product,
         'add_images': add_images,
         'product_variants': product_variants,

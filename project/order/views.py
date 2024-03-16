@@ -363,8 +363,6 @@ def retry_payment(request):
                     }
                     )
 
-
-
 def order_completed(request):
     try:
         if (request.session['order_id'] and request.session['payment_id']):

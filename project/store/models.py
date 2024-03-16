@@ -73,7 +73,7 @@ class ProductVariant(models.Model):
     sku_id = models.IntegerField()
     max_price = models.DecimalField(max_digits=6,decimal_places=2, validators=[MinValueValidator(0)])
     sale_price = models.DecimalField(max_digits=6,decimal_places=2, validators=[MinValueValidator(0)])
-    stock = models.IntegerField()
+    stock = models.PositiveIntegerField()
     product_variant_slug = models.SlugField(max_length=255,unique=True)
     thumbnail_image = models.ImageField(upload_to='photos/product-variant/thumbnail')
     is_active = models.BooleanField(default=True)
@@ -109,7 +109,10 @@ class AdditionalProductImages(models.Model):
 
     def __str__(self):
         return self.image.url
-    
+
+
+ 
+
 
     
 

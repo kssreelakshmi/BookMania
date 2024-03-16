@@ -8,10 +8,11 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_control
 from django.contrib import messages
-from django.views.decorators.cache import cache_control
+from django.core.mail import EmailMessage
 from category.models import Category
 from coupon.models import Coupon
 from accounts.models import Account
+from django.contrib.sites.shortcuts import get_current_site
 from store.models import Product,ProductVariant,Attribute,AttributeValue,Author,AdditionalProductImages,Publication
 from order.models import Order, OrderProduct, Payment, PaymentMethod,Invoice
 from order.forms import OrderStatusForm
@@ -57,7 +58,6 @@ def check_isadmin(view_func, redirect_url="admin_login"):
 @check_isadmin
 @login_required(login_url='admin_login')
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-
 def admin_home(request):
 
     orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
@@ -955,30 +955,57 @@ def update_order(request, order_id):
     return render(request, 'admin-dashboard/order_management/order_details.html',context)
 
 
+
+
 def order_handle(request):
     data = json.load(request)
-    print(data)
     # order_product_id = request.GET.get('order_product_id')
     try:
         order_product = OrderProduct.objects.get(id=data.get('order_product_id'))
     except Exception as e:
         print(e)
 
-    print(order_product)
     if order_product.order_status == 'Cancellation Requested':
         if data.get('operation') == 'accept':
             order_product.order_status = 'Cancelled'
             order_product.variant.stock += 1
             order_product.variant.save()
             order_product.save()
+
+            user = order_product.user
+            email = user.email
+            print(user)
+            current_site = get_current_site(request)
+            mail_subject = 'Cancellation Successful'
+            data = {
+            'user': user,
+            'domain': current_site,
+            'order_product' : order_product,
+            }
+            message = render_to_string ('base/admin_side/cancellation.html',data)
+            sendNotifyMail(email, message, mail_subject)
             return JsonResponse({
                 'status' : 'success',
                 'message': 'Reason validated, product cancelled from order',
                 'additional_message': 'Cancellation approved'
             })
+        
         elif data.get('operation') == 'reject':
             order_product.order_status = 'Cancellation Rejected'
             order_product.save()
+            
+            user = order_product.user
+            email = user.email
+            current_site = get_current_site(request)
+            mail_subject = 'Cancellation Rejected!'
+            data = {
+            'user': user,
+            'domain': current_site,
+            'order_product' : order_product,
+            }
+            message = render_to_string ('base/admin_side/cancellation_rejected.html',data)
+            sendNotifyMail(email, message, mail_subject)
+
             return JsonResponse({
                 'status' : 'success',
                 'message': 'Cancellation request has been rejected',
@@ -992,6 +1019,19 @@ def order_handle(request):
             order_product.variant.stock += 1
             order_product.variant.save()
             order_product.save()
+
+            user = order_product.user
+            email = user.email
+            current_site = get_current_site(request)
+            mail_subject = 'Return Successful'
+            data = {
+            'user': user,
+            'domain': current_site,
+            'order_product' : order_product,
+            }
+            message = render_to_string ('base/admin_side/return.html',data)
+            sendNotifyMail(email, message, mail_subject)
+
             return JsonResponse({
                 'status' : 'success',
                 'message': 'Reason validated',
@@ -1000,6 +1040,19 @@ def order_handle(request):
         elif data.get('operation') == 'reject':
             order_product.order_status = 'Return Rejected'
             order_product.save()
+
+            user = order_product.user
+            email = user.email
+            current_site = get_current_site(request)
+            mail_subject = 'Return Request Rejected'
+            data = {
+            'user': user,
+            'domain': current_site,
+            'order_product' : order_product,
+            }
+            message = render_to_string ('base/admin_side/return_rejected.html',data)
+            sendNotifyMail(email, message, mail_subject)
+
             return JsonResponse({
                 'status' : 'success',
                 'message': 'Return request has been rejected',
@@ -1007,6 +1060,16 @@ def order_handle(request):
             })
 
     return redirect('order_details')
+
+def sendNotifyMail(email, message, mail_subject):
+    to_email = email
+    send_email = EmailMessage(mail_subject,message,to=[to_email])
+    send_email.content_subtype = 'html'
+    send_email.send()
+    return
+
+
+
 
 def all_attributes(request):
     attribute =Attribute.objects.all()

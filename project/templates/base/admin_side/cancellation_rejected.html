@@ -1,0 +1,73 @@
+{% autoescape off %}
+{% load static %}
+<pre>
+
+    <title>Order Cancellation Request Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .header {
+            background-color: #f1f1f1;
+            padding: 20px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .footer {
+            background-color: #f1f1f1;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+   
+    <table class="content">
+        <tr>
+            <td><h1>Order Cancellation Request Update</h1></td>
+        </tr>
+        <tr>
+            <td>Dear {{user.username}},</td>
+        </tr>
+        <tr>
+            <td>This email is to inform you about the status of your cancellation request for order <strong> # {{order_product.order.order_id}} - {{order_product.variant}}</strong>.</td>
+        </tr>
+        <tr>
+            <td>We have carefully reviewed your request, but unfortunately, we are unable to process the cancellation at this time.</td>
+        </tr>
+       
+        
+        <tr>
+            <td>If you have any further questions about the reason for rejection or would like to discuss alternative options, please do not hesitate to contact us at bookmania.web@gmail.com </td>
+        </tr>
+        <tr>
+            <td>We appreciate your understanding.</td>
+        </tr>
+        <tr>
+            <td>Sincerely,</td>
+        </tr>
+        <tr>
+            <td>The BookMania Team</td>
+        </tr>
+    </table>
+    <table class="footer">
+        <tr>
+            <td>Thank you for choosing <strong>BookMania</strong>. Happy reading! </td>
+        </tr>
+    </table>
+
+
+</pre>
+
+
+{% endautoescape %}

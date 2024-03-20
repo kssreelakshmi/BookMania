@@ -40,20 +40,23 @@ from rest_framework.response import Response
 User = get_user_model()
 
 def check_isadmin(view_func, redirect_url="admin_login"):
-    
-    def wrapper(request, *args, **kwargs):
-        if request.user.is_authenticated:
-            if request.user.is_admin:
-                return view_func(request, *args, **kwargs)
-            else:
-                messages.error(request, "You need to be logged in as an admin to access this page")
-        else:
-            messages.error(request, "You need to be logged in as an admin to access this page")
+  """
+  Decorator that restricts access to views to authenticated admins.
 
-        redirect_url_ = reverse(redirect_url) + '?next=' + request.path
-        return redirect(redirect_url_)
+  Redirects non-authenticated users to the specified redirect URL.
+  """
 
-    return wrapper
+  @login_required
+  def wrapper(request, *args, **kwargs):
+    if request.user.is_admin:
+      return view_func(request, *args, **kwargs)
+    else:
+      messages.error(request, "You need to be logged in as an admin to access this page")
+      redirect_url_ = reverse(redirect_url) + '?next=' + request.path
+      return redirect(redirect_url_)
+
+  return wrapper
+
 
 @check_isadmin
 @login_required(login_url='admin_login')
@@ -143,7 +146,8 @@ class DashboardProductVsOrderData(APIView):
         }
         return Response(data, content_type="application/json")
 
-
+@check_isadmin
+@login_required(login_url='admin_login')
 def sales_report(request):
     if request.GET:
         start_date = request.GET['start-date']
@@ -207,7 +211,8 @@ def sales_report(request):
     return render(request,'admin-dashboard/sales_report.html',context)
 
 
-# @check_isadmin
+@check_isadmin
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_login(request):
     if request.user.is_authenticated and request.user.is_admin:
         return redirect('admin_home')
@@ -248,8 +253,8 @@ def admin_login(request):
         
     return render(request, 'admin-dashboard/admin_login.html')
 
+@check_isadmin
 @login_required(login_url='admin_login')
-# @check_isadmin
 def all_users(request):
     users= User.objects.all().exclude(is_admin = True)
     paginator = Paginator(users,5)
@@ -260,7 +265,7 @@ def all_users(request):
     }
     return render(request,'admin-dashboard/account_management/all_users.html',context)
 
-# @check_isadmin
+@check_isadmin
 @login_required(login_url='admin_login')
 def user_control(request, user_id):
     if not request.user.is_admin:
@@ -275,6 +280,7 @@ def user_control(request, user_id):
     return redirect('all_users')
 
 
+@check_isadmin
 @login_required(login_url='admin_login')
 def update_user(request,user_id):
     user = User.objects.get(id = user_id)
@@ -299,7 +305,7 @@ def update_user(request,user_id):
         }
     return render(request,'admin-dashboard/account_management/update_user.html',context)
 
-# @check_isadmin
+@check_isadmin
 @login_required(login_url='admin_login')
 def create_user(request):
         
@@ -338,6 +344,7 @@ def admin_logout(request):
 
 # category control
 
+@check_isadmin
 @login_required(login_url='admin_login')
 def all_category(request):
     categories = Category.objects.all().order_by('id')
@@ -350,6 +357,7 @@ def all_category(request):
     }
     return render(request, 'admin-dashboard/category_management/all_category.html', context)
 
+@check_isadmin
 
 @login_required(login_url='admin_login')
 def category_control(request, cat_slug):
@@ -381,6 +389,7 @@ def category_control(request, cat_slug):
     category.save()
     return redirect('all_category')
 
+@check_isadmin
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required(login_url='admin_login')
@@ -435,7 +444,7 @@ def create_category(request):
         }
     return render(request, 'admin-dashboard/category_management/category-create.html', context)
 
-
+@check_isadmin
 @login_required(login_url='admin_login')
 def all_products(request):
     products= Product.objects.annotate(
@@ -452,6 +461,7 @@ def all_products(request):
     }
     return render(request,'admin-dashboard/product_management/all_product.html',context)
 
+@check_isadmin
 @login_required(login_url='admin_login')
 def product_control(request,slug):
     product = Product.objects.get(slug=slug)
@@ -460,6 +470,7 @@ def product_control(request,slug):
     
     return redirect('all_products')
 
+@check_isadmin
 
 @login_required(login_url='admin_login')
 def create_product(request):
@@ -521,6 +532,7 @@ def create_product(request):
     
     return render(request,'admin-dashboard/product_management/create_product.html',context)
 
+@check_isadmin
 
 @login_required(login_url='admin_login')
 def product_update(request,slug):
@@ -547,6 +559,7 @@ def product_update(request,slug):
         }
     return render(request,'admin-dashboard/product_management/update_product.html', context)
 
+@check_isadmin
 
 @login_required(login_url='admin_login')
 def create_product_variant(request,slug):
@@ -605,7 +618,9 @@ def create_product_variant(request,slug):
         'attribute_dict' : attribute_dict,
     }   
     return render(request,'admin-dashboard/product_management/create_product_variant.html',context)
-    
+
+@check_isadmin
+
 @login_required(login_url='admin_login')
 def product_variant_update(request, product_variant_slug):
     

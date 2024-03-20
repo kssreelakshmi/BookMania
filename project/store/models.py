@@ -1,10 +1,20 @@
 from django.db import models
 from category.models import Category
+from accounts.models import Account
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator
 from django.urls import reverse
+from django.core.exceptions import ValidationError
+from django.db.models import Avg,Count
+
 
 #  Create your models here.
+def validate_file_type(file):
+   
+    allowed_mimetypes = ['image/jpeg', 'image/png']  
+    mime_type = file.content_type
+    if mime_type not in allowed_mimetypes:
+        raise ValidationError("Invalid file type. Only JPEG and PNG images are allowed.")
 
 class Attribute(models.Model):
     attribute_name = models.CharField(max_length=150,unique=True)
@@ -75,7 +85,7 @@ class ProductVariant(models.Model):
     sale_price = models.DecimalField(max_digits=6,decimal_places=2, validators=[MinValueValidator(0)])
     stock = models.PositiveIntegerField()
     product_variant_slug = models.SlugField(max_length=255,unique=True)
-    thumbnail_image = models.ImageField(upload_to='photos/product-variant/thumbnail')
+    thumbnail_image = models.ImageField(upload_to='photos/product-variant/thumbnail', validators=[validate_file_type])
     is_active = models.BooleanField(default=True)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now = True)
@@ -92,23 +102,78 @@ class ProductVariant(models.Model):
 
     def get_url(self):
         return reverse('product_variant_detail',args=[self.product.category.slug,self.product_variant_slug])
-        
-
+    
     def get_product_name(self):
         return f'{self.product.product_name}-{self.sku_id} - {", ".join([value[0] for value in self.attribute.all().values_list("attribute_value")])} by {self.product.publication}'
-
+    
+    def average_review(self):
+        from store.models import ReviewRating    
+        reviews = ReviewRating.objects.filter(product_variant=self,status=True).aggregate(average=Avg('rating'))
+        avg = 0
+        if reviews['average'] is not None:
+            avg = float(reviews['average'])
+        return avg
+    
+    def count_review(self):
+        from store.models import ReviewRating    
+        reviews = ReviewRating.objects.filter(product_variant=self,status=True).aggregate(count=Count('id'))
+        count = 0
+        if reviews['count'] is not None:
+            count = int(reviews['count'])
+        return count
 
     def __str__(self):
         return self.product_variant_slug
-    
+
+
+
 class AdditionalProductImages(models.Model):
     product_variant = models.ForeignKey(ProductVariant,on_delete=models.CASCADE,related_name='additional_product_images')
-    image = models.ImageField(upload_to='photos/product-variant/additional-images')
+    image = models.ImageField(upload_to='photos/product-variant/additional-images',validators=[validate_file_type])
     is_active = models.BooleanField(default=True)
 
 
     def __str__(self):
         return self.image.url
+    
+
+class ReviewRating(models.Model):
+    user = models.ForeignKey(Account,on_delete=models.CASCADE)
+    product_variant = models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
+    subject = models.CharField(max_length =200,blank = True)
+    review = models.TextField(max_length=500,blank=True)
+    rating = models.FloatField()
+    ip = models.CharField(max_length=50,blank=True)
+    status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.subject  
+
+class RecentViewedProduct(models.Model):
+    user = models.ForeignKey(Account,on_delete=models.CASCADE)
+    product = models.ForeignKey(ProductVariant,on_delete=models.CASCADE , related_name='recent_viewed_product')
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        # Get the total count of rows in the table
+        total_rows = RecentViewedProduct.objects.filter(user=self.user).count()
+
+        # If the user already has 10 rows, delete the oldest row before adding the new one
+        if total_rows >= 7:
+            oldest_row = RecentViewedProduct.objects.filter(user=self.user).order_by('updated_at').first()
+            oldest_row.delete()
+
+        # Call the parent class's save method to save the new row
+        super(RecentViewedProduct, self).save(*args, **kwargs)
+        
+
+    def __str__(self):
+        return self.user.first_name+" "+self.product.get_product_name()
+
+
 
 
  

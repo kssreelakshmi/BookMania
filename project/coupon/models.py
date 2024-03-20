@@ -5,11 +5,10 @@ from django.db import models
 class Coupon(models.Model):
     coupon_code = models.CharField(max_length=10)
     is_active = models.BooleanField(default=False)
-    discount_percentage = models.IntegerField(default=10)
-    minimum_amount = models.IntegerField(default=500)
+    discount_percentage = models.PositiveIntegerField(default=10,)
+    minimum_amount = models.IntegerField(default=200)
     description = models.CharField(max_length=100)
     expire_date = models.DateField()
-    
     
     
     def save(self, *args, **kwargs):

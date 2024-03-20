@@ -1,7 +1,9 @@
 from django.shortcuts import render,redirect
-from store.models import Product,ProductVariant,Publication,Attribute,AttributeValue,Author, AdditionalProductImages
+from store.models import Product,ProductVariant,Publication,Attribute,AttributeValue,Author, AdditionalProductImages,ReviewRating,RecentViewedProduct
+from store.forms import ReviewForm
 from category.models import Category
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from cart.models import Cart_item
 from wishlist.models import Wishlist, WishlistItem
 from cart.views import _cart_id
@@ -10,6 +12,8 @@ from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.views.decorators.cache import cache_control
 from order.models import Order,OrderProduct
 import itertools
+import datetime
+from django.contrib import messages 
 # from django.http import HttpResponse
 
 # Create your views here.
@@ -227,8 +231,28 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
        
     except Exception as e:
         raise e
+    
+    if request.user.is_authenticated:
+        try:
+            #recent viewed product add
+            recent_viewed,created = RecentViewedProduct.objects.get_or_create(user=request.user,product= single_product)
+            if not created:
+                recent_viewed.updated_at = datetime.now()
+                recent_viewed.save()
+            print(recent_viewed)  
+            order_product = OrderProduct.objects.filter(user=request.user,product_id= single_product.id).exists()
+              
+        except OrderProduct.DoesNotExist:
+            order_product = None
+    else:
+        order_product = None
+
+    reviews = ReviewRating.objects.filter(status=True,product_variant__id=single_product.id).order_by('-updated_at')
+
         
     context = {
+        'reviews' :reviews,
+        'order_product' : order_product,
         'popular_products' : most_sold_variants ,
         'single_product': single_product,
         'add_images': add_images,
@@ -237,6 +261,37 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
         'in_cart' : in_cart,
     }
     return render(request,'store_templates/product_variant_detail.html', context)
+
+@login_required(login_url='admin_login')
+def review_rating(request,product_id):
+    url = request.META.get('HTTP_REFERER')
+    if request.method =='POST':
+        try:
+            reviews = ReviewRating.objects.get(user__id=request.user.id,product__id=product_id)
+            form = ReviewForm(request.POST,instance=reviews)
+            if form.is_valid():
+                form.save()
+                messages.success(request,'The review has been updated successfully.Thank you !!')
+                return redirect(url)
+            else:
+                messages.error(request, form.errors)
+                return redirect(url)
+        except ReviewRating.DoesNotExist:
+            form = ReviewForm(request.POST)
+            if form.is_valid():
+                review = ReviewRating()
+                review.subject = form.cleaned_data['subject']
+                review.rating = form.cleaned_data['rating']
+                review.review = form.cleaned_data['review']
+                review.product_id = product_id
+                review.user_id = request.user.id
+                review.save()
+                messages.success(request, "Thank You !your review has been Posted")
+                return redirect(url)
+            else:
+                messages.error(request, form.errors.values)
+                return redirect(url)
+
 
 
 

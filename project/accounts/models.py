@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.utils import timezone
 from django_countries.fields import CountryField
-from store.models import ProductVariant
 from django.core.validators import RegexValidator,EmailValidator
 import datetime
 import uuid
@@ -132,13 +131,11 @@ class Addresses(models.Model):
     def __str__(self):
         return self.name
 
-# class wallet(models.Model):
-#     user = models.ForeignKey(Account,on_delete=models.CASCADE)
 
-# class Review(models.Model):
-#     user = models.ForeignKey(Account,on_delete=models.CASCADE)
-#     product_variant = models.ForeignKey(ProductVariant,on_delete=models.CASCADE)
-    
+
+
+
+
 class ContactMessage(models.Model):
     user = models.ForeignKey(Account,max_length=100, on_delete = models.CASCADE)
     email = models.EmailField()

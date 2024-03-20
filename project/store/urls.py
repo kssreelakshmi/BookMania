@@ -10,5 +10,6 @@ urlpatterns = [
 
     path('store/all-products/by-category/<slug:cat_slug>/', views.shop, name="shop_by_cat" ),
     path('search/', views.shop, name="search" ),
+    path('review/rating/<int:product_id>/',views.review_rating,name='review_rating'),
 
 ]

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product,ProductVariant,Attribute,AttributeValue,AdditionalProductImages,Publication,Author
+from .models import Product,ProductVariant,Attribute,AttributeValue,AdditionalProductImages,Publication,Author,ReviewRating
 
 
 class ProductForm(forms.ModelForm):
@@ -104,7 +104,10 @@ class AuthorForm(forms.ModelForm):
         model = Author
         fields = '__all__'        
 
-        
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = ReviewRating
+        fields = ['subject','review','rating']     
         
         
         

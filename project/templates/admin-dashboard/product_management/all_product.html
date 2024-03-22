@@ -13,6 +13,8 @@ Product Management - All Products
 {% include 'base/admin_side/admin_includes/admin_header.html' %}
 
 <section class="content-main">
+  {% include 'base/admin_side/admin_includes/alerts.html' %}
+
     <div class="content-header">
         <div>
             <h2 class="content-title card-title">Products List</h2>
@@ -22,33 +24,17 @@ Product Management - All Products
     <div class="card mb-4">
         <header class="card-header">
             <div class="row align-items-center">
-                <div class="col col-check flex-grow-0">
+                <!-- <div class="col col-check flex-grow-0">
                     <div class="form-check ms-2">
                         <input class="form-check-input" type="checkbox" value="">
                     </div>
+                </div> -->
+                
+                <div class="col-md-2 col-6 d-flex flex-end ">
+                  <a href="{% url 'create_product' %}" class="btn btn-primary m-3 p-3 "> Add Product</a>
                 </div>
-                <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
-                    <select class="form-select">
-                        <option selected>All category</option>
-                        <option>Electronics</option>
-                        <option>Clothes</option>
-                        <option>Automobile</option>
-                    </select>
-                </div>
-                <div class="col-md-2 col-6">
-                    <input type="date" value="02.05.2021" class="form-control">
-                </div>
-                <div class="col-md-2 col-6">
-                    <select class="form-select">
-                        <option selected>Status</option>
-                        <option>Active</option>
-                        <option>Disabled</option>
-                        <option>Show all</option>
-                    </select>
-                </div>
-                <div class=" m-2 p-2">
-                          
-                <div>
+                
+                
             </div>
         </header> <!-- card-header end// -->
         <div class ="card-body">

@@ -14,7 +14,10 @@ Publication Management - All Publication
 {% include 'base/admin_side/admin_includes/admin_header.html' %}
 <section class="content-main">
     <div class="content-header">
+    {% include 'base/admin_side/admin_includes/alerts.html' %}
+
         <div>
+
             <h2 class="content-title card-title">Publication List</h2>
         </div>
         
@@ -83,7 +86,7 @@ Publication Management - All Publication
         </div> <!-- card-body end// -->
     </div> <!-- card end// -->
     <div class="pagination-area mt-30 mb-50">
-      nav class="flex-c-m flex-w w-full p-t-45">
+      <nav class="flex-c-m flex-w w-full p-t-45">
                {% if publications.has_other_pages %}
                  <ul class="pagination">
                    {% if publications.has_previous %}

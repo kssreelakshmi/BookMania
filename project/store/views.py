@@ -12,7 +12,7 @@ from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.views.decorators.cache import cache_control
 from order.models import Order,OrderProduct
 import itertools
-import datetime
+from datetime import datetime
 from django.contrib import messages 
 # from django.http import HttpResponse
 
@@ -170,8 +170,6 @@ def shop(request, cat_slug = None):
     else:
         wishlist_products = []
 
-
-
     #price filter
     if price_max and price_min:
         paged_products = product_variants.filter(sale_price__lte=price_max, sale_price__gte=price_min)
@@ -240,7 +238,7 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
                 recent_viewed.updated_at = datetime.now()
                 recent_viewed.save()
             print(recent_viewed)  
-            order_product = OrderProduct.objects.filter(user=request.user,product_id= single_product.id).exists()
+            order_product = OrderProduct.objects.filter(user=request.user,variant__id= single_product.id).exists()
               
         except OrderProduct.DoesNotExist:
             order_product = None
@@ -267,7 +265,7 @@ def review_rating(request,product_id):
     url = request.META.get('HTTP_REFERER')
     if request.method =='POST':
         try:
-            reviews = ReviewRating.objects.get(user__id=request.user.id,product__id=product_id)
+            reviews = ReviewRating.objects.get(user__id=request.user.id,product_variant__id = product_id)
             form = ReviewForm(request.POST,instance=reviews)
             if form.is_valid():
                 form.save()

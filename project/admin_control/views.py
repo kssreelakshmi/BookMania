@@ -211,7 +211,7 @@ def sales_report(request):
     return render(request,'admin-dashboard/sales_report.html',context)
 
 
-@check_isadmin
+# @check_isadmin
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_login(request):
     if request.user.is_authenticated and request.user.is_admin:

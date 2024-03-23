@@ -15,15 +15,15 @@ Author Management - All Authors
 <section class="content-main">
   {% include 'base/admin_side/admin_includes/alerts.html' %}
     <div class="content-header">
-
         <div>
             <h2 class="content-title card-title">Authors List</h2>
         </div>
-        
     </div>
-
     <div class="card mb-4">
         <div class ="card-body">
+          <div class="col-md-2 col-6 d-flex flex-end ">
+            <a href="{% url 'add_authors' %}" class="btn btn-primary m-3 p-3 "> Add Author</a>
+          </div>
            <div class="table-responsive">
                <table class="table text-nowrap align-items-center mb-0 align-middle">
                    <thead class="text-dark fs-4">

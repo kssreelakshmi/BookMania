@@ -16,12 +16,32 @@ Contact Us
 
 {% include 'base/user_side/includes/header_cart.html' %}
 <!-- Slider -->
-{% include 'base/user_side/includes/slider.html' %}
+<!-- {% include 'base/user_side/includes/slider.html' %} -->
 
 
+<style>
+	.contact-bg{
+		background-image: url("{% static 'user/images/book.jpg' %}");
+		position: relative;
+		
+	}
+	.bg-image-wrapper{
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background-color: rgba(0, 0, 0, 0.5);
+	}
+	.sub{
+		height: 25px;
+		width: 30px;
+	}
+</style>
 	<!-- Title page -->
-	<section class="bg-img1 txt-center p-lr-15 p-tb-92" style="background-image: url('images/bg-01.jpg');">
-		<h2 class="ltext-105 cl0 txt-center">
+	<section class="contact-bg bg-img1 txt-center p-lr-15 p-tb-92">
+		<div class="bg-image-wrapper"></div>
+		<h2 class="ltext-105 m-0 cl0 txt-center">
 			Contact
 		</h2>
 	</section>	
@@ -38,12 +58,17 @@ Contact Us
 						</h4>
 
 						<div class="bor8 m-b-20 how-pos4-parent">
-							<input class="stext-111 cl2 plh3 size-116 p-l-62 p-r-30" type="text" name="email" placeholder="Your Email Address">
-							<img class="how-pos4 pointer-none" src="images/icons/icon-email.png" alt="ICON">
+							<input class="form-control  stext-111 cl2 plh3 size-116 p-l-62 p-r-30" type="text" name="email" placeholder="Your Email Address">
+							<img class="how-pos4 pointer-none" src="{% static 'user\images\icons\icon-email.png' %}" alt="ICON">
 						</div>
-
+						<div class="bor8 m-b-20 how-pos4-parent">
+							<input class=" form-control stext-111 cl2 plh3 size-116 p-l-62 p-r-30" type="text" name="text" placeholder="Subject">
+							<img class="how-pos4 pointer-none sub " src="{% static 'user\images\icons\chat.png' %}" alt="ICON">
+							
+						</div>
+						
 						<div class="bor8 m-b-30">
-							<textarea class="stext-111 cl2 plh3 size-120 p-lr-28 p-tb-25" name="msg" placeholder="How Can We Help?"></textarea>
+							<textarea class="form-control stext-111 cl2 plh3 size-120 p-lr-28 p-tb-25" name="msg" placeholder="Message"></textarea>
 						</div>
 
 						<button class="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
@@ -64,7 +89,7 @@ Contact Us
 							</span>
 
 							<p class="stext-115 cl6 size-213 p-t-18">
-								Coza Store Center 8th floor, 379 Hudson St, New York, NY 10018 US
+								BookMania Center 8th floor, 379 Hudson St, New York, NY 10018 US
 							</p>
 						</div>
 					</div>

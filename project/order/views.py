@@ -10,6 +10,7 @@ import datetime
 from accounts.forms import Addresses
 import razorpay
 import json
+from django.views.decorators.cache import cache_control
 from django.http import JsonResponse
 from django.conf import settings
 from django.http import HttpResponse
@@ -150,7 +151,8 @@ def place_order(request):
         return render(request,'store_templates/place_order.html',context)
     else:
         return redirect('order_summary')
-
+    
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def payment_success(request):
    
     payment_method = request.GET['method']
@@ -263,7 +265,7 @@ def payment_success(request):
     else:
         return redirect('user_dashboard')    
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def payment_failed(request):
     payment_method = request.GET['method']
     order_id = request.GET['order_id']
@@ -321,6 +323,7 @@ def payment_failed(request):
 
     return render(request,'store_templates/order_failed.html',context)
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def retry_payment(request):
 
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -362,7 +365,8 @@ def retry_payment(request):
                     'reason': 'Oops its not you, its us ! Please try again',
                     }
                     )
-
+        
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def order_completed(request):
     try:
         if (request.session['order_id'] and request.session['payment_id']):

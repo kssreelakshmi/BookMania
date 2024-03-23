@@ -40,9 +40,8 @@ def home(request, cat_slug=None):
     sale_data = dict(itertools.islice({key: value for key, value in sorted(sale_data.items(), key=lambda item: item[1], reverse = True)}.items(), 5))
     most_sold_variants = [product_variants.get(sku_id = i) for i in sale_data.keys()]
 
-    print("Hello the sale data is  :",sale_data)
 
-    if request.user.is_authenticated:
+    if not request.user.is_authenticated:
         wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
         if wishlist_exists:
             try:

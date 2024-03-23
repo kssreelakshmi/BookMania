@@ -796,6 +796,11 @@ def delete_address(request,id):
     except Addresses.DoesNotExist:
         return redirect('my_address')                
     
+def contact_us(request):
+    print('gdffgh=gfhfghghdghd==================================================================================')
+    return render(request,'store_templates/contact_us.html')
+
+
 
 def blog(request):
 

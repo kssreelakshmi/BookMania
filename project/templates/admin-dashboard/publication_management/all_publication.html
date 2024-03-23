@@ -13,17 +13,21 @@ Publication Management - All Publication
 
 {% include 'base/admin_side/admin_includes/admin_header.html' %}
 <section class="content-main">
+
     <div class="content-header">
     {% include 'base/admin_side/admin_includes/alerts.html' %}
 
         <div>
-
             <h2 class="content-title card-title">Publication List</h2>
         </div>
         
     </div>
     <div class="card mb-4">
         <div class ="card-body">
+          <div class="col-md-2 col-6 d-flex flex-end ">
+            <a href="{% url 'create_publication' %}" class="btn btn-primary m-3 p-3 "> Add Publication</a>
+          </div>
+
            <div class="table-responsive">
                <table class="table text-nowrap align-items-center mb-0 align-middle">
                    <thead class="text-dark fs-4">

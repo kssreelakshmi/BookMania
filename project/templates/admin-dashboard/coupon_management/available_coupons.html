@@ -39,7 +39,7 @@ Coupon Management - All Coupons
                         <th scope="col">Description</th>
                         <th scope="col">Active</th>
                         <th scope="col">Expiry Date</th>
-                        <th scope="col">Delete</th>
+                        <th scope="col">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -56,6 +56,7 @@ Coupon Management - All Coupons
                         <td> {{coupon.discount_percentage}}</td>
                         <td> {{coupon.minimum_amount}}</td>
                         <td> {{coupon.description}}</td>
+                        <td> {{coupon.expire_date}}</td>
                         <td>
                           {% if coupon.is_active %}
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
@@ -68,10 +69,13 @@ Coupon Management - All Coupons
                           {% endif %}
                         </td>
                        
-                        <td> {{coupon.expire_date}}</td>
-                        
-                        <td><a href="{% url 'delete_coupon' coupon.id %}" class="btn btn-dark text-decoration-none">Delete Coupon</a></td>
-                      </tr>
+                      <td>
+                        {% if coupon.is_active %}
+                        <a href="{% url 'coupon_control' coupon.id %}" class="btn btn-danger">Deactivate</a>
+                        {% else %}
+                        <a href="{% url 'coupon_control' coupon.id %}" class="btn btn-success">Activate</a>
+                        {% endif %}
+                      
                       {% endfor %}
               
                      

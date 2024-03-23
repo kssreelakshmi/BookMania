@@ -41,6 +41,7 @@ urlpatterns = [
     path('product-return-request/',views.product_return_request, name='product_return_request'),
 
     path('bibilolater-corner/',views.blog, name='blog'),
+    path('contact-us/',views.contact_us, name='contact_us'),
 
     
 ]

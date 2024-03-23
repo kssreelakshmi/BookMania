@@ -1266,14 +1266,15 @@ def coupon_update(request,id):
     return render(request,'admin-dashboard/coupon_management/coupon_update.html',context)
 
 
-def delete_coupon(request,id):
+def coupon_control(request,id):
     try:
         coupon = Coupon.objects.get(id=id)
     except Coupon.DoesNotExist:
         return redirect('all_coupon')
     except ValueError:
         return redirect('all_coupon')
-    coupon.delete()
-    messages.error(request, "Coupon Deleted")
+    coupon.is_active = not coupon.is_active
+    coupon.save()        
+    # messages.error(request, "Coupon Disabled")
     return redirect('all_coupon')
 

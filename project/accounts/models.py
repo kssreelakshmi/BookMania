@@ -132,11 +132,6 @@ class Addresses(models.Model):
     def __str__(self):
         return self.name
 
-
-
-
-
-
 class ContactMessage(models.Model):
     user = models.ForeignKey(Account,max_length=100, on_delete = models.CASCADE)
     email = models.EmailField()

@@ -41,7 +41,7 @@ def home(request, cat_slug=None):
     most_sold_variants = [product_variants.get(sku_id = i) for i in sale_data.keys()]
 
 
-    if not request.user.is_authenticated:
+    if request.user.is_authenticated:
         wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
         if wishlist_exists:
             try:

@@ -144,7 +144,7 @@ class ShippingAddress(models.Model):
         address_parts = f"{self.name}, {self.phone_number}, {self.address_line_1}"
         if self.address_line_2:
             address_parts += (', '+self.address_line_2)
-        address_parts += (f", Pin: {self.pincode}, {self.city}, {self.state}, {self.country.name}")
+        address_parts += (f", Pin: {self.pincode}, {self.city}, {self.state}, {self.country}")
         return address_parts
     
     def __str__(self):

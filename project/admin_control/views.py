@@ -248,7 +248,7 @@ def admin_login(request):
 @check_isadmin
 @login_required(login_url='admin_login')
 def all_users(request):
-    users= User.objects.all().exclude(is_admin = True)
+    users= User.objects.all().exclude(is_admin = True).order_by('-date_joined')
     paginator = Paginator(users,5)
     page = request.GET.get('page')
     paged_users = paginator.get_page(page)
@@ -269,6 +269,10 @@ def user_control(request, user_id):
     
     user.is_active = not user.is_active
     user.save()
+    if user.is_active:
+        messages.success(request, "User is now active!")
+    else:
+        messages.error(request, "User is now blocked!")
     return redirect('all_users')
 
 
@@ -282,6 +286,7 @@ def update_user(request,user_id):
     if request.method == 'POST':
         
         form = UserSignupForm(request.POST,instance = user)
+
         form.fields.pop('password', None)
         if form.is_valid():
             form.save()
@@ -379,6 +384,10 @@ def category_control(request, cat_slug):
                 variant.is_active = True
                 variant.save()
     category.save()
+    if category.is_active:
+        messages.success(request, "Category is now active!")
+    else:
+        messages.error(request, "Category is now blocked!")
     return redirect('all_category')
 
 @check_isadmin
@@ -459,7 +468,10 @@ def product_control(request,slug):
     product = Product.objects.get(slug=slug)
     product.is_available = not product.is_available
     product.save()
-    
+    if product.is_available:
+        messages.success(request, "product is now active!")
+    else:
+        messages.error(request, "product is now blocked!")
     return redirect('all_products')
 
 @check_isadmin
@@ -579,6 +591,7 @@ def create_product_variant(request,slug):
         for i in range(1,attribute_values_count+1):
             attribute_value_id = request.POST.get('attributes_'+str(i))
             if attribute_value_id != 'None':
+
                 attribute_ids.append(int(attribute_value_id)) 
         
         thumbnail_image = request.FILES.get('thumbnail_image')        
@@ -763,6 +776,10 @@ def publication_control(request, id):
                 variant.save()
    
     publication.save()
+    if publication.is_active:
+        messages.success(request, "publication is now active!")
+    else:
+        messages.error(request, "publication is now blocked!")
     return redirect('all_publication')
 
 @login_required(login_url='admin_login')
@@ -850,6 +867,11 @@ def author_control(request,id):
                 variant.save()
 
     author.save()
+    if author.is_active:
+        messages.success(request, "Author is now active!")
+    else:
+        messages.error(request, "Author is now blocked!")
+    
     return redirect('all_authors')
     
 def add_authors(request):
@@ -883,7 +905,7 @@ def update_author(request,id):
         if form.is_valid():
             form.save()
             messages.success(request, "Author updated")
-            return redirect('all_author')
+            return redirect('all_authors')
         else:
             messages.error(request, form.errors)
             return redirect('update_author')
@@ -1096,6 +1118,10 @@ def attribute_control(request,id):
     
     attribute.is_active = not attribute.is_active
     attribute.save()
+    if attribute.is_active:
+        messages.success(request, "attribute is now active!")
+    else:
+        messages.error(request, "attribute is now blocked!")
     return redirect('all_attributes')
 
 def create_attribute(request):
@@ -1156,6 +1182,10 @@ def attribute_value_control(request,id):
     
     attribute_value.is_active = not attribute_value.is_active
     attribute_value.save()
+    if attribute_value.is_active:
+        messages.success(request, "attribute_value is now active!")
+    else:
+        messages.error(request, "attribute_value is now blocked!")
     return redirect('all_attribute_values')
 
 def add_attribute_values(request):
@@ -1267,6 +1297,10 @@ def coupon_control(request,id):
         return redirect('all_coupon')
     coupon.is_active = not coupon.is_active
     coupon.save()        
+    if coupon.is_active:
+        messages.success(request, "coupon is now active!")
+    else:
+        messages.error(request, "coupon is now blocked!")
     # messages.error(request, "Coupon Disabled")
     return redirect('all_coupon')
 

@@ -107,6 +107,7 @@ DATABASES = {
         'USER': config("USER"),
         'PASSWORD': config("PASSWORD"),
         'PORT': '',
+        'HOST': 'localhost'
     }
 }
 

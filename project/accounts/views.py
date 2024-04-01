@@ -320,15 +320,17 @@ def reset_password(request):
 def user_logout(request):
     logout(request)
     messages.success(request,'you are logged out')
+    url = request.META.get('HTTP_REFERER')
+    profile_url = reverse('user_dashboard')
+    if profile_url in url:
+        return redirect('user_login')
     return redirect('user_home')
-
 
 @login_required (login_url='user_login')
 def user_dashboard(request):
-    
     return render(request,'base/user_side/user_dashboard.html')
 
-
+@login_required (login_url='user_login')
 def update_user_profile(request):
     if request.method == 'POST':
         profile = UserProfilePicForm(request.POST,request.FILES,instance=request.user)
@@ -338,6 +340,7 @@ def update_user_profile(request):
     else:    
         return redirect('user_dashboard')
             
+@login_required (login_url='user_login')
 def update_profile(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == 'POST' and is_ajax:
@@ -362,6 +365,7 @@ def update_profile(request):
             'message' : 'Invalid Request'
         })
         
+@login_required (login_url='user_login')
 def mobile_number_change(request):
     print('reached num ber')
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -369,7 +373,6 @@ def mobile_number_change(request):
         data =json.load(request)
         get_new_number = data['new_number']
         print(get_new_number)
-
         if (request.user.phone_number == get_new_number):
             return JsonResponse({
                 "status" : "error",
@@ -407,6 +410,7 @@ def mobile_number_change(request):
     else:
         return JsonResponse({"status": "error", "message": "Invalid request"})
     
+@login_required (login_url='user_login')
 def mobile_number_change_verify(request):
     print('reached verify')
     is_ajax = is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -415,7 +419,6 @@ def mobile_number_change_verify(request):
         number = data['new_number']
         otp = data['otp']
         print(otp)
-       
         try:
             user = User.objects.get(id = request.user.id)
             is_otp_valid = UserProfile.objects.filter(user = user, otp = otp).exists()
@@ -437,7 +440,7 @@ def mobile_number_change_verify(request):
     else:
         return JsonResponse({"status": "error", "message": "Invalid request"})
 
-
+@login_required (login_url='user_login')
 def email_change(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == "POST" and is_ajax:
@@ -478,23 +481,19 @@ def email_change(request):
                 "status": "error", 
                 "message": 'Unable to send mail , Please check mail again'
                 })
-            
     else:
         return JsonResponse({
             "status": "error", 
             "message": "Invalid request"
             })
 
+@login_required (login_url='user_login')
 def change_email_verify(request):  
-    
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == "POST" and is_ajax:
         data = json.load(request)
-        print(data)
         get_new_email = data['new_email']
         get_otp = data['otp']
-        
-        
         try:
             user = User.objects.get(id=request.user.id)
         except Exception as e:
@@ -508,7 +507,8 @@ def change_email_verify(request):
             messages.success(request,"Email ID changed successfully")
             return JsonResponse({
                 "status": "success",
-                "message": 'OTP OK'
+                "message": 'OTP OK',
+                'logout_url' : reverse('user_logout')
                  })
         else:
             return JsonResponse({
@@ -516,6 +516,7 @@ def change_email_verify(request):
                 "message": 'Invalid Otp'})
 
     
+@login_required (login_url='user_login')
 def password_change(request):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == "POST" and is_ajax:
@@ -550,6 +551,7 @@ def password_change(request):
         return JsonResponse({"status": "error", "message": "Invalid request"})
     
         
+@login_required (login_url='user_login')
 def change_password_with_email(request,uid):
 
     if request.method == "POST":
@@ -570,10 +572,8 @@ def change_password_with_email(request,uid):
             return render(request,'accounts/change_password_with_mail.html')
     else:
         return render(request, 'base/user_side/change_password_with_mail.html')
-        
 
-
-
+@login_required (login_url='user_login')
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     paginator = Paginator(orders,5)
@@ -587,6 +587,7 @@ def order_history(request):
     }
     return render(request,'base/user_side/order_history.html', context)
 
+@login_required (login_url='user_login')
 def order_detail(request,order_id):
     try:
         order = Order.objects.get(order_id = order_id)
@@ -634,6 +635,7 @@ def order_detail(request,order_id):
     return render(request,'base/user_side/order_details.html',context)
 
 
+@login_required (login_url='user_login')
 def product_cancel_request(request):
     if request.method == 'POST':
         order_id = request.POST.get('order_id')
@@ -659,7 +661,7 @@ def product_cancel_request(request):
         messages.info(request, 'Your request for cancellation has been submitted. Kindly wait for the verification and confirmation !!')
         return redirect('order_detail', order_id)
 
-
+@login_required (login_url='user_login')
 def product_return_request(request):
     if request.method == 'POST':
         order_id = request.POST.get('order_id')
@@ -669,12 +671,9 @@ def product_return_request(request):
             order_product = OrderProduct.objects.get(id = order_product_id)
         except Exception as e:
             print(e)
-
-
         return_reason = request.POST.get('reason')
         order.order_status = 'Cancel or Return Requested'
         order_product.order_status = 'Return Requested'
-
         if return_reason == 'other':
             other_reason = request.POST.get('other-reason')
             order_product.return_reason = 'other'
@@ -686,8 +685,7 @@ def product_return_request(request):
         messages.info(request, 'Your request for return has been submitted. Kindly wait for the verification and confirmation !!')
         return redirect('order_detail', order_id)
 
- 
-
+@login_required (login_url='user_login')
 def my_address(request):
     current_user = request.user
     address_form = AddressForm()
@@ -700,6 +698,7 @@ def my_address(request):
     return render(request,'base/user_side/my_address.html',context)
 
 
+@login_required (login_url='user_login')
 def add_address(request,source):
     if request.method == 'POST':
         address_form = AddressForm(request.POST)
@@ -724,11 +723,13 @@ def add_address(request,source):
         return render(request,'base/user_side/my_address.html',context)
  
 
+@login_required (login_url='user_login')
 def get_country_choices():
    return [(code, str(name)) for code, name in CountryField().get_choices()]
 
 
 
+@login_required (login_url='user_login')
 def update_address(request):
 
     if request.method == 'GET':
@@ -776,6 +777,7 @@ def update_address(request):
                 "name_error": address_form.errors
                 })    
 
+@login_required (login_url='user_login')
 def default_address(request, id):
     try:  
         address = Addresses.objects.get(id=id)
@@ -786,6 +788,7 @@ def default_address(request, id):
         return redirect('my_address')
             
             
+@login_required (login_url='user_login')
 def delete_address(request,id):
     try:
         address = Addresses.objects.get(id=id)
@@ -796,13 +799,7 @@ def delete_address(request,id):
     except Addresses.DoesNotExist:
         return redirect('my_address')                
     
+@login_required (login_url='user_login')
 def contact_us(request):
-    print('gdffgh=gfhfghghdghd==================================================================================')
     return render(request,'store_templates/contact_us.html')
-
-
-
-def blog(request):
-
-
-    return render(request,'store_templates.html/biblolater.html')   
+  

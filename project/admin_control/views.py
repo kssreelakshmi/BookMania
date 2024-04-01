@@ -35,6 +35,8 @@ from datetime import timedelta, date
 from django.views.generic import TemplateView
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.db.models import Q
+
 
 # Create your views here.
 User = get_user_model()
@@ -66,16 +68,19 @@ def admin_home(request):
     orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
     orders_count =orders.count()
     order_products = OrderProduct.objects.filter(is_ordered=True)
-    user = Account.objects.filter(is_active = True).exclude(is_admin = True)
+    users = Account.objects.filter(is_active = True).exclude(is_admin = True)
     products = ProductVariant.objects.filter(is_active = True)
     category = Category.objects.filter(is_active = True).count()
-    total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
-    extracted_total_revenue = total_revenue['total_revenue']
-    delivered_oders = orders.filter(order_status="Delivered")
+
+    if orders_count >= 1:
+        total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
+        extracted_total_revenue = total_revenue['total_revenue']
+    else:
+        extracted_total_revenue = 0
+    delivered_orders = orders.filter(order_status = "Delivered")
+    print(delivered_orders)
     coupons = Coupon.objects.filter(is_active = True)
     coupon_count= coupons.count()
-    
-   
     context = {
             'coupons ' : coupons ,
             'coupon_count ' : coupon_count ,
@@ -85,8 +90,8 @@ def admin_home(request):
             'products' : products.count(),
             'category' : category,
             'total_revenue': extracted_total_revenue,
-            'users' : user.count(),
-            'delivered_oders' : delivered_oders,
+            'users' : users.count(),
+            'delivered_orders' : delivered_orders,
     }
     return render(request,'admin-dashboard/admin_home.html',context)
 
@@ -95,7 +100,7 @@ class DashboardSalesData(APIView):
     permission_classes = []
     
     def get(self, request, format=None):    
-        print('reached efrerferf3ef')
+        
         total_orders_count  = OrderProduct.objects.filter(is_ordered=True).count()
         new_orders_count  = OrderProduct.objects.filter(is_ordered=True,order_status='New').count()
         cancelled_orders_count  = OrderProduct.objects.filter(is_ordered=True,order_status__in=["Cancelled"]).count()
@@ -123,12 +128,9 @@ class DashboardProductVsOrderData(APIView):
     permission_classes = []
     
     def get(self, request, format=None):
-        
         order_products = OrderProduct.objects.filter(is_ordered=True).order_by('-created_at')
         variants = ProductVariant.objects.filter(is_active = True)
         sale_data = {str(variant.sku_id): 0 for variant in variants }
-
-            
         for order_product in order_products:
             key = str(order_product.variant.sku_id)
             if sale_data[key]:
@@ -137,9 +139,6 @@ class DashboardProductVsOrderData(APIView):
                 sale_data[key] = order_product.quantity
         
         sale_data = dict(itertools.islice({key: value for key, value in sorted(sale_data.items(), key=lambda item: item[1], reverse = True)}.items(), 5))
-
-        print(sale_data)
-    
         data = {
             'status': 'success',
             'data': sale_data
@@ -183,21 +182,23 @@ def sales_report(request):
         stock[data]['sold_quantity'] = sale_data[data]
         stock[data]['total_revenue'] = stock[data]['sold_quantity'] * stock[data]['sale_price']
 
-    
-
     orders = Order.objects.filter(is_ordered=True).order_by('-created_at')
     orders_count = orders.count()
     product_variants = ProductVariant.objects.filter(is_active = True)
     user = Account.objects.filter(is_active = True).exclude(is_admin = True)
-    total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
-    extracted_total_revenue = total_revenue['total_revenue']    
-
-    cancelled_order_total = OrderProduct.objects.filter(is_ordered=True, order_status='Cancelled').aggregate(cancelled_order_total=Sum(F('product_price') * F('quantity')))
-    cancelled_amount = cancelled_order_total['cancelled_order_total']
-    returned_order_total = OrderProduct.objects.filter(is_ordered=True, order_status='Returned').aggregate(returned_order_total=Sum(F('product_price') * F('quantity')))
-    returned_amount = returned_order_total['returned_order_total']
-    final_amount = extracted_total_revenue - (returned_amount+cancelled_amount)
-
+    if orders_count >= 1:
+        total_revenue = orders.aggregate(total_revenue=Sum('order_total'))
+        extracted_total_revenue = total_revenue['total_revenue']
+    else:
+        extracted_total_revenue = 0
+    if orders_count >= 1:
+        cancelled_order_total = OrderProduct.objects.filter(is_ordered=True, order_status='Cancelled').aggregate(cancelled_order_total=Sum(F('product_price') * F('quantity')))
+        cancelled_amount = cancelled_order_total['cancelled_order_total']
+        returned_order_total = OrderProduct.objects.filter(is_ordered=True, order_status='Returned').aggregate(returned_order_total=Sum(F('product_price') * F('quantity')))
+        returned_amount = returned_order_total['returned_order_total']
+        final_amount += extracted_total_revenue - (returned_amount + cancelled_amount)
+    else:
+        final_amount = 0
     context = {
         'variant_sale_data' : stock,
         'product_variants': product_variants,
@@ -206,40 +207,32 @@ def sales_report(request):
         'revenue' : extracted_total_revenue,
         'final_amount': final_amount,
     }
-
-
     return render(request,'admin-dashboard/sales_report.html',context)
 
 
 # @check_isadmin
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_login(request):
+
     if request.user.is_authenticated and request.user.is_admin:
         return redirect('admin_home')
-    
     if request.method == 'POST':
             email = request.POST.get('email')
             password = request.POST.get('password')
-            
             if not email:
                 messages.warning(request,'Email is required !')
                 return redirect('admin_login')
-            
             if not password:
                 messages.warning(request,'Password is required !')
                 return redirect('admin_login')
-            
             check_if_user_exists = User.objects.filter(email=email).exists()
-            
             if check_if_user_exists:
                 user = authenticate(email=email, password=password)
-        
                 if user is not None:
-                    
                     if not user.is_admin:
                         messages.success(request,'You are not allowed to access this page ')
                         return redirect('user_home')
-                    
+                
                     login(request,user)
                     messages.success(request,'You are now logged in')
                     return redirect('admin_home')
@@ -250,7 +243,6 @@ def admin_login(request):
             else:
                 messages.error(request,'Invalid Email ID !')
                 return redirect('admin_login')
-        
     return render(request, 'admin-dashboard/admin_login.html')
 
 @check_isadmin

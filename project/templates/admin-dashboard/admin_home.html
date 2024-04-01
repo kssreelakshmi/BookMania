@@ -138,22 +138,22 @@ Admin - Dashboard
                             <article class="card-body">
                                 <h5 class="card-title">Delivered Orders</h5>
                                 <ul class="verti-timeline list-unstyled font-sm">
-                                    {% for order in delivered_oders %}
-                                    <li class="event-list">
-                                        <div class="event-timeline-dot">
-                                            <i class="material-icons md-play_circle_outline font-xxl"></i>
-                                        </div>
-                                        <div class="media">
-                                            <div class="me-3">
-                                                <h6><span></span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
+                                    {% for order in delivered_orders %}
+                                        <li class="event-list">
+                                            <div class="event-timeline-dot">
+                                                <i class="material-icons md-play_circle_outline font-xxl"></i>
                                             </div>
-                                            <div class="media-body">
-                                                <div>
-                                                    {{order}}
+                                            <div class="media">
+                                                <div class="me-3">
+                                                    <h6><span></span> <i class="material-icons md-trending_flat text-brand ml-15 d-inline-block"></i></h6>
+                                                </div>
+                                                <div class="media-body">
+                                                    <div>
+                                                        {{order}}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </li>
+                                        </li>
                                    {% endfor %}
                                 </ul>
                             </article>
@@ -168,7 +168,7 @@ Admin - Dashboard
                         <canvas id="top-products-sale" style="max-height: 300px;"></canvas>
                     </article>
                 </div>
-                <div class="card mb-4">
+                <!-- <div class="card mb-4">
                     <article class="card-body">
                         <h5 class="card-title">Marketing Chanel</h5>
                         <span class="text-muted font-xs">Facebook</span>
@@ -192,7 +192,7 @@ Admin - Dashboard
                             <div class="progress-bar" role="progressbar" style="width: 80%"> 80%</div>
                         </div>
                     </article>
-                </div>
+                </div> -->
             </div> 
         </div>
         <div class="card mb-4">

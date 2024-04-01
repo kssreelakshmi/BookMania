@@ -387,7 +387,7 @@ function sendEmailChangeOtpVerify(){
         if (data.status === "success") {
           // email success
           console.log(data);
-          location.reload();
+          window.location.href = window.location.origin + data.logout_url;
 
       } else {
           // Password change error

@@ -1,5 +1,5 @@
 from django.db import models
-from accounts.models import Account
+from accounts.models import Account,ShippingAddress
 from accounts.models import Addresses
 from store.models import ProductVariant
 from coupon.models import Coupon
@@ -55,10 +55,10 @@ class Order(models.Model):
         )
 
     user = models.ForeignKey(Account,on_delete=models.CASCADE)
+    shipping_address = models.ForeignKey(ShippingAddress,on_delete=models.CASCADE)
     order_id = models.CharField(max_length=100)
-    coupon = models.ForeignKey(Coupon, on_delete = models.CASCADE, null=True, blank = True)
+    coupon = models.ForeignKey(Coupon, on_delete = models.DO_NOTHING, null=True, blank = True)
     coupon_discount = models.DecimalField(max_digits=50, decimal_places=2, null=True, blank=True)
-    address = models.ForeignKey(Addresses,on_delete=models.CASCADE, null=True, blank=True)
     payment = models.ForeignKey(Payment,on_delete=models.SET_NULL, null=True, blank=True)
     order_instruction = models.CharField(max_length=100, blank=True, null=True)
     order_total = models.DecimalField(max_digits=50, decimal_places=2)

@@ -82,11 +82,11 @@
         <div>
             <ul class="list-address">
                 <li><strong>Invoiced To</strong></li>
-                <li>{{order.address.user.username}}</li>
-                <li>{{order.address.address_line_1}}, {{order.address.address_line_1}}</li>
-                <li>{{order.address.city}}, {{order.address.pincode}}</li>
-                <li>{{order.address.state}}, {{order.address.country.name}}</li>
-                <li>{{order.address.phone_number}}</li>
+                <li>{{order.user.username}}</li>
+                <li>{{order.shipping_address.address_line_1}}, {{order.shipping_address.address_line_1}}</li>
+                <li>{{order.shipping_address.city}}, {{order.shipping_address.pincode}}</li>
+                <li>{{order.shipping_address.state}}, {{order.shipping_address.country}}</li>
+                <li>{{order.shipping_address.phone_number}}</li>
             </ul>
         </div>
         <h3 style="text-align: center;">Product details</h3>

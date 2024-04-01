@@ -60,10 +60,10 @@ Order Management - Cancel or Return Requested
                           </a>
                           
                         </td>
-                        <td>{{order.address.user.username}}</td>
-                        <td>{{order.address.name}}</td>
-                        <td>{{order.address.phone_number}}</td>
-                        <td>{{order.address.pincode}}</td>
+                        <td>{{order.user.username}}</td>
+                        <td>{{order.shipping_address.name}}</td>
+                        <td>{{order.shipping_address.phone_number}}</td>
+                        <td>{{order.shipping_address.pincode}}</td>
                         <td>{{order.order_total}}</td>
                         <td>{{order.order_status}}</td>
                         <td>{{order.payment.method.method_name}}</td>

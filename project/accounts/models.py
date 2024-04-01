@@ -1,6 +1,8 @@
 from django.db import models
+from .models import *
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.utils import timezone
+import django_countries
 from django_countries.fields import CountryField
 from django.core.validators import RegexValidator,EmailValidator
 import datetime
@@ -66,7 +68,6 @@ class Account(AbstractBaseUser):
 
     objects = AccountManager()
 
-
     def __str__(self):
         return self.email
     
@@ -119,15 +120,32 @@ class Addresses(models.Model):
         
     def get_user_full_address(self):
         address_parts = f"{self.name}, {self.phone_number}, {self.address_line_1}"
-        
         if self.address_line_2:
             address_parts += (', '+self.address_line_2)
-        
         address_parts += (f", Pin: {self.pincode}, {self.city}, {self.state}, {self.country.name}")
-        
-        
         return address_parts
         # return f'{self.name},{self.phone},Pin:{self.pincode},Address:{self.address_line_1},{self.address_line_2},{self.city},{self.state},{self.country}'
+    
+    def __str__(self):
+        return self.name
+    
+class ShippingAddress(models.Model):
+    name = models.CharField(max_length=30)
+    phone_number = models.CharField(max_length=20)
+    address_line_1 = models.CharField(max_length=50)
+    address_line_2 = models.CharField(max_length=50,blank=True,null=True)
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    country = models.CharField(max_length=50)
+    pincode = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def get_user_full_address(self):
+        address_parts = f"{self.name}, {self.phone_number}, {self.address_line_1}"
+        if self.address_line_2:
+            address_parts += (', '+self.address_line_2)
+        address_parts += (f", Pin: {self.pincode}, {self.city}, {self.state}, {self.country.name}")
+        return address_parts
     
     def __str__(self):
         return self.name

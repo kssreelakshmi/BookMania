@@ -99,9 +99,6 @@ def shop(request, cat_slug = None):
     name = request.GET.get('new')
     
     product_variants = ProductVariant.objects.all().filter(is_active = True).order_by('-created_date').select_related('product').prefetch_related('attribute')
-   
-
-    
     paginator = Paginator(product_variants,4)
     page = request.GET.get('page')
     paged_products = paginator.get_page(page)

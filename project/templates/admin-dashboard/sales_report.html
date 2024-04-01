@@ -39,27 +39,16 @@ Admin - Dashboard
                 </div>
             
                     <div class="col-md-2 col-6">
-                        <input type="date" value="" class="form-control" id="start_date" placeholder="Start Date">
+                        <input type="date" value="" class="form-control" id="start_date">
                         <p id="start_date_error" hidden class="text-danger p-2">Choose a start date</p>
                     </div>
                     <div class="col-md-2 col-6">
-                        <input type="date" value=""  class="form-control" id="end_date" placeholder="End Date">
+                        <input type="date" value="" class="form-control" id="end_date">
                         <p id="end_date_error" hidden class="text-danger p-2">Choose an end date</p>
                     </div>
                     <div class="col-md-2 col-6">
                         <button type="button" id="filterbutton" class="btn btn-primary" onclick="saleHandle()">Filter</button>
                     </div>
-                <div class="col-md-2 col-6">
-                    <div class="custom_select">
-                        <select name="variants" class="form-select ">
-                            <option >Status</option>
-                            <option>All</option>
-                            <option>Paid</option>
-                            <option>Chargeback</option>
-                            <option>Refund</option>
-                        </select>
-                    </div>
-                </div> 
             </div>
         </header>
         <div class="card-body">
@@ -169,17 +158,32 @@ crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         const url = new URL(window.location.href)
         const urlParams = new URLSearchParams(window.location.search);
         const unformattedDates = Array.from(urlParams.values())
+        let startDate = document.getElementById("start_date")
+        let endDate = document.getElementById("end_date")
         
         if(unformattedDates.length == 0){
+            startDate.value = "2023-01-01"
+            
+            const today = new Date();
+            // Using padStart() for consistent formatting
+            const yyyy = today.getFullYear().toString().padStart(4, '0');
+            const mm = (today.getMonth() + 1).toString().padStart(2, '0'); // Jan is 0!
+            const dd = today.getDate().toString().padStart(2, '0');
+            const formattedCurrentDate = yyyy + '-' + mm + '-' + dd;
+            console.log(formattedCurrentDate); // Output: yyyy-mm-dd (e.g. 2024-04-01)
+            endDate.value = formattedCurrentDate
             return
         }
         let dates = []
-        
+        console.log(unformattedDates)
         unformattedDates.map((date) => {     // Array.from() is used for converting iterator to array
             const [year, month, day] = date.split('-');
             dates.push( `${day}-${month}-${year}`);
         })
-        document.getElementById('heading').innerHTML += ` ( From  ${dates[0]}  To  ${dates[1]} )` 
+        document.getElementById('heading').innerHTML += ` ( From  ${dates[0]}  To  ${dates[1]} )`
+        startDate.value =  unformattedDates[0]
+        endDate.value =  unformattedDates[1]
+
         
     })
 </script>

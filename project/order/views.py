@@ -7,7 +7,7 @@ from .models import Order,PaymentMethod,Payment,OrderProduct,Invoice
 from store.models import Product,ProductVariant
 from coupon.models import Coupon
 import datetime
-from accounts.forms import Addresses
+from accounts.models import Addresses, ShippingAddress
 import razorpay
 import json
 from django.views.decorators.cache import cache_control
@@ -61,15 +61,23 @@ def order_summary(request):
             messages.error(request, "Please choose an address")
             return redirect('cart_checkout')
         
+        order_address = ShippingAddress()
+        order_address.name = shipping_address.name
+        order_address.phone_number = shipping_address.phone_number
+        order_address.address_line_1 = shipping_address.address_line_1
+        order_address.address_line_2 = shipping_address.address_line_2
+        order_address.city = shipping_address.city
+        order_address.state = shipping_address.state
+        order_address.country = shipping_address.country.name
+        order_address.pincode = shipping_address.pincode
+        order_address.save()
 
-        data.address = shipping_address
+        data.shipping_address = order_address
         data.order_instruction = request.POST.get("delivery_note")
         data.save()
         
         payment_method = PaymentMethod.objects.filter(is_active=True)
         coupons = Coupon.objects.filter(is_active=True, expire_date__gt=datetime.date.today())
-        print(coupons)
-        print(data.order_id)
         context = { 
             'coupons' : coupons,
             'order': data,
@@ -78,7 +86,7 @@ def order_summary(request):
             'total': order_total,
             'tax': data.tax,
             'coupon_discount': data.coupon_discount,
-            'shipping_address': shipping_address,
+            'shipping_address': data.shipping_address,
             'payment_methods': payment_method,
             }
         
@@ -143,7 +151,7 @@ def place_order(request):
             'payment': payment,
             'tax': order.tax,
             'coupon_discount' : order.coupon_discount,
-            'shipping_address': order.address,
+            'shipping_address': order.shipping_address,
             'payment_method': payment_method,
             'success_url': success_url,
             'failed_url': failed_url,
@@ -346,9 +354,9 @@ def retry_payment(request):
             return JsonResponse(
                 {
                     'status' : 'SUCCESS',
-                    'name' : order.address.user.username,
-                    'email' : order.address.user.email,
-                    'contact' : order.address.phone_number,
+                    'name' : order.user.username,
+                    'email' : order.user.email,
+                    'contact' : order.user.phone_number,
                     'payment_id': payment['id'],
                     'payment_amount': payment['amount'],
 
@@ -416,7 +424,6 @@ def order_completed(request):
 def generate_invoice(request,invoice_number):
     try:
         invoice = Invoice.objects.get(invoice_number = invoice_number)
-        print(invoice)
     except:
         messages.warning(request, 'Invoice not generated for this order !')
     

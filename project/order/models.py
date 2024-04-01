@@ -55,7 +55,7 @@ class Order(models.Model):
         )
 
     user = models.ForeignKey(Account,on_delete=models.CASCADE)
-    shipping_address = models.ForeignKey(ShippingAddress,on_delete=models.CASCADE)
+    shipping_address = models.ForeignKey(ShippingAddress,on_delete=models.CASCADE, null=True, blank=True)
     order_id = models.CharField(max_length=100)
     coupon = models.ForeignKey(Coupon, on_delete = models.DO_NOTHING, null=True, blank = True)
     coupon_discount = models.DecimalField(max_digits=50, decimal_places=2, null=True, blank=True)

@@ -15,9 +15,7 @@ def coupon_control(request):
             
         action = data.get('action')
         coupon_code = data.get('coupon_code')
-        print(coupon_code)
         order_number = data.get('order_id')
-        print(action)
         order = Order.objects.get(is_ordered = False, order_id = order_number)
         # Update the order status based on the order_number and selected_option
         coupon = Coupon.objects.filter(coupon_code__iexact=coupon_code, is_active=True, expire_date__gt=date.today())

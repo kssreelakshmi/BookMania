@@ -252,7 +252,6 @@ def forgot_password(request):
             current_site = get_current_site(request)
             subject = 'Reset Your Password'
             uid = urlsafe_base64_encode(force_bytes(user.pk))
-            print(uid)
             data = {
                     'user': user,
                     'domain': current_site.domain,
@@ -301,7 +300,6 @@ def reset_password(request):
             uid = request.session.get('uid')
             try:
                 user = User.objects.get(pk=uid)
-                print('dfghj')
                 user.set_password(password)
                 user.save()
                 messages.success(request,"Password Resetting Completed")
@@ -367,12 +365,10 @@ def update_profile(request):
         
 @login_required (login_url='user_login')
 def mobile_number_change(request):
-    print('reached num ber')
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == 'POST' and is_ajax:
         data =json.load(request)
         get_new_number = data['new_number']
-        print(get_new_number)
         if (request.user.phone_number == get_new_number):
             return JsonResponse({
                 "status" : "error",
@@ -412,13 +408,11 @@ def mobile_number_change(request):
     
 @login_required (login_url='user_login')
 def mobile_number_change_verify(request):
-    print('reached verify')
     is_ajax = is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == 'POST' and is_ajax:
         data = json.load(request)
         number = data['new_number']
         otp = data['otp']
-        print(otp)
         try:
             user = User.objects.get(id = request.user.id)
             is_otp_valid = UserProfile.objects.filter(user = user, otp = otp).exists()
@@ -527,7 +521,6 @@ def password_change(request):
             #SEND OTP TO MAIL
             otp=random.randint(100000,999999)
             user_otp,created = UserProfile.objects.update_or_create(user=user, defaults={'otp': f'{otp}'})
-            print(otp)
             current_site = get_current_site(request)
             mail_subject = 'Password Change'
             message = render_to_string ('base/user_side/verification/password_change.html',{

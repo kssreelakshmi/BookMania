@@ -228,7 +228,6 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
             if not created:
                 recent_viewed.updated_at = datetime.now()
                 recent_viewed.save()
-            print(recent_viewed)  
             order_product = OrderProduct.objects.filter(user=request.user,variant__id= single_product.id).exists()
               
         except OrderProduct.DoesNotExist:

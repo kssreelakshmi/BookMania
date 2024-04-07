@@ -1009,9 +1009,6 @@ def update_order_product(request):
         return JsonResponse({'status':"error",
                              "message": "operation failed!"})
 
-
-
-
 @check_isadmin
 @login_required(login_url='admin_login')
 def order_handle(request):

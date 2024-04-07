@@ -54,7 +54,6 @@ def order_summary(request):
         
         Order.objects.filter(user = current_user, payment = None).exclude(order_id = data.order_id).delete()
         
-        
         try:
             shipping_address = Addresses.objects.get(id=address_id)
         except:
@@ -204,13 +203,12 @@ def payment_success(request):
                 order_product.product_price = cart_item.product.sale_price
                 order_product.is_ordered = True
                 order_product.save()
-            
+
                 product_variant = ProductVariant.objects.get(id=cart_item.product.id)
                 product_variant.stock -= cart_item.quantity
                 product_variant.save()
-            
+
             Cart_item.objects.filter(user=request.user).delete()
-            
             request.session["order_id"] = order.order_id
             request.session["payment_id"] = payment.payment_id
             return redirect('order_completed')
@@ -224,7 +222,6 @@ def payment_success(request):
         payment_order_id = request.GET['payment_order_id']
         payment_sign = request.GET['payment_sign']
         payment_amount = request.GET['payment_amount']
-        
         payment_method = PaymentMethod.objects.get(method_name = payment_method)
 
         if payment_method_is_active:
@@ -238,7 +235,6 @@ def payment_success(request):
                 payment_status = 'SUCCESS',
                 )
             payment.save()
-            
             order.payment = payment
             order.is_ordered = True
             order.order_status = 'New'
@@ -259,17 +255,13 @@ def payment_success(request):
                 product_variant = ProductVariant.objects.get(id=cart_item.product.id)
                 product_variant.stock -= cart_item.quantity
                 product_variant.save()
-            
-            
             Cart_item.objects.filter(user=request.user).delete()
-            
             request.session["order_id"] = order.order_id
             request.session["payment_id"] = payment_id
             return redirect('order_completed')
         else:
             messages.error(request, "Invalid Payment Method Found")
             return redirect('payment_failed')
-    
     else:
         return redirect('user_dashboard')    
 
@@ -288,8 +280,6 @@ def payment_failed(request):
     payment_amount = request.GET['payment_amount']
     error_reason = request.GET['error_reason']
     error_description = request.GET['error_description']
-    
-
     payment = Payment(
         user = request.user,
         payment_id = payment_id,
@@ -301,7 +291,6 @@ def payment_failed(request):
         payment_status = 'FAILED',
         )
     payment.save()
-        
     order.payment = payment
     order.is_ordered = False
     order.order_status = 'Payment Pending'
@@ -318,8 +307,6 @@ def payment_failed(request):
         order_product.product_price = cart_item.product.sale_price
         order_product.is_ordered = False
         order_product.save()
-
-
     context = {
         'payment_method' : payment_method,
         # 'error_code' : request.GET['error_code'],

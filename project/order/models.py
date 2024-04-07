@@ -150,4 +150,7 @@ class Invoice(models.Model):
         self.invoice_number = 'BMIV-0' + str(Invoice.objects.all().count() + 1)
         super(Invoice, self).save(*args, **kwargs)
 
+# class Wallet(models.Model):
+        
+
 

@@ -15,7 +15,7 @@ from accounts.models import Account
 from django.contrib.sites.shortcuts import get_current_site
 from store.models import Product,ProductVariant,Attribute,AttributeValue,Author,AdditionalProductImages,Publication
 from order.models import Order, OrderProduct, Payment, PaymentMethod,Invoice
-from order.forms import OrderStatusForm
+from order.forms import OrderStatusForm,OrderProductStatusForm
 from django.db.models import OuterRef, Subquery
 from admin_control.forms import CouponForm
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
@@ -78,7 +78,6 @@ def admin_home(request):
     else:
         extracted_total_revenue = 0
     delivered_orders = orders.filter(order_status = "Delivered")
-    print(delivered_orders)
     coupons = Coupon.objects.filter(is_active = True)
     coupon_count= coupons.count()
     context = {
@@ -210,12 +209,15 @@ def sales_report(request):
     return render(request,'admin-dashboard/sales_report.html',context)
 
 
-# @check_isadmin
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_login(request):
 
     if request.user.is_authenticated and request.user.is_admin:
         return redirect('admin_home')
+    else:
+        messages.error(request, "You need to be logged in as an admin to access this page")
+        
     if request.method == 'POST':
             email = request.POST.get('email')
             password = request.POST.get('password')
@@ -391,7 +393,6 @@ def category_control(request, cat_slug):
     return redirect('all_category')
 
 @check_isadmin
-
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required(login_url='admin_login')
 # @check_isadmin
@@ -422,7 +423,7 @@ def update_category(request, cat_slug):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required(login_url='admin_login')
-# @check_isadmin
+@check_isadmin
 def create_category(request):
     form = CategoryForm()
 
@@ -475,7 +476,6 @@ def product_control(request,slug):
     return redirect('all_products')
 
 @check_isadmin
-
 @login_required(login_url='admin_login')
 def create_product(request):
     
@@ -515,7 +515,6 @@ def create_product(request):
                 
             messages.success(request,'product added')
             return redirect('all_products')
-        
         else:
             
             messages.error(request,variant_form.errors)
@@ -527,7 +526,6 @@ def create_product(request):
             }       
             return render(request,'admin-dashboard/product_management/create_product.html',context)
     else:    
-      
         context = {
                 'product_form': product_form,
                 'variant_form' : variant_form,
@@ -537,7 +535,6 @@ def create_product(request):
     return render(request,'admin-dashboard/product_management/create_product.html',context)
 
 @check_isadmin
-
 @login_required(login_url='admin_login')
 def product_update(request,slug):
     
@@ -564,7 +561,6 @@ def product_update(request,slug):
     return render(request,'admin-dashboard/product_management/update_product.html', context)
 
 @check_isadmin
-
 @login_required(login_url='admin_login')
 def create_product_variant(request,slug):
     try:
@@ -625,7 +621,6 @@ def create_product_variant(request,slug):
     return render(request,'admin-dashboard/product_management/create_product_variant.html',context)
 
 @check_isadmin
-
 @login_required(login_url='admin_login')
 def product_variant_update(request, product_variant_slug):
     
@@ -722,6 +717,8 @@ def product_variant_update(request, product_variant_slug):
         }
     return render(request,'admin-dashboard/product_management/variant_update.html',context)
 
+
+@check_isadmin
 @login_required(login_url='admin_login')
 def delete_product_variant(request,product_variant_slug):
     try:
@@ -735,6 +732,7 @@ def delete_product_variant(request,product_variant_slug):
     return redirect('all_products')
 
 
+@check_isadmin
 @login_required(login_url='admin_login')
 def all_publication(request):
     publications = Publication.objects.all().order_by('-created_date')
@@ -747,6 +745,7 @@ def all_publication(request):
     return render(request,'admin-dashboard/publication_management/all_publication.html',context)
 
 
+@check_isadmin
 @login_required(login_url='admin_login')
 def publication_control(request, id):
     try:
@@ -782,6 +781,7 @@ def publication_control(request, id):
         messages.error(request, "publication is now blocked!")
     return redirect('all_publication')
 
+@check_isadmin
 @login_required(login_url='admin_login')
 def create_publication(request):
     
@@ -802,7 +802,7 @@ def create_publication(request):
         }
     return render(request, 'admin-dashboard/publication_management/create_publication.html', context)
 
-
+@check_isadmin
 @login_required(login_url='admin_login')
 def update_publication(request, id):
     try:
@@ -829,6 +829,8 @@ def update_publication(request, id):
         }
     return render(request, 'admin-dashboard/publication_management/update_publication.html', context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def all_authors(request):
     authors = Author.objects.all().order_by('-author_created_at')
     paginator = Paginator(authors,10)
@@ -839,6 +841,8 @@ def all_authors(request):
     }
     return render(request,'admin-dashboard/author_management/all_authors.html',context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def author_control(request,id):
     try:
         author = Author.objects.get(id = id)
@@ -873,7 +877,9 @@ def author_control(request,id):
         messages.error(request, "Author is now blocked!")
     
     return redirect('all_authors')
-    
+
+@check_isadmin
+@login_required(login_url='admin_login')   
 def add_authors(request):
     if request.method == 'POST':
         form = AuthorForm(request.POST)
@@ -891,6 +897,8 @@ def add_authors(request):
         }  
     return render(request,'admin-dashboard/author_management/add_author.html',context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def update_author(request,id):
     try:
         author = Author.objects.get(id=id)
@@ -915,6 +923,7 @@ def update_author(request,id):
     }
     return render(request,'admin-dashboard/author_management/update_author.html',context)
 
+@check_isadmin
 @login_required(login_url='admin_login')
 def all_orders(request):
     order_status = request.GET.get('status')
@@ -930,15 +939,14 @@ def all_orders(request):
     paged_orders = paginator.get_page(page)
     order = Order()
     choices = order.ORDER_STATUS_CHOICES
-
     order_status_choices = [choice[0].replace(' ', '-') for choice in choices]
-
     context = {
         'orders': paged_orders,
-        'order_status_choices' : order_status_choices
+        'order_status_choices' : order_status_choices,
     }
     return render(request, 'admin-dashboard/order_management/all_orders.html',context)
 
+@check_isadmin
 @login_required(login_url='admin_login')
 def update_order(request, order_id):
     try:
@@ -954,24 +962,25 @@ def update_order(request, order_id):
         selected_option = data.get('selected_option')
         order.order_status = selected_option
         order.save()
-        return JsonResponse({"status": "success", "selected_option": selected_option})
-
-
+        return JsonResponse({
+            "status": "success", 
+            "selected_option": selected_option
+            })
     order_products = OrderProduct.objects.filter(order = order)
     total = 0
     for order_product in order_products:
         total += order_product.product_price * order_product.quantity
-
     try:
         payment = Payment.objects.filter(payment_id = order.payment.payment_id)[0]
     except:
         payment = None
     form = OrderStatusForm(instance = order)
 
-    print(order.is_ordered)
     if order.is_ordered:
         invoice = Invoice.objects.filter(order=order).first()
+    
 
+    order_product_choices = [choice_pair[0] for choice_pair in order_products[0].STATUS_CHOICES]
     context = {
 
         'invoice' :invoice,
@@ -979,13 +988,32 @@ def update_order(request, order_id):
         'order_products': order_products,
         'total': total,
         'payment': payment,
-        'form': form,
+        'order_form': form,
+        'order_product_choices' : order_product_choices,
     }
     return render(request, 'admin-dashboard/order_management/order_details.html',context)
 
 
+@check_isadmin
+@login_required(login_url='admin_login')
+def update_order_product(request):
+    data = json.load(request)
+    try:
+        order_product = OrderProduct.objects.get(pk = int(data['orderProductId']))
+        order_product.order_status = data['selectedOption']
+        order_product.save()
+        return JsonResponse({'status':"success",
+                             "message": f'Order product has been updated with the status: {data["selectedOption"]}'})
+    except Exception as e:
+        print(e)
+        return JsonResponse({'status':"error",
+                             "message": "operation failed!"})
 
 
+
+
+@check_isadmin
+@login_required(login_url='admin_login')
 def order_handle(request):
     data = json.load(request)
     # order_product_id = request.GET.get('order_product_id')
@@ -1003,7 +1031,6 @@ def order_handle(request):
 
             user = order_product.user
             email = user.email
-            print(user)
             current_site = get_current_site(request)
             mail_subject = 'Cancellation Successful'
             data = {
@@ -1090,6 +1117,8 @@ def order_handle(request):
 
     return redirect('order_details')
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def sendNotifyMail(email, message, mail_subject):
     to_email = email
     send_email = EmailMessage(mail_subject,message,to=[to_email])
@@ -1098,8 +1127,8 @@ def sendNotifyMail(email, message, mail_subject):
     return
 
 
-
-
+@check_isadmin
+@login_required(login_url='admin_login')
 def all_attributes(request):
     attribute =Attribute.objects.all()
     paginator = Paginator(attribute,10)
@@ -1110,6 +1139,8 @@ def all_attributes(request):
     }
     return render(request,'admin-dashboard/product_management/all_attributes.html',context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def attribute_control(request,id):
     try:
         attribute = Attribute.objects.get(id = id)
@@ -1124,6 +1155,8 @@ def attribute_control(request,id):
         messages.error(request, "attribute is now blocked!")
     return redirect('all_attributes')
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def create_attribute(request):
     if request.method == 'POST':
         attribute_form = CreateAttributeForm(request.POST)
@@ -1140,6 +1173,8 @@ def create_attribute(request):
     }  
     return render(request,'admin-dashboard/product_management/create_attribute.html',context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def update_attribute(request,id):
     try:
         attribute = Attribute.objects.get(id=id)
@@ -1164,6 +1199,8 @@ def update_attribute(request,id):
     }
     return render(request,'admin-dashboard/product_management/update_attributes.html',context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def all_attribute_values(request):
     attributevalue = AttributeValue.objects.all()
     paginator = Paginator(attributevalue,10)
@@ -1174,6 +1211,8 @@ def all_attribute_values(request):
     }
     return render(request,'admin-dashboard/product_management/all_attribute_values.html',context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def attribute_value_control(request,id):
     try:
         attribute_value = AttributeValue.objects.get(id = id)
@@ -1188,6 +1227,8 @@ def attribute_value_control(request,id):
         messages.error(request, "attribute_value is now blocked!")
     return redirect('all_attribute_values')
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def add_attribute_values(request):
     if request.method == 'POST':
         attribute_value_form = CreateAttributeValueForm(request.POST)
@@ -1207,6 +1248,8 @@ def add_attribute_values(request):
     }  
     return render(request,'admin-dashboard/product_management/create_attribute_value.html',context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def update_attribute_values(request,id):
     try:
         attribute_value = AttributeValue.objects.get(id=id)
@@ -1231,7 +1274,8 @@ def update_attribute_values(request,id):
         }
     return render(request,'admin-dashboard/product_management/update_attribute_values.html',context)
 
-
+@check_isadmin
+@login_required(login_url='admin_login')
 def all_coupon(request):
     coupons = Coupon.objects.all()
     paginator = Paginator(coupons,10)
@@ -1244,6 +1288,8 @@ def all_coupon(request):
     return render(request,'admin-dashboard/coupon_management/available_coupons.html',context)
 
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def create_coupon(request):
 
     if request.method =='POST':
@@ -1263,6 +1309,8 @@ def create_coupon(request):
     }  
     return render(request,'admin-dashboard/coupon_management/create_coupon.html',context)
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def coupon_update(request,id):
     try:
         coupon = Coupon.objects.get(id=id)
@@ -1288,6 +1336,8 @@ def coupon_update(request,id):
     return render(request,'admin-dashboard/coupon_management/coupon_update.html',context)
 
 
+@check_isadmin
+@login_required(login_url='admin_login')
 def coupon_control(request,id):
     try:
         coupon = Coupon.objects.get(id=id)
@@ -1301,6 +1351,5 @@ def coupon_control(request,id):
         messages.success(request, "coupon is now active!")
     else:
         messages.error(request, "coupon is now blocked!")
-    # messages.error(request, "Coupon Disabled")
     return redirect('all_coupon')
 

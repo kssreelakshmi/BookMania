@@ -28,8 +28,7 @@ def home(request, cat_slug=None):
     order_products = OrderProduct.objects.filter(is_ordered=True).order_by('-created_at')
     variants = ProductVariant.objects.filter(is_active = True)
     sale_data = {str(variant.sku_id): 0 for variant in variants }
-
-            
+    cart_products = Cart_item.objects.filter(cart__cart_id = _cart_id(request))
     for order_product in order_products:
         key = str(order_product.variant.sku_id)
         if key in sale_data:
@@ -39,7 +38,6 @@ def home(request, cat_slug=None):
     
     sale_data = dict(itertools.islice({key: value for key, value in sorted(sale_data.items(), key=lambda item: item[1], reverse = True)}.items(), 5))
     most_sold_variants = [product_variants.get(sku_id = i) for i in sale_data.keys()]
-
 
     if request.user.is_authenticated:
         wishlist_exists = Wishlist.objects.filter(user = request.user).exists()
@@ -84,6 +82,7 @@ def home(request, cat_slug=None):
         'products' : products,
         'product_variants' : product_variants[:8],
         'wishlist_products': wishlist_products,
+        'cart_products' : cart_products,
         
     }
     
@@ -149,7 +148,6 @@ def shop(request, cat_slug = None):
         except Exception as e:
             print(e)
 
-
     #wishlist
     if request.user.is_authenticated:
 
@@ -169,22 +167,20 @@ def shop(request, cat_slug = None):
     #price filter
     if price_max and price_min:
         paged_products = product_variants.filter(sale_price__lte=price_max, sale_price__gte=price_min)
-
     elif price_min:
-        
         paged_products = product_variants.filter(sale_price__gte=price_min)
     elif price_max:
         paged_products = product_variants.filter(sale_price__lte=price_max)
 
     #price sort
     if sort_by == "Low-to-High":
-        paged_products = product_variants.order_by('sale_price')
+        paged_products = paged_products.order_by('sale_price')
     elif sort_by == "High-to-Low":
-        paged_products = product_variants.order_by('-sale_price')
+        paged_products = paged_products.order_by('-sale_price')
 
     #Sort by new
     if name == 'New':
-        paged_products = product_variants.order_by('-created_date')
+        paged_products = paged_products.order_by('-created_date')
   
     context = {
        
@@ -222,7 +218,6 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
         sale_data = dict(itertools.islice({key: value for key, value in sorted(sale_data.items(), key=lambda item: item[1], reverse = True)}.items(), 5))
         most_sold_variants = [product_variant.get(sku_id = i) for i in sale_data.keys()]
 
-       
     except Exception as e:
         raise e
     
@@ -242,8 +237,7 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
         order_product = None
 
     reviews = ReviewRating.objects.filter(status=True,product_variant__id=single_product.id).order_by('-updated_at')
-
-        
+    
     context = {
         'reviews' :reviews,
         'order_product' : order_product,

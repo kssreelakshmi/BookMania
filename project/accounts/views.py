@@ -724,8 +724,9 @@ def add_address(request,source):
  
 
 @login_required (login_url='user_login')
-def get_country_choices():
-   return [(code, str(name)) for code, name in CountryField().get_choices()]
+def get_country_choices(request):
+   country_choices = [(code, str(name)) for code, name in CountryField().get_choices()]
+   return country_choices
 
 
 
@@ -748,7 +749,7 @@ def update_address(request):
         form_data.pop('country')
         form_data['country'] = address.country.name
 
-        country_choices = get_country_choices()
+        country_choices = get_country_choices(request)
         countries = json.dumps(country_choices)
         
         return JsonResponse({

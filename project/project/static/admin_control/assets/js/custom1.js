@@ -15,32 +15,32 @@ function getCookie(name) {
   
   
   function send_data(inputid, variant_slug, image_id='thumbnail') {
-      var formData = new FormData();
-      var files = $('#photo'+ inputid)[0].files[0]
-      formData.append('file', files);
-      formData.append('image_id', image_id);
-  
-      $.ajax({
-        type: "POST",
-        url: `/admin-control/product-management/product-variant-update/additional-product-images/${variant_slug}/`, 
-        dataType: "json", 
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: {
-            "X-Requested-With" : "XMLHttpRequest",
-            "X-CSRFToken" : getCookie("csrftoken"), 
-          },
-        success: (data) => {
-          console.log(data);
-          document.getElementById('image'+ inputid).setAttribute('src', data['new_image'])
-          },
-        error: (error) => {
-            console.log(error);
-            alert(error)
-          }
-      });
-    }
+    var formData = new FormData();
+    var files = $('#photo'+ inputid)[0].files[0]
+    formData.append('file', files);
+    formData.append('image_id', image_id);
+
+    $.ajax({
+      type: "POST",
+      url: `/admin-control/product-management/product-variant-update/additional-product-images/${variant_slug}/`, 
+      dataType: "json", 
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: {
+          "X-Requested-With" : "XMLHttpRequest",
+          "X-CSRFToken" : getCookie("csrftoken"), 
+        },
+      success: (data) => {
+        console.log(data);
+        document.getElementById('image'+ inputid).setAttribute('src', data['new_image'])
+        },
+      error: (error) => {
+          console.log(error);
+          alert(error)
+        }
+    });
+  }
 
 
     const handleImage = (id) =>{
@@ -76,14 +76,9 @@ function getCookie(name) {
       //     console.log('supports');
       //   }
       // }
-
       // if(additional_image_field.value){
       //   console.log(additional_image_field.files);
-
-
       // }
-
-
     }
     
     function showSelectedOption(selectElement, order_number) {
@@ -113,6 +108,43 @@ function getCookie(name) {
         });
       }
 
+
+      // ORDERPRODUCT STATUS CHANGE
+    function orderProductStatusChange(selectElement, orderProductId) {
+      console.log("ivide ethiiii");
+      var selectedOption = selectElement.value
+      console.log (selectedOption);
+      var data = {
+        selectedOption: selectedOption,
+        orderProductId: orderProductId
+
+      };
+      console.log(data);
+      $.ajax({
+        type: "POST",
+        url: "/admin-control/order-management/change-order-product-status/",
+        dataType: "json", 
+        data: JSON.stringify(data),
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": getCookie("csrftoken"), 
+        },
+        success: (data) => {
+          console.log(data);
+          swal(data.status, data.message);
+
+        },
+          
+        error: (error) => {
+                console.log(error);
+                alert(error)
+              }
+        });
+      }
+
+   
+          
+
 // order detail page on modal operation order_product_id accessing to handleOperation function  
       
 $(document).ready(function(){
@@ -132,8 +164,7 @@ $(document).ready(function(){
   });
 });
 
-    
-    
+  
 function order_operation(order_product_id, operation, reason, otherReason = null){
   const title = document.getElementById('reasonsModalTitle')
   const reasonElement = document.getElementById('user-reason')

@@ -1,7 +1,7 @@
 {% extends 'base/admin_side/admin_base.html' %}
 
 {% block title %}
-Order Management - All orders
+Order Management - Order Details
 {% endblock %}
 
 {% load static %}
@@ -70,8 +70,8 @@ Order Management - All orders
                         <div class="col-md-8">
                             <div class="form-group">
                                 <select name="order_status" class="form-select cursor-pointer" onchange="showSelectedOption(this,'{{order.order_id}}')">
-                                    {% for value, label in form.fields.order_status.choices %}
-                                    <option value="{{ value }}" {% if form.instance.order_status == value %}selected{% endif %}>
+                                    {% for value, label in order_form.fields.order_status.choices %}
+                                    <option value="{{ value }}" {% if order_form.instance.order_status == value %}selected{% endif %}>
                                         {{ label }}</option>
                                     {% endfor %}
                                 </select>
@@ -135,7 +135,9 @@ Order Management - All orders
                                             <th class="pl-50">Product Detail</th>
                                             <th>Quantity</th>
                                             <th>Price</th>
-                                            <th class="pl-50">Order Status</th>
+                                            <th class="pl-50">Order Product Status</th>
+                                            <th class="pl-50">Action</th>
+
                                         </tr>
                                         {% for order_product in order_products %}
                                           <tr>
@@ -184,6 +186,22 @@ Order Management - All orders
                                                     <!--Modal-->
 
                                                 </p>
+                                            </td>
+                                            <td class="align-middle">
+                                                <div class="" >
+                                                    <div class="col-md-8">
+                                                        <div class="form-group">
+                                                            {% for order_product in order_products %}
+                                                            <select name="order_product_status" class="form-select cursor-pointer" onchange="orderProductStatusChange(this,'{{order_product.id}}')">
+                                                                {% for choice in order_product_choices %}
+                                                                <option id ='choice{{forloop.counter}}' value="{{ choice }}" {% if order_product.order_status == choice %}selected{% endif %}>
+                                                                    {{ choice }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>  
                                             </td>
                                            
 

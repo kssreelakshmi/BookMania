@@ -39,9 +39,7 @@ def Add_to_cart(request,product_id=None):
         data = json.load(request)
         product_id = int(data['productVariantId'])
         cart_action = data['selected_option']
-        
         product = ProductVariant.objects.get(id=product_id)
-        
         if request.user.is_authenticated:
             cart_item = Cart_item.objects.get(product=product,user=request.user)
             cart_items = Cart_item.objects.filter(user=request.user, is_active=True).order_by('-created_at')
@@ -49,7 +47,6 @@ def Add_to_cart(request,product_id=None):
             cart_item = Cart_item.objects.get(product=product,cart=cart)
             cart_items = Cart_item.objects.filter(cart=cart, is_active=True).order_by('-created_at')
             
-        
         if cart_action == '+':
             if cart_item.product.stock == cart_item.quantity:
                 return JsonResponse({
@@ -79,8 +76,6 @@ def Add_to_cart(request,product_id=None):
             })
         else:
             if cart_action == '-':
-                
-                
                 if cart_item.quantity>1:
                     cart_item.quantity -= 1
                     cart_item.save()
@@ -107,7 +102,6 @@ def Add_to_cart(request,product_id=None):
                 'grand_total': grand_total
                 })
     else:
-        
         if request.user.is_authenticated:
             try:
                 cart_item = Cart_item.objects.get(product=product,user=request.user)
@@ -135,8 +129,6 @@ def Add_to_cart(request,product_id=None):
         cart_item.save()
         return redirect(request.META['HTTP_REFERER'])
 
-
-
 def Remove_cart_item(request,product_id):
     
     product = get_object_or_404(ProductVariant, id=product_id)
@@ -145,7 +137,6 @@ def Remove_cart_item(request,product_id):
     else:
         cart = Cart.objects.get(cart_id = _cart_id(request))
         cart_item = Cart_item.objects.get(product=product, cart=cart)
-        
     cart_item.delete()
     return redirect('cart')
 
@@ -168,14 +159,12 @@ def cart(request,total=0,quantity=0,cart_items=None):
         grand_total = total + tax
     except ObjectDoesNotExist:
         pass
-    print(tax)
     context = {
         'total' : total,
         'cart_items' : cart_items,
         'tax' : tax,
         'grand_total' : grand_total
     }
-    
     return render(request,'store_templates/cart.html',context)
 
 
@@ -217,7 +206,6 @@ def Cart_checkout(request,total=0,cart_items=None,quantity=0):
     order_number = 'BM-ORD'+concatenated_datetime+str(order.pk)
     order.order_id = order_number
     order.save()
-    print(order)
 
     context = {
         'order_id' : order.order_id,

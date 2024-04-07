@@ -6,21 +6,22 @@ from django.http import Http404, JsonResponse
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse, reverse_lazy
+from cart.models import Cart,Cart_item
 # Create your views here.
 
 def wishlist(request):
     wishlist = Wishlist.objects.get(user=request.user)
     wishlist_items = WishlistItem.objects.filter(wishlist = wishlist)
     wishlist_count = wishlist_items.count()
-    print(wishlist_count)
     paginator = Paginator(wishlist_items,6)
     page = request.GET.get('page')
     paged_wishlist = paginator.get_page(page)
-
+    cart_items = Cart_item.objects.filter(user=request.user)
 
     context = {
         'wishlists':paged_wishlist,
-        'wishlist_count':wishlist_count
+        'wishlist_count':wishlist_count,
+        'cart_items' :  cart_items,
     }
     return render(request,'store_templates/wishlist.html',context)
 

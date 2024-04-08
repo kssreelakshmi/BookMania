@@ -124,7 +124,7 @@
 								</div>
 							</div>
 							
-								<div class="filter-col3 p-r-15 p-b-27">
+								<!-- <div class="filter-col3 p-r-15 p-b-27">
 									{% for item, value in attribute_content.items %}
 									<div class="mtext-102 cl2 p-b-15">
 										{{item}}
@@ -144,25 +144,9 @@
 											
 										</ul>
 										{% endfor %}
-									</div>
+									</div> -->
 						
-							<!-- <div class="filter-col4 p-b-27">
-								<div class="mtext-102 cl2 p-b-15">
-										Categories
-								</div>
-								
-									<div class="flex-w p-t-4 m-r--5">
-											<ul class="list-menu">
-												<li><a href="{% url 'shop' %}">All Categories </a></li>
-												{% for category in category_list %}
-													{% if category.parent_cat %}
-													<li><a href="{{category.get_url}}">{{category.parent_cat.category_name}} </a></li>
-													{% endif %}
-												{% endfor %}
-											</ul>
-									</div>
-							</div> -->
-						
+							
 						</div>
 					</div>
 				</div>

@@ -250,34 +250,62 @@ def product_variant_detail(request,cat_slug,product_variant_slug):
     return render(request,'store_templates/product_variant_detail.html', context)
 
 @login_required(login_url='admin_login')
-def review_rating(request,product_id):
+# def review_rating(request,product_id):
+#     url = request.META.get('HTTP_REFERER')
+#     if request.method =='POST':
+#         try:
+#             reviews = ReviewRating.objects.get(user__id=request.user.id,product_variant__id = product_id)
+#             form = ReviewForm(request.POST,instance=reviews)
+#             if form.is_valid():
+#                 form.save()
+#                 messages.success(request,'The review has been updated successfully.Thank you !!')
+#                 return redirect(url)
+#             else:
+#                 messages.error(request, form.errors)
+#                 return redirect(url)
+#         except ReviewRating.DoesNotExist:
+#             form = ReviewForm(request.POST)
+#             if form.is_valid():
+#                 review = ReviewRating()
+#                 review.subject = form.cleaned_data['subject']
+#                 review.rating = form.cleaned_data['rating']
+#                 review.review = form.cleaned_data['review']
+#                 review.product_id = product_id
+#                 review.user_id = request.user.id
+#                 review.save()
+#                 messages.success(request, "Thank You !your review has been Posted")
+#                 return redirect(url)
+#             else:
+#                 messages.error(request, form.errors.values)
+#                 return redirect(url)
+
+
+def review_rating(request, product_id):
     url = request.META.get('HTTP_REFERER')
-    if request.method =='POST':
+    if request.method == 'POST':
         try:
-            reviews = ReviewRating.objects.get(user__id=request.user.id,product_variant__id = product_id)
-            form = ReviewForm(request.POST,instance=reviews)
-            if form.is_valid():
-                form.save()
-                messages.success(request,'The review has been updated successfully.Thank you !!')
-                return redirect(url)
-            else:
-                messages.error(request, form.errors)
-                return redirect(url)
+            # Attempt to get the existing review for the current user and product
+            review = ReviewRating.objects.get(user=request.user, product_variant__id=product_id)
+            form = ReviewForm(request.POST, instance=review)
         except ReviewRating.DoesNotExist:
+            # If no existing review found, create a new instance of ReviewRating
             form = ReviewForm(request.POST)
-            if form.is_valid():
-                review = ReviewRating()
-                review.subject = form.cleaned_data['subject']
-                review.rating = form.cleaned_data['rating']
-                review.review = form.cleaned_data['review']
-                review.product_id = product_id
-                review.user_id = request.user.id
-                review.save()
-                messages.success(request, "Thank You !your review has been Posted")
-                return redirect(url)
-            else:
-                messages.error(request, form.errors.values)
-                return redirect(url)
+
+        if form.is_valid():
+            # Save the form data
+            review = form.save(commit=False)  # Don't save to database yet
+            review.product_variant_id = product_id
+            review.user = request.user
+            review.save()  # Now save to database
+            messages.success(request, 'Your review has been updated successfully. Thank you!')
+            return redirect(url)
+        else:
+            # If form is not valid, display error messages
+            messages.error(request, form.errors)
+            return redirect(url)
+    else:
+        # Handle GET request if needed
+        return render(request, 'template_name.html', context)
 
 
 

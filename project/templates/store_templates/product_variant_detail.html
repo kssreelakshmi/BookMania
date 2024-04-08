@@ -114,9 +114,6 @@ Product Detail
 									<div class="rs1-select2 bor8 bg0">
 										<select class="js-select2" name="time">
 											<option>{{value.attribute_value}}</option>
-											<!-- <option>Blue</option>
-											<option>White</option>
-											<option>Grey</option> -->
 										</select>
 										<div class="dropDownSelect2"></div>
 									</div>
@@ -255,34 +252,47 @@ Product Detail
 								<div class="col-sm-10 col-md-8 col-lg-6 m-lr-auto">
 									<div class="p-b-30 m-lr-15-sm">
 										<!-- Review -->
-										{% if single_product.average_review %}
-										<div class="Stars" style="--rating: {{single_product.average_review}};" aria-label="Rating of this product is {{single_product.average_review}} out of 5.">
-											{{single_product.average_review}} 
-										</div> <span class="text-muted"> ({{single_product.count_review}})</span>
-										{% endif %}
-										{% for review in reviews %}
-											<div class="flex-w flex-t p-b-68">
-												<div class="wrap-pic-s size-109 bor0 of-hidden m-r-18 m-t-6">
-													<img src="{{ review.user.profile_pic }}" alt="AVATAR">
-												</div>
-												
-												<div class="size-207">
-													<div class="flex-w flex-sb-m p-b-17">
-														<span class="mtext-107 cl2 p-r-20">
-															{{review.user.username}}
-														</span>
-														
-														<span class="fs-18 cl11">
-															{{review.rating}}
-														</span>
+										<div class="card p-2 m-3">
+
+											{% if single_product.average_review %}
+											<div class="Stars" style="--rating: {{single_product.average_review}};" aria-label="Rating of this product is {{single_product.average_review}} out of 5.">
+												{{single_product.average_review}} 
+											</div> <span class="text-muted"> ({{single_product.count_review}})</span>
+											{% endif %}
+											{% for review in reviews %}
+												<div class="flex-w flex-t p-b-68">
+													<div class="wrap-pic-s size-109 bor0 of-hidden m-r-18 m-t-6">
+														<img src="{{ review.user.profile_pic.url }}" alt="AVATAR">
 													</div>
-													<label class="form-label">Review Title</label>
-													<p class="stext-102 cl6">
-														{{review.review}}
-													</p>
-												</div>
-											</div> 
-										{% endfor %}
+													
+													<div class="size-207">
+														<div class="flex-w flex-sb-m p-b-17">
+															<span class="mtext-107 cl2 p-r-20">
+																{{review.user.username}}
+															</span>
+															
+															<span class="fs-18 cl11">
+																{{review.rating}}
+															</span>
+														</div>
+														<div>
+
+															<label class="form-label">Review Title</label>
+															<p class="stext-102 cl6">
+																{{review.subject}}
+															</p>
+														</div>
+														<div>
+
+															<label class="form-label">Comments</label>
+															<p class="stext-102 cl6">
+																{{review.review}}
+															</p>
+														</div>
+													</div>
+												</div> 
+											{% endfor %}
+										</div>
 											<!-- Add review -->
 											<form class="w-full" method="post" action="{% url 'review_rating' single_product.product_id %}">
 												{% csrf_token %}
@@ -301,8 +311,8 @@ Product Detail
 												<br>
 												<div class="row p-b-25">
 													<div class="col-12 p-b-5">
-														<label class="form-label stext-102 cl3" for="review">Your review</label>
-														<textarea class=" size-110 bor8 stext-102 cl2 p-lr-20 p-tb-10" id="review" name="review"></textarea>
+														<!-- <label class="form-label stext-102 cl3" for="review">Your review</label> -->
+														<textarea class="size-110 bor8 stext-102 cl2 p-lr-20 p-tb-10" id="review" name="review"></textarea>
 													</div>
 												</div>
 													<label class="stext-102 cl3 m-r-16 flex-w flex-m ">
